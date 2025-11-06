@@ -1,14 +1,23 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ profile.user.username }}'s Profile</title>
+</head>
+<body>
+    <h1>{{ profile.user.username }}'s Profile</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Upload</button>
+    </form>
+    {% if profile.profile_pic %}
+        <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" width="150">
+    {% endif %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Update Profile</button>
+    <p><strong>Bio:</strong> {{ profile.bio }}</p>
+</body>
+</html>
 
-{% block content %}
-  <h2>Log In</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Log In</button>
-  </form>
-
-  {% if form.errors %}
-    <p>Your username and password didn't match. Please try again.</p>
-  {% endif %}
-{% endblock %}

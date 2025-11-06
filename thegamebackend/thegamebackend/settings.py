@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +31,7 @@ SECRET_KEY = 'django-insecure-&vc4@x^sxn+aa3+9r51)ikv983j@8*v0$jqc#01&x4pdx9qtc9
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 # Application definition
 
@@ -57,7 +62,7 @@ ROOT_URLCONF = 'thegamebackend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR, 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
