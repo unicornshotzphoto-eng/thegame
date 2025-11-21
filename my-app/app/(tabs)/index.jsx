@@ -1,113 +1,100 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+// import { Image } from 'expo-image';
+// import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// import { HelloWave } from '@/components/hello-wave';
+// import ParallaxScrollView from '@/components/parallax-scroll-view';
+// import { ThemedText } from '@/components/themed-text';
+// import { ThemedView } from '@/components/themed-view';
+// import { Link } from 'expo-router';
 
-export default function HomeScreen() {
+// export default function HomeScreen() {
+//   return (
+//     <ParallaxScrollView
+//       headerBackgroundColor={{ light: '#000000', dark: '#000000' }} // Changed to black
+//       headerImage={
+//         <Image
+//           source={require('@/assets/images/partial-react-logo.png')}
+//           style={styles.reactLogo}
+//         />
+//       }
+//       contentBackgroundColor={{ light: '#000000', dark: '#000000' }}> 
+//       {/* Changed styles.contentContainer to styles.titleContainer to use the existing style */}
+//       <ThemedView style={[styles.titleContainer, { flex: 1 }]}>
+//         <ThemedText type="title" style={{ color: '#FFFFFF' }}> 
+//           Welcome to Know Me, Grow Us
+//         </ThemedText>
+//       </ThemedView>
+//       <ThemedText style={{ color: '#FFFFFF' }}> 
+//         A guided intimacy game designed to deepen connection through curiosity,
+//         discovry, and play
+//       </ThemedText>
+//     </ParallaxScrollView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   titleContainer: { // This style is now being correctly referenced
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     gap: 8,
+//     backgroundColor: '#000000', // Changed to black
+//   },
+//   stepContainer: {
+//     gap: 8,
+//     marginBottom: 8,
+//   },
+//   reactLogo: {
+//     height: 178,
+//     width: 290,
+//     bottom: 0,
+//     left: 0,
+//     position: 'absolute',
+//   },
+// });
+
+
+// // 
+
+import React from 'react';
+import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+
+const HomeScreen = () => {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome to Know Me, Grow Us</ThemedText>
-      </ThemedView>
-      <ThemedText>
-        A guided intimacy game designed to deepen connection through curiosity,discovry, and play
-      </ThemedText>
-      <ThemedView>
-        <ThemedText style={styles.titleContainer} type="title">
-        Just doing a little practice
-        </ThemedText>
-      </ThemedView>
-      {/* <ThemedView style={styles.stepContainer}> 
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView> */}
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Lets just figure it out</ThemedText>
-        <ThemedText>
-          Learn the rules and play the game.Then you can level up. You are getting the hang of it. Just keep going! You are doing great!
-          
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-      
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">We will get this all figured out I promise</ThemedText>
-        <ThemedText>
-          {`When you're ready, you will kill it`}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    // SafeAreaView ensures content avoids notches and status bars on modern devices
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.text}>Know Me, Grow Us</Text>
+        <Text style={styles.smallText}>A guided intimacy game designed to deepen connection through curiosity,
+         discovery, and play</Text>
+      </View>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: '#000000', // Black background
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  content: {
+    flex: 1,
+    justifyContent: 'center', // Center content vertically
+    alignItems: 'center', // Center content horizontally
+    padding: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  text: {
+    color: '#FFFFFF', // White text color
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    fontFamily: 'montserrat-regular',
+  },
+  smallText: {
+    color: '#FFFFFF', // White text color
+    fontSize: 16,
+    textAlign: 'center',
+    fontFamily: 'montserrat-regular',
   },
 });
-// 
+
+export default HomeScreen;

@@ -1,15 +1,24 @@
-import { Text, StatusBar, View, StyleSheet } from 'react-native';
+import { Text, StatusBar, View, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Title from '../common/Title';
+import { use, useEffect} from 'react';
 
-const SplashScreen = () => {
+function SplashScreen () {
+
+  const translatey = new Animated.Value(0);
+  const duration = 5000;
+   useEffect(() => {
+    Animated.timing(translatey, {
+      toValue: 20,
+      duration: duration,
+      useNativeDriver: true,
+    }).start();
+   }, []);
   return (
     <SafeAreaView style={styles.container}>
       {/* The inner View now has flex: 1 and the background color, ensuring it fills the safe area */}
       <View style={styles.contentArea}>
-        {/* This is your custom app text, centered within the contentArea */}
-        <Text style={styles.textStyle}>
-          Know Me, Grow Us
-        </Text>
+        <Title text ="Know Me, Grow Us" />
       </View>
     </SafeAreaView>
   );
@@ -33,6 +42,7 @@ const styles = StyleSheet.create({
   textStyle: {
     fontSize: 48,
     textAlign: 'center',
+    fontFamily: 'montserrat-regular',
     color: 'white',
     // Removed flex: 1 from Text style as it's no longer needed and caused layout issues.
   },
