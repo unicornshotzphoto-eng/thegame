@@ -1,12 +1,12 @@
 import React from 'react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, StyleSheet } from 'react-native';
-import  RulesScreen  from '../src/screens/RulesScreen';
+import  PlayerRuleScreen  from '../src/screens/PlayerRulesScreen';
 
 const Rules = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <RulesScreen />
+      <PlayerRuleScreen />
       {/* You can add other components here */}
     </SafeAreaView>
   );
