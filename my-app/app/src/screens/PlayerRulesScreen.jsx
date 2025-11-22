@@ -3,49 +3,53 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Title from '../common/Title';
 import { use, useEffect} from 'react';
 
-const PlayerRulesScreen = () => {
+const rules = [
+  "Always answer honestly.",
+  "Guess based on knowledge, not assumptions.",
+  "Do not rush; connection is intentional.",
+  "Any question can be passed or replaced.",
+  "Play with presence, curiosity, and enjoyment.",
+  "Growth is the goal; points are the game."
+];
+
+const RuleList = () => {
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <Title text="Player Instructions & Rules" />
-        <Text style={styles.text}>
-          Always answer honestly.
-        </Text>
-      </ScrollView>
-    </View>
+    // Wrap all elements in a single root container, like a React Fragment
+    <> 
+      <View style={styles.container}>
+        <Title text="Player Rules" />      
+        {rules.map((rule, index) => (
+          <View key={index} style={styles.listItem}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.itemText}>{rule}</Text>
+          </View>
+        ))}
+      </View>
+    </>
   );
 };
-
-
-
 const styles = StyleSheet.create({
   container: {
+    padding: 16,
     flex: 1,
-    padding: 20,
     backgroundColor: 'black',
   },
-  scrollView: {
-    flex: 1, // Allow ScrollView to take available vertical space
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 5,
-    padding: 10,
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
   },
-  text: {
+  bullet: {
+    marginRight: 8,
+    fontSize: 16, // Adjust size as needed
+    lineHeight: 24, // Ensure vertical alignment
+  },
+  itemText: {
+    flex: 1,
     fontSize: 16,
     lineHeight: 24,
-    marginBottom: 10,
-    fontFamily: 'montserrat-regular',
-    color: 'white',
-  },
-  meduimtext: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    lineHeight: 24,
-    marginBottom: 10,
-    fontFamily: 'montserrat-regular',
     color: 'white',
   },
 });
 
-export default PlayerRulesScreen;
+export default RuleList;

@@ -54,7 +54,22 @@ Scoring
             <Text style={styles.text}>
 ◦ 3 points: intimate, revealing, or layered questions
             </Text>
-           
+            <Text style={styles.meduimtext}>
+            
+Consequence Options
+</Text>
+            <Text style={styles.text}>
+(Players may toggle which types they want available.)
+• Truth-sharing
+
+• Romantic compliments
+• Revealing a fantasy
+• Describing a memory
+• Performing a creative response
+• Offering a commitment or intention
+• Mild sensual prompt (if Erotic Mode is enabled)
+• Sip or shot (if Drinking Mode is enabled)
+            </Text>
            
           </ScrollView>
         </View>
