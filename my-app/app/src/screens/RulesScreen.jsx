@@ -31,12 +31,16 @@ round.
 
 7. The game ends when:
 </Text>
-            <Text style={styles.text}>
+            <Text style={styles.indenttext}>
             
           ◦ A player reaches the chosen point goal, or
+          </Text>
+           <Text style={styles.indenttext}>
           ◦ Both partners decide to conclude the experience.
             
             </Text>
+           
+
             <Text style={styles.meduimtext}>
 
 Scoring
@@ -54,23 +58,6 @@ Scoring
             <Text style={styles.text}>
 ◦ 3 points: intimate, revealing, or layered questions
             </Text>
-            <Text style={styles.meduimtext}>
-            
-Consequence Options
-</Text>
-            <Text style={styles.text}>
-(Players may toggle which types they want available.)
-• Truth-sharing
-
-• Romantic compliments
-• Revealing a fantasy
-• Describing a memory
-• Performing a creative response
-• Offering a commitment or intention
-• Mild sensual prompt (if Erotic Mode is enabled)
-• Sip or shot (if Drinking Mode is enabled)
-            </Text>
-           
           </ScrollView>
         </View>
       );
@@ -98,6 +85,14 @@ const styles = StyleSheet.create({
   meduimtext: {
     fontSize: 20,
     fontWeight: 'bold',
+    lineHeight: 24,
+    marginBottom: 10,
+    fontFamily: 'montserrat-regular',
+    color: 'white',
+  },
+   indenttext: {
+    paddingLeft: 20,
+    fontSize: 16,
     lineHeight: 24,
     marginBottom: 10,
     fontFamily: 'montserrat-regular',

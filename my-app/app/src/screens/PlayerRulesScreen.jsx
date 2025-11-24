@@ -36,8 +36,9 @@ const styles = StyleSheet.create({
   },
   listItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: 8,
+
   },
   bullet: {
     marginRight: 8,
@@ -46,9 +47,10 @@ const styles = StyleSheet.create({
   },
   itemText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     lineHeight: 24,
     color: 'white',
+    fontFamily: 'montserrat-regular',
   },
 });
 
