@@ -1,79 +1,67 @@
-import { Text, StatusBar, View, StyleSheet, Animated, ScrollView } from 'react-native';
+import React from 'react';
+import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Title from '../common/Title';
-import { use, useEffect} from 'react';
+
+const rules = [
+  'One partner reads a question aloud.',
+  'The other partner must guess the correct answer.',
+  'The reader confirms correct or incorrect.',
+  'Points are awarded for correct answers.',
+  'Consequences are activated for incorrect answers.',
+  'Players may switch roles each question or after each round.',
+];
+
+const endings = [
+  'A player reaches the chosen point goal.',
+  'Both partners decide to conclude the experience.',
+];
+
+const scoring = [
+  { label: '1 point', desc: 'light, playful questions' },
+  { label: '2 points', desc: 'moderate or emotional questions' },
+  { label: '3 points', desc: 'intimate, revealing, or layered questions' },
+];
+
+const SectionTitle = ({ children }) => (
+  <Text style={styles.sectionTitle}>{children}</Text>
+);
+
+const Bullet = ({ index, text }) => (
+  <Text style={styles.text}>{index ? `${index}. ${text}` : `• ${text}`}</Text>
+);
 
 const RulesScreen = () => {
-      return (
-        <View style={styles.container}>
-          <ScrollView style={styles.scrollView}>
-            <Title text ="Instructions & Rules" />
-            <Text style={styles.text}>
-             1. One partner reads a question aloud.
-            </Text>
-            <Text style={styles.text}>
-2. The other partner must guess the correct answer.
-            </Text>
-            <Text style={styles.text}>
-3. The reader confirms correct or incorrect.
-            </Text>
-            <Text style={styles.text}>
-4. Points are awarded for correct answers. 
-            </Text>
-            <Text style={styles.text}>
-5. Consequences are activated for incorrect answers.
-            </Text>
-            <Text style={styles.text}>
-6. Players may switch roles each question or after each   
-round.
-            </Text>
-            <Text style={styles.text}>
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Title text="Instructions & Rules" />
 
-7. The game ends when:
-</Text>
-            <Text style={styles.indenttext}>
-            
-          ◦ A player reaches the chosen point goal, or
-          </Text>
-           <Text style={styles.indenttext}>
-          ◦ Both partners decide to conclude the experience.
-            
-            </Text>
-           
+        {rules.map((r, i) => (
+          <Bullet key={`rule-${i}`} index={i + 1} text={r} />
+        ))}
 
-            <Text style={styles.meduimtext}>
+        <SectionTitle>Game End</SectionTitle>
+        {endings.map((e, i) => (
+          <Text key={`end-${i}`} style={styles.indentText}>◦ {e}</Text>
+        ))}
 
-Scoring
-</Text>
-            <Text style={styles.text}>
-• Each question is worth 1 to 3 points.
-            </Text>
-            <Text style={styles.text}>
-
-◦ 1 point: light, playful questions
-            </Text>
-            <Text style={styles.text}>
-◦ 2 points: moderate or emotional questions
-            </Text>
-            <Text style={styles.text}>
-◦ 3 points: intimate, revealing, or layered questions
-            </Text>
-          </ScrollView>
-        </View>
-      );
-    };
+        <SectionTitle>Scoring</SectionTitle>
+        <Text style={styles.text}>Each question is worth 1 to 3 points.</Text>
+        {scoring.map((s) => (
+          <Text key={s.label} style={styles.text}>◦ {s.label}: {s.desc}</Text>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: 'black',
   },
-  scrollView: {
-    flex: 1, // Allow ScrollView to take available vertical space
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 5,
-    padding: 10,
+  content: {
+    padding: 20,
   },
   text: {
     fontSize: 16,
@@ -82,19 +70,18 @@ const styles = StyleSheet.create({
     fontFamily: 'montserrat-regular',
     color: 'white',
   },
-  meduimtext: {
+  sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    lineHeight: 24,
-    marginBottom: 10,
-    fontFamily: 'montserrat-regular',
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 8,
     color: 'white',
   },
-   indenttext: {
-    paddingLeft: 20,
+  indentText: {
+    paddingLeft: 12,
     fontSize: 16,
     lineHeight: 24,
-    marginBottom: 10,
+    marginBottom: 8,
     fontFamily: 'montserrat-regular',
     color: 'white',
   },
