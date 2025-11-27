@@ -12,15 +12,18 @@ const rules = [
   'Players may switch roles each question or after each round.',
 ];
 
+const playerRules = [
+  'Always answer honestly.',
+  'Guess based on knowledge, not assumptions.',
+  'Do not rush; connection is intentional.',
+  'Any question can be passed or replaced.',
+  'Play with presence, curiosity, and enjoyment.',
+  'Growth is the goal; points are the game.',
+];
+
 const endings = [
   'A player reaches the chosen point goal.',
   'Both partners decide to conclude the experience.',
-];
-
-const scoring = [
-  { label: '1 point', desc: 'light, playful questions' },
-  { label: '2 points', desc: 'moderate or emotional questions' },
-  { label: '3 points', desc: 'intimate, revealing, or layered questions' },
 ];
 
 const SectionTitle = ({ children }) => (
@@ -31,12 +34,21 @@ const Bullet = ({ index, text }) => (
   <Text style={styles.text}>{index ? `${index}. ${text}` : `• ${text}`}</Text>
 );
 
+const Divider = () => <View style={styles.divider} />;
+
 const RulesScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
         <Title text="Instructions & Rules" />
 
+        <SectionTitle>Player Rules</SectionTitle>
+        {playerRules.map((p, i) => (
+          <Text key={`player-${i}`} style={styles.text}>◦ {p}</Text>
+        ))}
+
+        <Divider />
+        <SectionTitle>Rules</SectionTitle>
         {rules.map((r, i) => (
           <Bullet key={`rule-${i}`} index={i + 1} text={r} />
         ))}
@@ -46,11 +58,6 @@ const RulesScreen = () => {
           <Text key={`end-${i}`} style={styles.indentText}>◦ {e}</Text>
         ))}
 
-        <SectionTitle>Scoring</SectionTitle>
-        <Text style={styles.text}>Each question is worth 1 to 3 points.</Text>
-        {scoring.map((s) => (
-          <Text key={s.label} style={styles.text}>◦ {s.label}: {s.desc}</Text>
-        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -62,6 +69,10 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+  },
+  scrollView: {
+    flex: 1,
+    width: '100%',
   },
   text: {
     fontSize: 16,
