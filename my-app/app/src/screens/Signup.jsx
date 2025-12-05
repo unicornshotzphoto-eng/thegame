@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Text, TouchableOpacity, StyleSheet, TextInput, View, Alert, ScrollView } from 'react-native';
+import { 
+    Text,  
+    TouchableWithoutFeedback, 
+    TouchableOpacity, 
+    StyleSheet, 
+    TextInput, 
+    View, 
+    ScrollView, 
+    KeyboardAvoidingView 
+} from 'react-native';
+import { showAlert } from '../utils/alert';
 
 function signup(props) {
     const [name, setName] = useState('');
@@ -9,19 +19,19 @@ function signup(props) {
 
     const validate = () => {
         if (!name.trim()) {
-            Alert.alert('Name required', 'Please enter your name');
+            showAlert('Name required', 'Please enter your name');
             return false;
         }
         if (!email.includes('@')) {
-            Alert.alert('Invalid email', 'Please enter a valid email address');
+            showAlert('Invalid email', 'Please enter a valid email address');
             return false;
         }
         if (password.length < 6) {
-            Alert.alert('Weak password', 'Password must be at least 6 characters');
+            showAlert('Weak password', 'Password must be at least 6 characters');
             return false;
         }
         if (password !== confirmPassword) {
-            Alert.alert('Passwords do not match', 'Please make sure both passwords are the same');
+            showAlert('Passwords do not match', 'Please make sure both passwords are the same');
             return false;
         }
         return true;
@@ -33,7 +43,7 @@ function signup(props) {
             props.onAuthSuccess('TEST_TOKEN');
             return;
         }
-        Alert.alert('Signed up', 'Signup simulated (no backend)');
+        showAlert('Signed up', 'Signup simulated (no backend)');
     };
 
     const handleTestSignUp = () => {
@@ -50,72 +60,76 @@ function signup(props) {
 
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.content}>
-                <Text style={styles.title}>Create account</Text>
+            <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
+                <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss();}}>
+                    <View style={styles.content}>
+                        <Text style={styles.title}>Create account</Text>
 
-                <View style={styles.field}>
-                    <Text style={styles.label}>Name</Text>
-                    <TextInput
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Your name"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        autoCapitalize="words"
-                    />
-                </View>
+                        <View style={styles.field}>
+                            <Text style={styles.label}>Name</Text>
+                            <TextInput
+                                value={name}
+                                onChangeText={setName}
+                                placeholder="Your name"
+                                placeholderTextColor="#999"
+                                style={styles.input}
+                                autoCapitalize="words"
+                            />
+                        </View>
 
-                <View style={styles.field}>
-                    <Text style={styles.label}>Email</Text>
-                    <TextInput
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder="you@example.com"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                    />
-                </View>
+                        <View style={styles.field}>
+                            <Text style={styles.label}>Email</Text>
+                            <TextInput
+                                value={email}
+                                onChangeText={setEmail}
+                                placeholder="you@example.com"
+                                placeholderTextColor="#999"
+                                style={styles.input}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                        </View>
 
-                <View style={styles.field}>
-                    <Text style={styles.label}>Password</Text>
-                    <TextInput
-                        value={password}
-                        onChangeText={setPassword}
-                        placeholder="At least 6 characters"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        secureTextEntry
-                    />
-                </View>
+                        <View style={styles.field}>
+                            <Text style={styles.label}>Password</Text>
+                            <TextInput
+                                value={password}
+                                onChangeText={setPassword}
+                                placeholder="At least 6 characters"
+                                placeholderTextColor="#999"
+                                style={styles.input}
+                                secureTextEntry
+                            />
+                        </View>
 
-                <View style={styles.field}>
-                    <Text style={styles.label}>Confirm Password</Text>
-                    <TextInput
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                        placeholder="Re-enter password"
-                        placeholderTextColor="#999"
-                        style={styles.input}
-                        secureTextEntry
-                    />
-                </View>
+                        <View style={styles.field}>
+                            <Text style={styles.label}>Confirm Password</Text>
+                            <TextInput
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                                placeholder="Re-enter password"
+                                placeholderTextColor="#999"
+                                style={styles.input}
+                                secureTextEntry
+                            />
+                        </View>
 
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>Sign up</Text>
-                </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                            <Text style={styles.buttonText}>Sign up</Text>
+                        </TouchableOpacity>
 
-                <TouchableOpacity style={styles.ghostButton} onPress={handleTestSignUp}>
-                    <Text style={styles.ghostText}>Sign up (test)</Text>
-                </TouchableOpacity>
+                        <TouchableOpacity style={styles.ghostButton} onPress={handleTestSignUp}>
+                            <Text style={styles.ghostText}>Sign up (test)</Text>
+                        </TouchableOpacity>
 
-                <View style={styles.divider} />
+                        <View style={styles.divider} />
 
-                <TouchableOpacity style={styles.signinButton} onPress={handleSignIn}>
-                    <Text style={styles.signinText}>Already have an account? <Text style={styles.signinLink}>Sign in</Text></Text>
-                </TouchableOpacity>
-            </View>
+                        <TouchableOpacity style={styles.signinButton} onPress={handleSignIn}>
+                            <Text style={styles.signinText}>Already have an account? <Text style={styles.signinLink}>Sign in</Text></Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
         </ScrollView>
     );
 }

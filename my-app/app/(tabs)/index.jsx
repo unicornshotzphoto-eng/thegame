@@ -135,6 +135,14 @@ const GameRulesScreen = ({ navigation }) => (
   </ScreenWrapper>
 );
 
+const SigninScreen = ({ navigation, onAuthSuccess }) => {
+  return signin({ navigation, onAuthSuccess });
+};
+
+const SignupScreen = ({ navigation, onAuthSuccess }) => {
+  return signup({ navigation, onAuthSuccess });
+};
+
 // AppContainer controls initiation/auth flow and renders the appropriate navigator.
 const AppContainer = () => {
   const [initiated, setInitiated] = useState(true);
@@ -223,8 +231,12 @@ const AppContainer = () => {
         <Stack.Screen name="Messages" component={messages} options={{ title: 'Messages' }} />
         <Stack.Screen name="Questions" component={questions} options={{ title: 'Questions' }} />
         <Stack.Screen name="Search" component={search} options={{ title: 'Search' }} />
-        <Stack.Screen name="Signin" component={signin} options={{ title: 'Sign in' }} />
-        <Stack.Screen name="Signup" component={signup} options={{ title: 'Sign up' }} />
+        <Stack.Screen name="Signin">
+          {(props) => <SigninScreen {...props} onAuthSuccess={markAuthenticated} />}
+        </Stack.Screen>
+        <Stack.Screen name="Signup">
+          {(props) => <SignupScreen {...props} onAuthSuccess={markAuthenticated} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </>
   );
