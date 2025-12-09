@@ -1,7 +1,7 @@
 import React from 'react';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, StyleSheet } from 'react-native';
-import  SplashScreen  from '../src/screens/Splash';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet } from 'react-native';
+import  SplashScreen  from '../src/screens/splash';
 
 const App = () => {
   return (
