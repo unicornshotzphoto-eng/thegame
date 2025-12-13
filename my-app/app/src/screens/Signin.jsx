@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { 
     Text,
     TouchableOpacity, 
@@ -10,23 +10,23 @@ import {
     Keyboard,
     KeyboardAvoidingView
     } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
+import api from '../core/api';
+import utils from '../core/utils';
+import useStore from '../core/global';
 
-function signin(props) {
+function Signin(props) {
     console.log('Signin component rendered');
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const login = useStore((state) => state.login);
 
     const validate = () => {
         console.log('Validating...');
-        if (!email.trim()) {
-            console.log('Email is empty');
-            showAlert('Email required', 'Please enter your email address');
-            return false;
-        }
-        if (!email.includes('@')) {
-            console.log('Email invalid format');
-            showAlert('Invalid email', 'Please enter a valid email address');
+        if (!username.trim()) {
+            console.log('Username is empty');
+            showAlert('Username required', 'Please enter your username');
             return false;
         }
         if (!password.trim()) {
@@ -45,10 +45,51 @@ function signin(props) {
 
     const handleSubmit = () => {
         console.log('testing');
-        console.log('Email:', email);
+        console.log('Username:', username);
         console.log('Password:', password);
         if (!validate()) return;
-        showAlert('Signed in', 'Sign in button pressed');
+        
+        api({
+            method: 'POST',
+            url: 'quiz/signin/',
+            data: {
+                username: username,
+                password: password
+            }
+        })
+        .then(response => {
+            console.log('=== Sign in Response JSON ===');
+            console.log(JSON.stringify(response.data, null, 2));
+            console.log('=== End Response ===');
+            
+            // Update Zustand store with user data
+            login(response.data.user);
+            
+            // Save user data to AsyncStorage for persistence
+            AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+            
+            // Clear input fields
+            setUsername('');
+            setPassword('');
+            
+            showAlert('Sign in successful', `Welcome back, ${response.data.user.username}!`);
+        })
+        .catch(error => {
+            console.log('=== Sign in Error ===');
+            if (error.response) {
+                console.log('Status:', error.response.status);
+                console.log('Data:', JSON.stringify(error.response.data, null, 2));
+                console.log('Headers:', error.response.headers);
+                showAlert('Sign in failed', `Error: ${JSON.stringify(error.response.data)}`);
+            } else if (error.request) {
+                console.log('No response received:', error.request);
+                console.log('Full error:', error);
+                showAlert('Network Error', 'Could not connect to server. Make sure the API is running at http://localhost:8000');
+            } else {
+                console.log('Sign in error:', error.message);
+                showAlert('Sign in failed', error.message);
+            }
+        });
     };
 
     const handleTestSignIn = () => {
@@ -66,19 +107,18 @@ function signin(props) {
     return (
         <ScrollView style={styles.container}>
             <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
-                <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss();}}>
+                
                     <View style={styles.content}>
                         <Text style={styles.title}>Sign in</Text>
 
                         <View style={styles.field}>
-                            <Text style={styles.label}>Email</Text>
+                            <Text style={styles.label}>Username</Text>
                             <TextInput
-                                value={email}
-                                onChangeText={setEmail}
-                                placeholder="you@example.com"
+                                value={username}
+                                onChangeText={setUsername}
+                                placeholder="Your username"
                                 placeholderTextColor="#999"
                                 style={styles.input}
-                                keyboardType="email-address"
                                 autoCapitalize="none"
                             />
                         </View>
@@ -111,13 +151,13 @@ function signin(props) {
                             <Text style={styles.signupText}>Don't have an account? <Text style={styles.signupLink}>Sign up</Text></Text>
                         </TouchableOpacity>
                     </View>
-                </TouchableWithoutFeedback>
+               
             </KeyboardAvoidingView>
         </ScrollView>
     );
 }
 
-export default signin;
+export default Signin;
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#000' },

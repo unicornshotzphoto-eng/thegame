@@ -1,8 +1,8 @@
 
 import  SplashScreen  from '../src/screens/Splash';
 import RulesScreen from '../src/screens/RulesScreen';
-import signin from '../src/screens/Signin';
-import signup from '../src/screens/Signup';
+import Signin from '../src/screens/Signin';
+import Signup from '../src/screens/Signup';
 import messages from '../src/screens/Messages';
 import home from '../src/screens/Home';
 import questions from '../src/screens/Questions';
@@ -13,6 +13,8 @@ import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, Scro
 // The app already provides a NavigationContainer at the root (Expo Router or app entry).
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import useStore from '../src/core/global';
+
 
 const Stack = createNativeStackNavigator();
 const AuthTab = createBottomTabNavigator();
@@ -28,42 +30,45 @@ try {
 
 // Reusable bottom navigation bar used on every screen
 const NavBar = ({ navigation }) => {
+  const logout = useStore((state) => state.logout);
+  const authenticated = useStore((state) => state.authenticated);
+  const user = useStore((state) => state.user);
+  
+  console.log('NavBar render - authenticated:', authenticated, 'user:', user);
+  console.log('Full Zustand state:', useStore.getState());
+  
+  const handleLogout = async () => {
+    console.log('Logging out...');
+    logout();
+    if (AsyncStorage) {
+      await AsyncStorage.removeItem('userData');
+    }
+  };
+  
   const tryNavigate = (name) => {
-    // Check if the current navigator has the route
+    console.log('NavBar: Navigating to:', name, '| authenticated:', authenticated);
+    console.log('Navigation object:', navigation);
+    console.log('Navigation methods:', Object.keys(navigation));
     try {
-      const state = navigation.getState && navigation.getState();
-      if (state && Array.isArray(state.routeNames) && state.routeNames.includes(name)) {
-        navigation.navigate(name);
+      if (!navigation || typeof navigation.navigate !== 'function') {
+        console.error('Navigation object is invalid or navigate is not a function');
         return;
       }
-
-      // Walk up parents to find a navigator that contains the route
-      let parent = navigation.getParent && navigation.getParent();
-      while (parent) {
-        const pstate = parent.getState && parent.getState();
-        if (pstate && Array.isArray(pstate.routeNames) && pstate.routeNames.includes(name)) {
-          parent.navigate(name);
-          return;
-        }
-        parent = parent.getParent && parent.getParent();
-      }
-
-      // Route not found: warn so developer can see what's wrong.
-      // Fallback: attempt a best-effort navigate (may no-op).
-      console.warn(`NavBar: route "${name}" not registered in current navigator`);
       navigation.navigate(name);
+      console.log('Navigation successful to:', name);
     } catch (e) {
-      // If anything fails, try the simple navigate as a last resort
-      navigation.navigate(name);
+      console.error('NavBar navigation error:', e);
+      console.error('Error stack:', e.stack);
     }
   };
 
-  const items = [
+  const items = authenticated ? [
     { name: 'Home', label: 'Home' },
-    { name: 'Description', label: 'Description' },
     { name: 'Rules', label: 'Rules' },
+    { name: 'Questions', label: 'Questions' },
     { name: 'Profile', label: 'Profile' },
     { name: 'Settings', label: 'Settings' },
+  ] : [
     { name: 'Signin', label: 'Signin' },
     { name: 'Signup', label: 'Signup' },
   ];
@@ -75,6 +80,11 @@ const NavBar = ({ navigation }) => {
           <Text style={styles.navButtonText}>{item.label}</Text>
         </TouchableOpacity>
       ))}
+      {authenticated && (
+        <TouchableOpacity style={styles.navButton} onPress={handleLogout}>
+          <Text style={styles.navButtonText}>Logout</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -136,30 +146,64 @@ const GameRulesScreen = ({ navigation }) => (
 );
 
 const SigninScreen = ({ navigation, onAuthSuccess }) => {
-  return signin({ navigation, onAuthSuccess });
+  return Signin({ navigation, onAuthSuccess });
 };
 
 const SignupScreen = ({ navigation, onAuthSuccess }) => {
-  return signup({ navigation, onAuthSuccess });
+  return Signup({ navigation, onAuthSuccess });
 };
 
 // AppContainer controls initiation/auth flow and renders the appropriate navigator.
 const AppContainer = () => {
-  const [initiated, setInitiated] = useState(true);
-  const [authenticated, setAuthenticated] = useState(true);
+  console.log('========================================');
+  console.log('AppContainer FUNCTION CALLED');
+  console.log('========================================');
+  
+  const [initiated, setInitiated] = useState(true); // Skip onboarding - go straight to auth
+  const [isLoading, setIsLoading] = useState(true);
+  const [localAuth, setLocalAuth] = useState(false);
+  
+  // Get entire auth state to ensure re-renders
+  const authState = useStore();
+  const authenticated = authState.authenticated;
+  const login = authState.login;
+  const logout = authState.logout;
+  
+  // Sync local state with Zustand
+  useEffect(() => {
+    console.log('useEffect: authenticated changed to:', authenticated);
+    setLocalAuth(authenticated);
+  }, [authenticated]);
+
+  console.log('AppContainer STATE - authenticated:', authenticated, 'localAuth:', localAuth, 'isLoading:', isLoading, 'initiated:', initiated);
+  console.log('Current Zustand authenticated value:', useStore.getState().authenticated);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      if (!AsyncStorage) return;
+      if (!AsyncStorage) {
+        setIsLoading(false);
+        return;
+      }
       try {
         const i = await AsyncStorage.getItem('initiated');
-        const t = await AsyncStorage.getItem('authToken');
+        const userData = await AsyncStorage.getItem('userData');
         if (!mounted) return;
-        setInitiated(i === 'true');
-        setAuthenticated(!!t);
+        // Always set initiated to true - skip onboarding
+        setInitiated(true);
+        if (userData) {
+          // Restore authentication state from storage
+          console.log('Restoring user data from storage:', userData);
+          login(JSON.parse(userData));
+        } else {
+          // Make sure we're logged out if no data
+          logout();
+        }
       } catch (e) {
-        // ignore
+        console.error('Error loading stored data:', e);
+        logout();
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     };
     load();
@@ -172,9 +216,31 @@ const AppContainer = () => {
   };
 
   const markAuthenticated = async (token) => {
-    setAuthenticated(true);
+    // Authentication is now handled by Zustand store
     if (AsyncStorage && token) await AsyncStorage.setItem('authToken', token);
   };
+
+  // Debug button to force logout and clear storage
+  const forceLogout = async () => {
+    console.log('Force logout triggered');
+    logout();
+    if (AsyncStorage) {
+      await AsyncStorage.clear();
+    }
+    setIsLoading(false);
+  };
+
+  // Wait for initial data to load before rendering
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+        <Text style={{ color: '#fff', marginBottom: 20 }}>Loading...</Text>
+        <TouchableOpacity onPress={forceLogout} style={{ padding: 10, backgroundColor: '#333' }}>
+          <Text style={{ color: '#fff' }}>Clear Data & Logout</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   if (!initiated) {
     return (
@@ -189,11 +255,16 @@ const AppContainer = () => {
     );
   }
 
-  if (!authenticated) {
+  console.log('CHECKING authenticated value:', authenticated, 'localAuth:', localAuth, 'type:', typeof authenticated);
+  console.log('!localAuth evaluates to:', !localAuth);
+  
+  if (!localAuth) {
+    console.log('✓ CONDITION MET - Rendering UNAUTHENTICATED navigator with Signin/Signup routes');
     return (
-      <>
+      <React.Fragment key="unauthenticated">
         <StatusBar barStyle="light-content" backgroundColor="#000000" />
         <Stack.Navigator
+          initialRouteName="Signin"
           screenOptions={{
             headerShown: true,
             headerStyle: { backgroundColor: '#111111' },
@@ -202,20 +273,23 @@ const AppContainer = () => {
           }}
         >
           <Stack.Screen name="Signin">
-            {(props) => <signin {...props} onAuthSuccess={markAuthenticated} />}
+            {(props) => <Signin {...props} onAuthSuccess={markAuthenticated} />}
           </Stack.Screen>
           <Stack.Screen name="Signup">
-            {(props) => <signup {...props} onAuthSuccess={markAuthenticated} />}
+            {(props) => <Signup {...props} onAuthSuccess={markAuthenticated} />}
           </Stack.Screen>
         </Stack.Navigator>
-      </>
+      </React.Fragment>
     );
   }
 
+  console.log('✗ CONDITION NOT MET - Rendering AUTHENTICATED navigator with Home/Rules/Profile/etc routes');
+
   return (
-    <>
+    <React.Fragment key="authenticated">
       <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Stack.Navigator
+        initialRouteName="Home"
         screenOptions={{
           headerShown: true,
           headerStyle: { backgroundColor: '#111111' },
@@ -238,7 +312,7 @@ const AppContainer = () => {
           {(props) => <SignupScreen {...props} onAuthSuccess={markAuthenticated} />}
         </Stack.Screen>
       </Stack.Navigator>
-    </>
+    </React.Fragment>
   );
 };
 

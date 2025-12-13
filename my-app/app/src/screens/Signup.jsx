@@ -9,17 +9,26 @@ import {
     ScrollView, 
     KeyboardAvoidingView 
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
+import api from '../core/api';
+import { log } from '../core/utils';
+import useStore from '../core/global';
 
-function signup(props) {
-    const [name, setName] = useState('');
+function Signup(props) {
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const login = useStore((state) => state.login);
 
     const validate = () => {
-        if (!name.trim()) {
-            showAlert('Name required', 'Please enter your name');
+        if (!username.trim()) {
+            showAlert('Username required', 'Please enter your username');
+            return false;
+        }
+        if (!email.trim()) {
+            showAlert('Email required', 'Please enter your email');
             return false;
         }
         if (!email.includes('@')) {
@@ -39,11 +48,54 @@ function signup(props) {
 
     const handleSubmit = () => {
         if (!validate()) return;
-        if (props && typeof props.onAuthSuccess === 'function') {
-            props.onAuthSuccess('TEST_TOKEN');
-            return;
-        }
-        showAlert('Signed up', 'Signup simulated (no backend)');
+        
+        log('Attempting signup with:', { username, email });
+        
+        api({
+            method: 'POST',
+            url: 'quiz/signup/',
+            data: {
+                username: username,
+                email: email,
+                password: password
+            }
+        })
+        .then(response => {
+            log('=== Sign up Response JSON ===');
+            log(response.data);
+            log('=== End Response ===');
+            
+            // Update Zustand store with user data
+            login(response.data.user);
+            
+            // Save user data to AsyncStorage for persistence
+            AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+            
+            // Clear input fields
+            setUsername('');
+            setEmail('');
+            setPassword('');
+            setConfirmPassword('');
+            
+            showAlert('Sign up successful', `Welcome ${username}!`);
+        })
+        .catch(error => {
+            log('=== Sign up Error ===');
+            if (error.response) {
+                log('Status:', error.response.status);
+                log('Data:', error.response.data);
+                log('Headers:', error.response.headers);
+                showAlert('Sign up failed', `Error: ${JSON.stringify(error.response.data)}`);
+            } else if (error.request) {
+                log('No response received:', error.request);
+                log('Full error:', error);
+                showAlert('Network Error', 'Could not connect to server. Make sure the API is running at http://localhost:8000');
+            } else {
+                log('Error:', error.message);
+                showAlert('Sign up failed', error.message);
+            }
+            log('=== End Error ===');
+        });
     };
 
     const handleTestSignUp = () => {
@@ -61,19 +113,19 @@ function signup(props) {
     return (
         <ScrollView style={styles.container}>
             <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
-                <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss();}}>
+               
                     <View style={styles.content}>
                         <Text style={styles.title}>Create account</Text>
 
                         <View style={styles.field}>
-                            <Text style={styles.label}>Name</Text>
+                            <Text style={styles.label}>Username</Text>
                             <TextInput
-                                value={name}
-                                onChangeText={setName}
-                                placeholder="Your name"
+                                value={username}
+                                onChangeText={setUsername}
+                                placeholder="Your username"
                                 placeholderTextColor="#999"
                                 style={styles.input}
-                                autoCapitalize="words"
+                                autoCapitalize="none"
                             />
                         </View>
 
@@ -128,13 +180,13 @@ function signup(props) {
                             <Text style={styles.signinText}>Already have an account? <Text style={styles.signinLink}>Sign in</Text></Text>
                         </TouchableOpacity>
                     </View>
-                </TouchableWithoutFeedback>
+                
             </KeyboardAvoidingView>
         </ScrollView>
     );
 }
 
-export default signup;
+export default Signup;
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#000' },
