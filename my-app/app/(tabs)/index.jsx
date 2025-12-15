@@ -73,6 +73,8 @@ const NavBar = ({ navigation }) => {
     { name: 'Home', label: 'Home' },
     { name: 'Rules', label: 'Rules' },
     { name: 'Questions', label: 'Questions' },
+    { name: 'Search', label: 'Search' },
+    { name: 'Messages', label: 'Messages' },
     { name: 'Profile', label: 'Profile' },
     { name: 'Settings', label: 'Settings' },
   ] : [
@@ -276,21 +278,25 @@ const AppContainer = () => {
           initiated = i === 'true';
         }
         
-        // Get user data from encrypted storage
+        // Get user data and token from encrypted storage
         const userData = await getUserData();
+        const token = await import('../src/core/secureStorage').then(m => m.getAuthToken());
         
         if (!mounted) return;
         
         // Always set initiated to true - skip onboarding
         setInitiated(true);
         
-        if (userData) {
+        if (userData && token) {
           // Restore authentication state from encrypted storage
-          console.log('Restoring user data from encrypted storage');
+          console.log('Restoring user data and token from encrypted storage');
+          console.log('Token found:', token ? 'Yes' : 'No');
           login(userData);
         } else {
-          // Make sure we're logged out if no data
-          console.log('No encrypted user data found');
+          // Make sure we're logged out if no data or token
+          console.log('No encrypted user data or token found');
+          console.log('User data:', userData ? 'Found' : 'Not found');
+          console.log('Token:', token ? 'Found' : 'Not found');
           logout();
         }
       } catch (e) {

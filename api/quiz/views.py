@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer
 from .models import User
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.db.models import Q
 
 # Create your views here.
 
@@ -98,3 +99,20 @@ class UpdateProfilePictureView(APIView):
             'user': UserSerializer(user).data,
             'message': 'Profile picture updated successfully'
         }, status=200)
+
+class SearchUsersView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        
+        if not query:
+            return Response({'users': []}, status=200)
+        
+        # Search by username or email (case-insensitive)
+        users = User.objects.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        ).exclude(id=request.user.id)[:20]  # Exclude current user, limit to 20 results
+        
+        serializer = UserSerializer(users, many=True)
+        return Response({'users': serializer.data}, status=200)

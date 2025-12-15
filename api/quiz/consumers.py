@@ -44,6 +44,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message_type = text_data_json.get('type', 'chat_message')
             message = text_data_json.get('message', '')
             username = text_data_json.get('username', 'Anonymous')
+            image_data = text_data_json.get('image', None)
+            timestamp = text_data_json.get('timestamp', None)
             
             # Send message to room group
             await self.channel_layer.group_send(
@@ -52,6 +54,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'type': 'chat_message',
                     'message': message,
                     'username': username,
+                    'image': image_data,
+                    'timestamp': timestamp,
                 }
             )
         except json.JSONDecodeError:
@@ -66,12 +70,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         message = event['message']
         username = event['username']
+        image = event.get('image', None)
+        timestamp = event.get('timestamp', None)
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'chat_message',
             'message': message,
             'username': username,
+            'image': image,
+            'timestamp': timestamp,
         }))
 
 
