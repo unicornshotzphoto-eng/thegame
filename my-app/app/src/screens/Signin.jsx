@@ -70,9 +70,13 @@ function Signin(props) {
             // Save user data to encrypted storage for persistence
             await storeUserData(response.data.user);
             
-            // Store auth token if provided
-            if (response.data.token) {
+            // Store auth token (access token from JWT)
+            if (response.data.access) {
+                await storeAuthToken(response.data.access);
+                console.log('Auth token stored successfully');
+            } else if (response.data.token) {
                 await storeAuthToken(response.data.token);
+                console.log('Auth token stored successfully');
             }
             
             // Clear input fields

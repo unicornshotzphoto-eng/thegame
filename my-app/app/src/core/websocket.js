@@ -187,11 +187,23 @@ export class ChatWebSocket extends WebSocketClient {
     return super.connect(`ws/chat/${this.roomName}/`, options);
   }
 
-  sendMessage(message, username) {
+  sendMessage(message, username, image = null) {
     this.send({
       type: 'chat_message',
       message,
       username,
+      image,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  sendImage(imageBase64, username, caption = '') {
+    this.send({
+      type: 'chat_message',
+      message: caption,
+      username,
+      image: imageBase64,
+      timestamp: new Date().toISOString(),
     });
   }
 }

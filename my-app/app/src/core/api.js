@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
 import { API_BASE_URL, API_TIMEOUT, API_HEADERS, DEBUG_API } from './apiConfig';
+import { getAuthToken } from './secureStorage';
 
 // Auto-detect best API URL based on platform if not explicitly set in config
 const getBaseURL = () => {
@@ -37,15 +38,35 @@ const api = axios.create({
     timeout: API_TIMEOUT,
 });
 
-// Add request interceptor for debugging
+// Add request interceptor for authentication and debugging
 api.interceptors.request.use(
-  (config) => {
-    if (DEBUG_API) {
-      console.log('📤 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
-      if (config.data) {
+  async (config) => {
+    // Add authentication token if available
+    try {
+      const token = await getAuthToken();
+      if (DEBUG_API) {
+        console.log('📤 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
+        console.log('🔍 Token retrieved:', token ? `${token.substring(0, 20)}...` : 'No token found');
+      }
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        if (DEBUG_API) {
+          console.log('🔑 Auth Token added to headers');
+        }
+      } else {
+        if (DEBUG_API) {
+          console.warn('⚠️ No auth token available - request may fail if authentication required');
+        }
+      }
+      
+      if (DEBUG_API && config.data) {
         console.log('📦 Request Data:', config.data);
       }
+    } catch (error) {
+      console.error('❌ Error retrieving auth token:', error);
     }
+    
     return config;
   },
   (error) => {

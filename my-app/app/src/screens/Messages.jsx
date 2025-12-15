@@ -8,8 +8,12 @@ import {
     FlatList, 
     StyleSheet,
     KeyboardAvoidingView,
-    Platform 
+    Platform,
+    Image,
+    Alert,
+    ActivityIndicator
 } from "react-native";
+import * as ImagePicker from 'expo-image-picker';
 import { ChatWebSocket } from '../core/websocket';
 import useStore from '../core/global';
 
@@ -17,6 +21,8 @@ function Messages() {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
     const wsRef = useRef(null);
     const user = useStore((state) => state.user);
     const username = user?.username || 'Anonymous';
@@ -45,10 +51,11 @@ function Messages() {
         // Listen for chat messages
         wsRef.current.on('chat_message', (data) => {
             const newMessage = {
-                id: Date.now().toString(),
+                id: Date.now().toString() + Math.random(),
                 username: data.username,
                 message: data.message,
-                timestamp: new Date().toLocaleTimeString(),
+                image: data.image,
+                timestamp: data.timestamp ? new Date(data.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString(),
                 isOwn: data.username === username,
             };
             setMessages(prev => [...prev, newMessage]);
@@ -66,10 +73,48 @@ function Messages() {
         };
     }, [roomName, username]);
 
+    const pickImage = async () => {
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'We need permission to access your photos');
+                return;
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.6,
+                base64: true,
+            });
+
+            if (!result.canceled && result.assets[0]) {
+                setSelectedImage(result.assets[0]);
+            }
+        } catch (error) {
+            console.error('Error picking image:', error);
+            Alert.alert('Error', 'Failed to pick image');
+        }
+    };
+
+    const removeSelectedImage = () => {
+        setSelectedImage(null);
+    };
+
     const sendMessage = () => {
-        if (inputMessage.trim() && wsRef.current && wsRef.current.isConnected()) {
-            wsRef.current.sendMessage(inputMessage, username);
-            setInputMessage('');
+        if (wsRef.current && wsRef.current.isConnected()) {
+            if (selectedImage) {
+                setIsUploading(true);
+                const imageBase64 = `data:image/jpeg;base64,${selectedImage.base64}`;
+                wsRef.current.sendMessage(inputMessage.trim() || '', username, imageBase64);
+                setSelectedImage(null);
+                setInputMessage('');
+                setIsUploading(false);
+            } else if (inputMessage.trim()) {
+                wsRef.current.sendMessage(inputMessage, username);
+                setInputMessage('');
+            }
         }
     };
 
@@ -81,7 +126,16 @@ function Messages() {
             {!item.isOwn && (
                 <Text style={styles.username}>{item.username}</Text>
             )}
-            <Text style={styles.messageText}>{item.message}</Text>
+            {item.image && (
+                <Image 
+                    source={{ uri: item.image }} 
+                    style={styles.messageImage}
+                    resizeMode="cover"
+                />
+            )}
+            {item.message ? (
+                <Text style={styles.messageText}>{item.message}</Text>
+            ) : null}
             <Text style={styles.timestamp}>{item.timestamp}</Text>
         </View>
     );
@@ -108,26 +162,55 @@ function Messages() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
             >
+                {selectedImage && (
+                    <View style={styles.imagePreviewContainer}>
+                        <Image 
+                            source={{ uri: selectedImage.uri }} 
+                            style={styles.imagePreview}
+                            resizeMode="cover"
+                        />
+                        <TouchableOpacity 
+                            style={styles.removeImageButton}
+                            onPress={removeSelectedImage}
+                        >
+                            <Text style={styles.removeImageText}>✕</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                
                 <View style={styles.inputContainer}>
+                    <TouchableOpacity
+                        style={styles.imageButton}
+                        onPress={pickImage}
+                        disabled={!isConnected || isUploading}
+                    >
+                        <Text style={styles.imageButtonText}>📷</Text>
+                    </TouchableOpacity>
+                    
                     <TextInput
                         style={styles.input}
                         value={inputMessage}
                         onChangeText={setInputMessage}
-                        placeholder="Type a message..."
+                        placeholder={selectedImage ? "Add a caption..." : "Type a message..."}
                         placeholderTextColor="#999"
                         multiline
                         maxLength={500}
                     />
-                    <TouchableOpacity
-                        style={[
-                            styles.sendButton,
-                            (!inputMessage.trim() || !isConnected) && styles.sendButtonDisabled
-                        ]}
-                        onPress={sendMessage}
-                        disabled={!inputMessage.trim() || !isConnected}
-                    >
-                        <Text style={styles.sendButtonText}>Send</Text>
-                    </TouchableOpacity>
+                    
+                    {isUploading ? (
+                        <ActivityIndicator size="small" color="#1a73e8" style={styles.sendButton} />
+                    ) : (
+                        <TouchableOpacity
+                            style={[
+                                styles.sendButton,
+                                ((!inputMessage.trim() && !selectedImage) || !isConnected) && styles.sendButtonDisabled
+                            ]}
+                            onPress={sendMessage}
+                            disabled={(!inputMessage.trim() && !selectedImage) || !isConnected}
+                        >
+                            <Text style={styles.sendButtonText}>Send</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -192,11 +275,45 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
     },
+    messageImage: {
+        width: 200,
+        height: 150,
+        borderRadius: 8,
+        marginVertical: 4,
+    },
     timestamp: {
         color: '#aaa',
         fontSize: 10,
         marginTop: 4,
         alignSelf: 'flex-end',
+    },
+    imagePreviewContainer: {
+        position: 'relative',
+        padding: 12,
+        backgroundColor: '#111',
+        borderTopWidth: 1,
+        borderTopColor: '#333',
+    },
+    imagePreview: {
+        width: 100,
+        height: 100,
+        borderRadius: 8,
+    },
+    removeImageButton: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        backgroundColor: 'rgba(0,0,0,0.7)',
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    removeImageText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -204,6 +321,15 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#333',
         backgroundColor: '#000',
+    },
+    imageButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginRight: 8,
+        justifyContent: 'center',
+    },
+    imageButtonText: {
+        fontSize: 24,
     },
     input: {
         flex: 1,
