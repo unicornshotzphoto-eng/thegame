@@ -1,4 +1,4 @@
-import React, { use, useState } from 'react';
+import React, { useState } from 'react';
 import { 
     Text,
     TouchableOpacity, 
@@ -10,14 +10,16 @@ import {
     Keyboard,
     KeyboardAvoidingView
     } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
 import api from '../core/api';
-import utils from '../core/utils';
+import { log } from '../core/utils';
 import useStore from '../core/global';
+import { storeUserData, storeAuthToken } from '../core/secureStorage';
 
 function Signin(props) {
     console.log('Signin component rendered');
+    console.log('Signin props:', props);
+    console.log('Signin navigation:', props?.navigation);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const login = useStore((state) => state.login);
@@ -57,7 +59,7 @@ function Signin(props) {
                 password: password
             }
         })
-        .then(response => {
+        .then(async response => {
             console.log('=== Sign in Response JSON ===');
             console.log(JSON.stringify(response.data, null, 2));
             console.log('=== End Response ===');
@@ -65,12 +67,33 @@ function Signin(props) {
             // Update Zustand store with user data
             login(response.data.user);
             
-            // Save user data to AsyncStorage for persistence
-            AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+            // Save user data to encrypted storage for persistence
+            await storeUserData(response.data.user);
+            
+            // Store auth token if provided
+            if (response.data.token) {
+                await storeAuthToken(response.data.token);
+            }
             
             // Clear input fields
             setUsername('');
             setPassword('');
+            
+            // Navigate to Home screen
+            console.log('Attempting navigation...');
+            console.log('props:', props);
+            console.log('props.navigation:', props?.navigation);
+            if (props && props.navigation) {
+                console.log('Navigating to Home...');
+                try {
+                    props.navigation.navigate('Home');
+                    console.log('Navigation called successfully');
+                } catch (error) {
+                    console.error('Navigation error:', error);
+                }
+            } else {
+                console.warn('Navigation not available');
+            }
             
             showAlert('Sign in successful', `Welcome back, ${response.data.user.username}!`);
         })

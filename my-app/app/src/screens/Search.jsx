@@ -1,12 +1,11 @@
-import { SafeAreaView, Text } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "react-native";
 
-
-
-function search() {
+function Search() {
     return (
         <SafeAreaView>
             <Text>Search Screen</Text>
         </SafeAreaView>
     );
 }
-export default search;
+export default Search;

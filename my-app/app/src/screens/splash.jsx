@@ -1,7 +1,7 @@
 import { Text, StatusBar, View, StyleSheet, Animated, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Title from '../common/Title';
-import { use, useEffect} from 'react';
+import { useEffect } from 'react';
 
 // function SplashScreen () {
 

@@ -1,12 +1,11 @@
-import { SafeAreaView, Text } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "react-native";
 
-
-
-function home() {
+function Home() {
     return (
         <SafeAreaView>
             <Text>Home Screen</Text>
         </SafeAreaView>
     );
 }
-export default home;
+export default Home;

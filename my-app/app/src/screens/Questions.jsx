@@ -1,12 +1,11 @@
-import { SafeAreaView, Text } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "react-native";
 
-
-
-function questions() {
+function Questions() {
     return (
         <SafeAreaView>
             <Text>Questions Screen</Text>
         </SafeAreaView>
     );
 }
-export default questions;
+export default Questions;

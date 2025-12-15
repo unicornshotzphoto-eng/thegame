@@ -9,13 +9,16 @@ import {
     ScrollView, 
     KeyboardAvoidingView 
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
 import api from '../core/api';
 import { log } from '../core/utils';
 import useStore from '../core/global';
+import { storeUserData, storeAuthToken } from '../core/secureStorage';
 
 function Signup(props) {
+    console.log('Signup component rendered');
+    console.log('Signup props:', props);
+    console.log('Signup navigation:', props?.navigation);
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -60,7 +63,7 @@ function Signup(props) {
                 password: password
             }
         })
-        .then(response => {
+        .then(async response => {
             log('=== Sign up Response JSON ===');
             log(response.data);
             log('=== End Response ===');
@@ -68,16 +71,38 @@ function Signup(props) {
             // Update Zustand store with user data
             login(response.data.user);
             
-            // Save user data to AsyncStorage for persistence
-            AsyncStorage.setItem('userData', JSON.stringify(response.data.user));
+            // Save user data to encrypted storage for persistence
+            await storeUserData(response.data.user);
+            
+            // Store auth token if provided
+            if (response.data.token) {
+                await storeAuthToken(response.data.token);
+            }
             
             // Clear input fields
+            const currentUsername = username;
             setUsername('');
             setEmail('');
             setPassword('');
             setConfirmPassword('');
             
-            showAlert('Sign up successful', `Welcome ${username}!`);
+            // Navigate to Home screen
+            console.log('Attempting navigation...');
+            console.log('props:', props);
+            console.log('props.navigation:', props?.navigation);
+            if (props && props.navigation) {
+                console.log('Navigating to Home...');
+                try {
+                    props.navigation.navigate('Home');
+                    console.log('Navigation called successfully');
+                } catch (error) {
+                    console.error('Navigation error:', error);
+                }
+            } else {
+                console.warn('Navigation not available');
+            }
+            
+            showAlert('Sign up successful', `Welcome ${currentUsername}!`);
         })
         .catch(error => {
             log('=== Sign up Error ===');

@@ -3,12 +3,16 @@ import  SplashScreen  from '../src/screens/Splash';
 import RulesScreen from '../src/screens/RulesScreen';
 import Signin from '../src/screens/Signin';
 import Signup from '../src/screens/Signup';
-import messages from '../src/screens/Messages';
-import home from '../src/screens/Home';
-import questions from '../src/screens/Questions';
-import search from '../src/screens/Search';
+import Messages from '../src/screens/Messages';
+import Home from '../src/screens/Home';
+import Questions from '../src/screens/Questions';
+import Search from '../src/screens/Search';
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, Image } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { showAlert } from '../src/utils/alert';
+import api from '../src/core/api';
+import { getUserData, clearSecureStorage, storeUserData } from '../src/core/secureStorage';
 // Note: Do NOT wrap this file in a NavigationContainer.
 // The app already provides a NavigationContainer at the root (Expo Router or app entry).
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -40,8 +44,11 @@ const NavBar = ({ navigation }) => {
   const handleLogout = async () => {
     console.log('Logging out...');
     logout();
+    // Clear all encrypted storage
+    await clearSecureStorage();
+    // Also clear AsyncStorage if used for non-sensitive data
     if (AsyncStorage) {
-      await AsyncStorage.removeItem('userData');
+      await AsyncStorage.removeItem('initiated');
     }
   };
   
@@ -130,12 +137,92 @@ const SettingsScreen = ({ navigation }) => (
   </ScreenWrapper>
 );
 
-const ProfileScreen = ({ navigation }) => (
-  <ScreenWrapper navigation={navigation}>
-    <Text style={styles.title}>Profile</Text>
-    <Text style={styles.smallText}>View and edit your profile information.</Text>
-  </ScreenWrapper>
-);
+const ProfileScreen = ({ navigation }) => {
+  const user = useStore((state) => state.user);
+  const [image, setImage] = React.useState(user.thumbnail || null);
+  
+  const pickImage = async () => {
+    // Request permission and pick image
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      showAlert('Permission denied', 'We need camera roll permissions to upload a profile picture.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled && result.assets[0]) {
+      const imageUri = result.assets[0].uri;
+      setImage(imageUri);
+      
+      try {
+        // Get user data from encrypted storage to retrieve token
+        const userData = await getUserData();
+        if (!userData) {
+          showAlert('Error', 'Please log in again');
+          return;
+        }
+        
+        const token = userData.access;
+        
+        // Create form data
+        const formData = new FormData();
+        const filename = imageUri.split('/').pop();
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : 'image/jpeg';
+        
+        formData.append('thumbnail', {
+          uri: imageUri,
+          name: filename,
+          type: type,
+        });
+        
+        // Upload to backend
+        const response = await api.post('quiz/profile/picture/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        // Update Zustand store with new user data
+        login(response.data.user);
+        
+        showAlert('Success', 'Profile picture updated!');
+      } catch (error) {
+        console.error('Upload error:', error);
+        showAlert('Error', error.response?.data?.error || 'Failed to upload profile picture');
+      }
+    }
+  };
+  
+  return (
+    <ScreenWrapper navigation={navigation}>
+      <Text style={styles.title}>Profile</Text>
+      <View style={styles.profileContainer}>
+        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+          {image || user?.thumbnail ? (
+            <Image 
+              source={{ uri: image || `http://192.168.1.210:8000${user.thumbnail}` }} 
+              style={styles.profileImage} 
+            />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Text style={styles.placeholderText}>Tap to upload</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.username}>{user.username || 'Guest'}</Text>
+        <Text style={styles.email}>{user.email || ''}</Text>
+      </View>
+    </ScreenWrapper>
+  );
+};
 
 const GameRulesScreen = ({ navigation }) => (
   <ScreenWrapper navigation={navigation}>
@@ -181,22 +268,29 @@ const AppContainer = () => {
   useEffect(() => {
     let mounted = true;
     const load = async () => {
-      if (!AsyncStorage) {
-        setIsLoading(false);
-        return;
-      }
       try {
-        const i = await AsyncStorage.getItem('initiated');
-        const userData = await AsyncStorage.getItem('userData');
+        // Check initiated status from AsyncStorage (non-sensitive)
+        let initiated = true;
+        if (AsyncStorage) {
+          const i = await AsyncStorage.getItem('initiated');
+          initiated = i === 'true';
+        }
+        
+        // Get user data from encrypted storage
+        const userData = await getUserData();
+        
         if (!mounted) return;
+        
         // Always set initiated to true - skip onboarding
         setInitiated(true);
+        
         if (userData) {
-          // Restore authentication state from storage
-          console.log('Restoring user data from storage:', userData);
-          login(JSON.parse(userData));
+          // Restore authentication state from encrypted storage
+          console.log('Restoring user data from encrypted storage');
+          login(userData);
         } else {
           // Make sure we're logged out if no data
+          console.log('No encrypted user data found');
           logout();
         }
       } catch (e) {
@@ -216,14 +310,18 @@ const AppContainer = () => {
   };
 
   const markAuthenticated = async (token) => {
-    // Authentication is now handled by Zustand store
-    if (AsyncStorage && token) await AsyncStorage.setItem('authToken', token);
+    // Authentication is now handled by Zustand store and encrypted storage
+    // Token is stored securely in storeAuthToken() called from Signin/Signup
+    console.log('Authentication marked');
   };
 
   // Debug button to force logout and clear storage
   const forceLogout = async () => {
     console.log('Force logout triggered');
     logout();
+    // Clear encrypted storage
+    await clearSecureStorage();
+    // Clear AsyncStorage
     if (AsyncStorage) {
       await AsyncStorage.clear();
     }
@@ -258,32 +356,33 @@ const AppContainer = () => {
   console.log('CHECKING authenticated value:', authenticated, 'localAuth:', localAuth, 'type:', typeof authenticated);
   console.log('!localAuth evaluates to:', !localAuth);
   
-  if (!localAuth) {
-    console.log('✓ CONDITION MET - Rendering UNAUTHENTICATED navigator with Signin/Signup routes');
-    return (
-      <React.Fragment key="unauthenticated">
-        <StatusBar barStyle="light-content" backgroundColor="#000000" />
-        <Stack.Navigator
-          initialRouteName="Signin"
-          screenOptions={{
-            headerShown: true,
-            headerStyle: { backgroundColor: '#111111' },
-            headerTintColor: '#fff',
-            headerTitleStyle: { color: '#fff', fontFamily: 'montserrat-regular' },
-          }}
-        >
-          <Stack.Screen name="Signin">
-            {(props) => <Signin {...props} onAuthSuccess={markAuthenticated} />}
-          </Stack.Screen>
-          <Stack.Screen name="Signup">
-            {(props) => <Signup {...props} onAuthSuccess={markAuthenticated} />}
-          </Stack.Screen>
-        </Stack.Navigator>
-      </React.Fragment>
-    );
-  }
+  // AUTHENTICATION BYPASS - Always show home screen
+  // if (!localAuth) {
+  //   console.log('✓ CONDITION MET - Rendering UNAUTHENTICATED navigator with Signin/Signup routes');
+  //   return (
+  //     <React.Fragment key="unauthenticated">
+  //       <StatusBar barStyle="light-content" backgroundColor="#000000" />
+  //       <Stack.Navigator
+  //         initialRouteName="Signin"
+  //         screenOptions={{
+  //           headerShown: true,
+  //           headerStyle: { backgroundColor: '#111111' },
+  //           headerTintColor: '#fff',
+  //           headerTitleStyle: { color: '#fff', fontFamily: 'montserrat-regular' },
+  //         }}
+  //       >
+  //         <Stack.Screen name="Signin">
+  //           {(props) => <Signin {...props} onAuthSuccess={markAuthenticated} />}
+  //         </Stack.Screen>
+  //         <Stack.Screen name="Signup">
+  //           {(props) => <Signup {...props} onAuthSuccess={markAuthenticated} />}
+  //         </Stack.Screen>
+  //       </Stack.Navigator>
+  //     </React.Fragment>
+  //   );
+  // }
 
-  console.log('✗ CONDITION NOT MET - Rendering AUTHENTICATED navigator with Home/Rules/Profile/etc routes');
+  console.log('✗ BYPASSING AUTH - Rendering home screen navigator with all routes');
 
   return (
     <React.Fragment key="authenticated">
@@ -302,9 +401,9 @@ const AppContainer = () => {
         <Stack.Screen name="Rules" component={GameRulesScreen} options={{ title: 'Rules' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
-        <Stack.Screen name="Messages" component={messages} options={{ title: 'Messages' }} />
-        <Stack.Screen name="Questions" component={questions} options={{ title: 'Questions' }} />
-        <Stack.Screen name="Search" component={search} options={{ title: 'Search' }} />
+        <Stack.Screen name="Messages" component={Messages} options={{ title: 'Messages' }} />
+        <Stack.Screen name="Questions" component={Questions} options={{ title: 'Questions' }} />
+        <Stack.Screen name="Search" component={Search} options={{ title: 'Search' }} />
         <Stack.Screen name="Signin">
           {(props) => <SigninScreen {...props} onAuthSuccess={markAuthenticated} />}
         </Stack.Screen>
@@ -358,6 +457,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     fontFamily: 'montserrat-regular',
+  },
+  profileContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  imageContainer: {
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  placeholderImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  placeholderText: {
+    color: '#999',
+    fontSize: 14,
+  },
+  username: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  email: {
+    color: '#999',
+    fontSize: 16,
   },
 });
 
