@@ -42,6 +42,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             text_data_json = json.loads(text_data)
             message_type = text_data_json.get('type', 'chat_message')
+            
+            # Handle typing events separately
+            if message_type == 'user_typing':
+                username = text_data_json.get('username', 'Anonymous')
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'user_typing',
+                        'username': username,
+                    }
+                )
+                return
+            
+            # Handle regular chat messages
             message = text_data_json.get('message', '')
             username = text_data_json.get('username', 'Anonymous')
             image_data = text_data_json.get('image', None)
@@ -80,6 +94,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'username': username,
             'image': image,
             'timestamp': timestamp,
+        }))
+
+    async def user_typing(self, event):
+        """
+        Receive typing event from room group and send to WebSocket
+        """
+        username = event['username']
+
+        # Send typing event to WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'user_typing',
+            'username': username,
         }))
 
 

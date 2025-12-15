@@ -127,12 +127,6 @@ function Signup(props) {
         });
     };
 
-    const handleTestSignUp = () => {
-        if (props && typeof props.onAuthSuccess === 'function') {
-            props.onAuthSuccess('TEST_TOKEN');
-        }
-    };
-
     const handleSignIn = () => {
         if (props && props.navigation) {
             props.navigation.navigate('Signin');
@@ -197,10 +191,6 @@ function Signup(props) {
 
                         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                             <Text style={styles.buttonText}>Sign up</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.ghostButton} onPress={handleTestSignUp}>
-                            <Text style={styles.ghostText}>Sign up (test)</Text>
                         </TouchableOpacity>
 
                         <View style={styles.divider} />

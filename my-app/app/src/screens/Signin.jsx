@@ -119,10 +119,6 @@ function Signin(props) {
         });
     };
 
-    const handleTestSignIn = () => {
-        showAlert('Test Sign In', 'Test sign in button pressed');
-    };
-
     const handleSignUp = () => {
         if (props && props.navigation) {
             props.navigation.navigate('Signup');
@@ -166,10 +162,6 @@ function Signin(props) {
 
                         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                             <Text style={styles.buttonText}>Sign in</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.ghostButton} onPress={handleTestSignIn}>
-                            <Text style={styles.ghostText}>Sign in (test)</Text>
                         </TouchableOpacity>
 
                         <View style={styles.divider} />

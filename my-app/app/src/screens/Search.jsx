@@ -9,6 +9,7 @@ function Search() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
+    const [sendingRequest, setSendingRequest] = useState({});
 
     useEffect(() => {
         const delaySearch = setTimeout(() => {
@@ -37,8 +38,22 @@ function Search() {
         }
     };
 
+    const sendFriendRequest = async (userId) => {
+        try {
+            setSendingRequest(prev => ({ ...prev, [userId]: true }));
+            await api.post('/quiz/friends/request/send/', { to_user_id: userId });
+            showAlert('Success', 'Friend request sent!');
+        } catch (error) {
+            console.error('Send friend request error:', error);
+            const errorMsg = error.response?.data?.error || 'Failed to send friend request';
+            showAlert('Error', errorMsg);
+        } finally {
+            setSendingRequest(prev => ({ ...prev, [userId]: false }));
+        }
+    };
+
     const renderUserItem = ({ item }) => (
-        <TouchableOpacity style={styles.userCard}>
+        <View style={styles.userCard}>
             <View style={styles.userInfo}>
                 {item.thumbnail ? (
                     <Image source={{ uri: item.thumbnail }} style={styles.avatar} />
@@ -51,8 +66,19 @@ function Search() {
                     <Text style={styles.username}>{item.username}</Text>
                     <Text style={styles.email}>{item.email}</Text>
                 </View>
+                <TouchableOpacity
+                    style={[styles.addButton, sendingRequest[item.id] && styles.addButtonDisabled]}
+                    onPress={() => sendFriendRequest(item.id)}
+                    disabled={sendingRequest[item.id]}
+                >
+                    {sendingRequest[item.id] ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                        <Text style={styles.addButtonText}>Add Friend</Text>
+                    )}
+                </TouchableOpacity>
             </View>
-        </TouchableOpacity>
+        </View>
     );
 
     return (
@@ -173,6 +199,22 @@ const styles = StyleSheet.create({
     },
     email: {
         color: '#888',
+        fontSize: 14,
+    },
+    addButton: {
+        backgroundColor: '#1a73e8',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+        minWidth: 100,
+        alignItems: 'center',
+    },
+    addButtonDisabled: {
+        backgroundColor: '#555',
+    },
+    addButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
         fontSize: 14,
     },
 });

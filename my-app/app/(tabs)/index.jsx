@@ -4,9 +4,15 @@ import RulesScreen from '../src/screens/RulesScreen';
 import Signin from '../src/screens/Signin';
 import Signup from '../src/screens/Signup';
 import Messages from '../src/screens/Messages';
+import DirectMessages from '../src/screens/DirectMessages';
+import DirectChat from '../src/screens/DirectChat';
 import Home from '../src/screens/Home';
 import Questions from '../src/screens/Questions';
 import Search from '../src/screens/Search';
+import Friends from '../src/screens/Friends';
+import GroupChats from '../src/screens/GroupChats';
+import GroupChat from '../src/screens/GroupChat';
+import CreateGroup from '../src/screens/CreateGroup';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -74,6 +80,8 @@ const NavBar = ({ navigation }) => {
     { name: 'Rules', label: 'Rules' },
     { name: 'Questions', label: 'Questions' },
     { name: 'Search', label: 'Search' },
+    { name: 'Friends', label: 'Friends' },
+    { name: 'Groups', label: 'Groups' },
     { name: 'Messages', label: 'Messages' },
     { name: 'Profile', label: 'Profile' },
     { name: 'Settings', label: 'Settings' },
@@ -407,9 +415,14 @@ const AppContainer = () => {
         <Stack.Screen name="Rules" component={GameRulesScreen} options={{ title: 'Rules' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profile' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
-        <Stack.Screen name="Messages" component={Messages} options={{ title: 'Messages' }} />
+        <Stack.Screen name="Messages" component={DirectMessages} options={{ title: 'Direct Messages' }} />
+        <Stack.Screen name="DirectChat" component={DirectChat} options={{ title: 'Chat' }} />
         <Stack.Screen name="Questions" component={Questions} options={{ title: 'Questions' }} />
         <Stack.Screen name="Search" component={Search} options={{ title: 'Search' }} />
+        <Stack.Screen name="Friends" component={Friends} options={{ title: 'Friends' }} />
+        <Stack.Screen name="Groups" component={GroupChats} options={{ title: 'Groups' }} />
+        <Stack.Screen name="GroupChat" component={GroupChat} options={{ title: 'Group Chat' }} />
+        <Stack.Screen name="CreateGroup" component={CreateGroup} options={{ title: 'Create Group' }} />
         <Stack.Screen name="Signin">
           {(props) => <SigninScreen {...props} onAuthSuccess={markAuthenticated} />}
         </Stack.Screen>
