@@ -25,25 +25,55 @@ SECRET_KEY = 'django-insecure-idnpwjvypsg#y_k@^-57pbjz7g$p%%-2&ajpk$4ete@^y!weq)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.210', '10.0.2.2', '*']
 
+AUTH_USER_MODEL = 'quiz.User'
+
+# CORS settings - Allow all origins for development
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# Alternative: Specific origins (comment out CORS_ALLOW_ALL_ORIGINS if using this)
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8081",
+#     "http://127.0.0.1:8081",
+#     "http://192.168.1.210:8081",
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+#     "http://10.0.2.2:8081",
+# ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',  # Must be first for Channels
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+<<<<<<< HEAD
     'rest_framework',
     'authentication',
+=======
+    'quiz',
+>>>>>>> main
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -118,7 +148,33 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media files (uploaded by users)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Channels Configuration
+ASGI_APPLICATION = 'api.asgi.application'
+
+# Channel layers configuration
+# Using in-memory channel layer for development (no Redis required)
+# For production, use Redis backend
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
+# For production with Redis:
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
+#     },
+# }
