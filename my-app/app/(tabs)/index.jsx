@@ -13,6 +13,7 @@ import Friends from '../src/screens/Friends';
 import GroupChats from '../src/screens/GroupChats';
 import GroupChat from '../src/screens/GroupChat';
 import CreateGroup from '../src/screens/CreateGroup';
+import GamePlay from '../src/screens/GamePlay';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, ScrollView, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -423,6 +424,7 @@ const AppContainer = () => {
         <Stack.Screen name="Groups" component={GroupChats} options={{ title: 'Groups' }} />
         <Stack.Screen name="GroupChat" component={GroupChat} options={{ title: 'Group Chat' }} />
         <Stack.Screen name="CreateGroup" component={CreateGroup} options={{ title: 'Create Group' }} />
+        <Stack.Screen name="GamePlay" component={GamePlay} options={{ title: 'Game Play' }} />
         <Stack.Screen name="Signin">
           {(props) => <SigninScreen {...props} onAuthSuccess={markAuthenticated} />}
         </Stack.Screen>

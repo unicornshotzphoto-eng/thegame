@@ -3,15 +3,62 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, Image, StyleSheet, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
+import { getAuthToken } from '../core/secureStorage';
+import useStore from '../core/global';
 
-function Search() {
+function Search({ navigation }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
     const [sendingRequest, setSendingRequest] = useState({});
+    const authenticated = useStore((state) => state.authenticated);
+    const user = useStore((state) => state.user);
 
     useEffect(() => {
+        const checkAuth = async () => {
+            const token = await getAuthToken();
+            console.log('Auth check - Token exists:', !!token);
+            console.log('Auth check - Zustand authenticated:', authenticated);
+            console.log('Auth check - User:', user?.username);
+        };
+        checkAuth();
+    }, []);
+
+    useEffect(() => {
+        const searchUsers = async () => {
+            try {
+                setLoading(true);
+                console.log('Searching for:', searchQuery);
+                
+                // Check token before making request
+                const token = await getAuthToken();
+                if (!token) {
+                    console.error('No auth token found - user needs to login');
+                    showAlert('Error', 'Please sign in to search users');
+                    setLoading(false);
+                    return;
+                }
+                
+                const response = await api.get(`/quiz/search/users/?q=${encodeURIComponent(searchQuery)}`);
+                console.log('Search response:', response.data);
+                setUsers(response.data.users || []);
+                setHasSearched(true);
+            } catch (error) {
+                console.error('Search error:', error);
+                console.error('Error response:', error.response?.data);
+                console.error('Error status:', error.response?.status);
+                
+                if (error.response?.status === 401) {
+                    showAlert('Session Expired', 'Please sign in again to continue');
+                } else {
+                    showAlert('Error', error.response?.data?.detail || 'Failed to search users');
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
         const delaySearch = setTimeout(() => {
             if (searchQuery.trim()) {
                 searchUsers();
@@ -23,20 +70,6 @@ function Search() {
 
         return () => clearTimeout(delaySearch);
     }, [searchQuery]);
-
-    const searchUsers = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get(`/quiz/search/users/?q=${encodeURIComponent(searchQuery)}`);
-            setUsers(response.data.users || []);
-            setHasSearched(true);
-        } catch (error) {
-            console.error('Search error:', error);
-            showAlert('Error', 'Failed to search users');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const sendFriendRequest = async (userId) => {
         try {

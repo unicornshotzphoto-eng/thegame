@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, GroupChat, GroupMessage
+from .models import User, GroupChat, GroupMessage, Question, QuestionResponse, GameSession, GameRound, GameTurn
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -53,3 +53,42 @@ class GroupMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMessage
         fields = ('id', 'group', 'sender', 'content', 'image', 'created_at')
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('id', 'category', 'question_number', 'question_text', 'points', 'consequence', 'created_at')
+
+class QuestionResponseSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    partner = UserSerializer(read_only=True)
+    question = QuestionSerializer(read_only=True)
+    
+    class Meta:
+        model = QuestionResponse
+        fields = ('id', 'question', 'user', 'partner', 'response_text', 'is_correct', 'points_earned', 'created_at')
+
+class GameSessionSerializer(serializers.ModelSerializer):
+    participants = UserSerializer(many=True, read_only=True)
+    current_turn_user = UserSerializer(read_only=True)
+    group = GroupChatSerializer(read_only=True)
+    
+    class Meta:
+        model = GameSession
+        fields = ('id', 'session_type', 'group', 'participants', 'current_turn_user', 'turn_order', 'is_active', 'created_at', 'updated_at')
+
+class GameTurnSerializer(serializers.ModelSerializer):
+    player = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = GameTurn
+        fields = ('id', 'round', 'player', 'answer', 'points_earned', 'answered_at', 'created_at')
+
+class GameRoundSerializer(serializers.ModelSerializer):
+    question = QuestionSerializer(read_only=True)
+    picker = UserSerializer(read_only=True)
+    answers = GameTurnSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = GameRound
+        fields = ('id', 'session', 'question', 'picker', 'picker_answer', 'answers', 'is_completed', 'created_at')

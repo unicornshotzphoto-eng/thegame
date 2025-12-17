@@ -12,7 +12,17 @@ from .views import (
     GroupChatListView,
     GroupChatDetailView,
     GroupMessagesView,
-    AddGroupMembersView
+    AddGroupMembersView,
+    QuestionsListView,
+    QuestionDetailView,
+    SubmitAnswerView,
+    UserResponsesView,
+    CreateGameSessionView,
+    GetRandomQuestionView,
+    SubmitGameAnswerView,
+    GameSessionDetailView,
+    ActiveGameSessionsView,
+    DeleteGameSessionView
 )
 
 urlpatterns = [
@@ -28,5 +38,15 @@ urlpatterns = [
     path('groups/', GroupChatListView.as_view(), name='group-list'),
     path('groups/<int:group_id>/', GroupChatDetailView.as_view(), name='group-detail'),
     path('groups/<int:group_id>/messages/', GroupMessagesView.as_view(), name='group-messages'),
-    path('groups/<int:group_id>/add-members/', AddGroupMembersView.as_view(), name='add-group-members'),
+    path('groups/<int:group_id>/members/add/', AddGroupMembersView.as_view(), name='add-group-members'),
+    path('questions/', QuestionsListView.as_view(), name='questions-list'),
+    path('questions/<int:question_id>/', QuestionDetailView.as_view(), name='question-detail'),
+    path('questions/answer/', SubmitAnswerView.as_view(), name='submit-answer'),
+    path('questions/responses/', UserResponsesView.as_view(), name='user-responses'),
+    path('game/create/', CreateGameSessionView.as_view(), name='create-game-session'),
+    path('game/<int:session_id>/', GameSessionDetailView.as_view(), name='game-session-detail'),
+    path('game/<int:session_id>/delete/', DeleteGameSessionView.as_view(), name='delete-game-session'),
+    path('game/random-question/', GetRandomQuestionView.as_view(), name='get-random-question'),
+    path('game/answer/', SubmitGameAnswerView.as_view(), name='submit-game-answer'),
+    path('game/active/', ActiveGameSessionsView.as_view(), name='active-game-sessions'),
 ]
