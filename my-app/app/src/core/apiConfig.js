@@ -7,7 +7,7 @@
 
 // OPTION 1: Web Browser / Expo Web
 // Use this when running: npm start -> press 'w' for web
-export const API_BASE_URL = 'http://localhost:8000';
+// export const API_BASE_URL = 'http://localhost:8000';
 
 // OPTION 2: Android Emulator
 // Use this when running on Android Studio emulator
@@ -20,7 +20,7 @@ export const API_BASE_URL = 'http://localhost:8000';
 // OPTION 4: Physical Device (Android/iOS)
 // Use this when running on a real phone connected to same WiFi
 // Find your computer's IP with: ipconfig (Windows) or ifconfig (Mac/Linux)
-// export const API_BASE_URL = 'http://192.168.1.210:8000/';
+export const API_BASE_URL = 'http://192.168.1.210:8000/';
 
 // OPTION 5: Expo Go App
 // Use this when testing with Expo Go on physical device
