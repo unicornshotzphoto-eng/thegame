@@ -12,7 +12,23 @@ from .views import (
     GroupChatListView,
     GroupChatDetailView,
     GroupMessagesView,
-    AddGroupMembersView
+    AddGroupMembersView,
+    CalendarListCreateView,
+    CalendarDetailView,
+    CalendarInviteView,
+    CalendarEventListCreateView,
+    CalendarEventDetailView,
+    QuestionsListView,
+    QuestionCategoriesView,
+    RandomQuestionView,
+    CreateGameSessionView,
+    GameSessionDetailView,
+    GameSessionListView,
+    StartGameRoundView,
+    SubmitAnswerView,
+    GetAnswersView,
+    NextRoundView,
+    EndGameView
 )
 
 urlpatterns = [
@@ -29,4 +45,25 @@ urlpatterns = [
     path('groups/<int:group_id>/', GroupChatDetailView.as_view(), name='group-detail'),
     path('groups/<int:group_id>/messages/', GroupMessagesView.as_view(), name='group-messages'),
     path('groups/<int:group_id>/add-members/', AddGroupMembersView.as_view(), name='add-group-members'),
+    # Calendar routes
+    path('calendars/', CalendarListCreateView.as_view(), name='calendar-list-create'),
+    path('calendars/<int:calendar_id>/', CalendarDetailView.as_view(), name='calendar-detail'),
+    path('calendars/<int:calendar_id>/invite/', CalendarInviteView.as_view(), name='calendar-invite'),
+    path('calendars/<int:calendar_id>/events/', CalendarEventListCreateView.as_view(), name='calendar-events'),
+    path('calendars/<int:calendar_id>/events/<int:event_id>/', CalendarEventDetailView.as_view(), name='calendar-event-detail'),
+    # Question routes
+    path('questions/categories/', QuestionCategoriesView.as_view(), name='question-categories'),
+    path('questions/random/', RandomQuestionView.as_view(), name='random-question'),
+    path('questions/random/<str:category>/', RandomQuestionView.as_view(), name='random-question-by-category'),
+    path('questions/<str:category>/', QuestionsListView.as_view(), name='questions-by-category'),
+    path('questions/', QuestionsListView.as_view(), name='questions-list'),
+    # Multiplayer game routes
+    path('games/create/', CreateGameSessionView.as_view(), name='create-game'),
+    path('games/', GameSessionListView.as_view(), name='games-list'),
+    path('games/<int:game_id>/', GameSessionDetailView.as_view(), name='game-detail'),
+    path('games/<int:game_id>/start-round/', StartGameRoundView.as_view(), name='start-round'),
+    path('games/<int:game_id>/submit-answer/', SubmitAnswerView.as_view(), name='submit-answer'),
+    path('games/<int:game_id>/answers/', GetAnswersView.as_view(), name='get-answers'),
+    path('games/<int:game_id>/next-round/', NextRoundView.as_view(), name='next-round'),
+    path('games/<int:game_id>/end/', EndGameView.as_view(), name='end-game'),
 ]

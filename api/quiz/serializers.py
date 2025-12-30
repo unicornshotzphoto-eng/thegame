@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User, GroupChat, GroupMessage
+from django.db import models
+from .models import User, GroupChat, GroupMessage, SharedCalendar, CalendarEvent, Question, QuestionCategory, GameSession, PlayerAnswer
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -53,3 +54,103 @@ class GroupMessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GroupMessage
         fields = ('id', 'group', 'sender', 'content', 'image', 'created_at')
+
+
+class CalendarEventSerializer(serializers.ModelSerializer):
+    creator = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = CalendarEvent
+        fields = ('id', 'calendar', 'creator', 'title', 'description', 'start_date', 'end_date', 'color', 'created_at', 'updated_at')
+
+
+class SharedCalendarSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    members = UserSerializer(many=True, read_only=True)
+    members_count = serializers.SerializerMethodField()
+    events = CalendarEventSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = SharedCalendar
+        fields = ('id', 'name', 'created_by', 'members', 'members_count', 'events', 'created_at', 'updated_at')
+    
+    def get_members_count(self, obj):
+        return obj.members_count()
+
+
+class SharedCalendarListSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    members_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SharedCalendar
+        fields = ('id', 'name', 'created_by', 'members_count', 'created_at', 'updated_at')
+    
+    def get_members_count(self, obj):
+        return obj.members_count()
+
+
+class QuestionCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionCategory
+        fields = ('id', 'category', 'name', 'description')
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    category = QuestionCategorySerializer(read_only=True)
+    
+    class Meta:
+        model = Question
+        fields = ('id', 'category', 'question_text', 'points', 'consequence', 'order')
+
+
+class QuestionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ('id', 'question_text', 'points', 'consequence')
+
+
+class PlayerAnswerSerializer(serializers.ModelSerializer):
+    player = UserSerializer(read_only=True)
+    question = QuestionSerializer(read_only=True)
+    
+    class Meta:
+        model = PlayerAnswer
+        fields = ('id', 'player', 'question', 'answer_text', 'points_awarded', 'created_at')
+
+
+class GameSessionSerializer(serializers.ModelSerializer):
+    creator = UserSerializer(read_only=True)
+    players = UserSerializer(many=True, read_only=True)
+    category_picker = UserSerializer(read_only=True)
+    current_question = QuestionSerializer(read_only=True)
+    answers = PlayerAnswerSerializer(many=True, read_only=True)
+    player_scores = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = GameSession
+        fields = ('id', 'creator', 'players', 'status', 'current_round', 'current_question', 
+                  'category_picker', 'answers', 'player_scores', 'created_at', 'updated_at')
+    
+    def get_player_scores(self, obj):
+        """Calculate total points for each player"""
+        scores = {}
+        for player in obj.players.all():
+            total_points = obj.answers.filter(player=player).aggregate(
+                total=models.Sum('points_awarded')
+            )['total'] or 0
+            scores[player.username] = total_points
+        return scores
+
+
+class GameSessionListSerializer(serializers.ModelSerializer):
+    creator = UserSerializer(read_only=True)
+    players = UserSerializer(many=True, read_only=True)
+    player_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = GameSession
+        fields = ('id', 'creator', 'players', 'player_count', 'status', 'created_at', 'updated_at')
+    
+    def get_player_count(self, obj):
+        return obj.players.count()

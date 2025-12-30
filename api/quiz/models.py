@@ -60,3 +60,115 @@ class GroupMessage(models.Model):
     
     def __str__(self):
         return f'{self.sender.username} in {self.group.name}: {self.content[:50]}'
+
+
+class SharedCalendar(models.Model):
+    name = models.CharField(max_length=100)
+    created_by = models.ForeignKey(User, related_name='created_calendars', on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='shared_calendars')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-updated_at']
+    
+    def __str__(self):
+        return self.name
+    
+    def members_count(self):
+        return self.members.count()
+
+
+class CalendarEvent(models.Model):
+    calendar = models.ForeignKey(SharedCalendar, related_name='events', on_delete=models.CASCADE)
+    creator = models.ForeignKey(User, related_name='created_events', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    color = models.CharField(max_length=7, default='#1a73e8')  # Hex color code
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['start_date']
+    
+    def __str__(self):
+        return f'{self.title} ({self.calendar.name})'
+
+
+class QuestionCategory(models.Model):
+    CATEGORIES = [
+        ('spiritual', 'Spiritual Knowing (1-20)'),
+        ('mental', 'Mental Knowing (21-40)'),
+        ('physical', 'Physical Knowing (41-60)'),
+        ('disagreeables', 'Disagreeables & Truth Checks (61-80)'),
+        ('romantic', 'Romantic Knowing (81-100)'),
+        ('erotic', 'Erotic Knowing (101-160)'),
+        ('creative', 'Creative & Fun (161-200)'),
+    ]
+    
+    category = models.CharField(max_length=20, choices=CATEGORIES, unique=True)
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    
+    class Meta:
+        ordering = ['category']
+    
+    def __str__(self):
+        return self.name
+
+
+class Question(models.Model):
+    category = models.ForeignKey(QuestionCategory, related_name='questions', on_delete=models.CASCADE)
+    question_text = models.TextField()
+    points = models.IntegerField(default=1)
+    consequence = models.TextField(help_text="What happens if you refuse to answer")
+    order = models.IntegerField(default=0)
+    
+    class Meta:
+        ordering = ['order']
+    
+    def __str__(self):
+        return f"{self.question_text[:50]}... ({self.category.name})"
+
+
+class GameSession(models.Model):
+    """Represents a multiplayer game session"""
+    STATUS_CHOICES = [
+        ('waiting', 'Waiting for Players'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+    ]
+    
+    creator = models.ForeignKey(User, related_name='created_game_sessions', on_delete=models.CASCADE)
+    players = models.ManyToManyField(User, related_name='game_sessions')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
+    current_round = models.IntegerField(default=1)
+    current_question = models.ForeignKey(Question, null=True, blank=True, on_delete=models.SET_NULL)
+    category_picker = models.ForeignKey(User, null=True, blank=True, related_name='picked_categories', on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Game #{self.id} - {self.status}"
+
+
+class PlayerAnswer(models.Model):
+    """Stores answers from each player in a game session"""
+    game_session = models.ForeignKey(GameSession, related_name='answers', on_delete=models.CASCADE)
+    player = models.ForeignKey(User, related_name='game_answers', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer_text = models.TextField()
+    points_awarded = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('game_session', 'player', 'question')
+    
+    def __str__(self):
+        return f"{self.player.username} - {self.question.question_text[:30]}"
