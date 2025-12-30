@@ -1,3 +1,14 @@
+<<<<<<< HEAD
+import { useNavigation } from '@react-navigation/native';
+import React from 'react';
+import Home from '../src/screens/Home';
+
+export default function HomeScreen() {
+  const navigation = useNavigation();
+  
+  return <Home navigation={navigation} />;
+}
+=======
 import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import Signin from '../src/screens/Signin';
@@ -68,3 +79,4 @@ const AppContainer = () => {
 };
 
 export default AppContainer;
+>>>>>>> main

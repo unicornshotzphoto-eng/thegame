@@ -16,6 +16,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { ChatWebSocket } from '../core/websocket';
 import useStore from '../core/global';
+import { THEME } from '../constants/appTheme';
 
 function Messages() {
     const [messages, setMessages] = useState([]);
@@ -220,18 +221,18 @@ function Messages() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: THEME.secondary,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 16,
+        padding: THEME.spacing.lg,
         borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        borderBottomColor: THEME.borderLight,
     },
     headerText: {
-        color: '#fff',
+        color: THEME.text.primary,
         fontSize: 18,
         fontWeight: '600',
     },
@@ -241,68 +242,68 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
     connectedDot: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: THEME.primary,
     },
     disconnectedDot: {
-        backgroundColor: '#F44336',
+        backgroundColor: THEME.button.danger,
     },
     messagesList: {
         flex: 1,
     },
     messagesContent: {
-        padding: 16,
+        padding: THEME.spacing.lg,
     },
     messageContainer: {
         maxWidth: '80%',
-        marginBottom: 12,
-        padding: 12,
-        borderRadius: 12,
+        marginBottom: THEME.spacing.md,
+        padding: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.lg,
     },
     ownMessage: {
         alignSelf: 'flex-end',
-        backgroundColor: '#1a73e8',
+        backgroundColor: THEME.primary,
     },
     otherMessage: {
         alignSelf: 'flex-start',
-        backgroundColor: '#333',
+        backgroundColor: THEME.surfaceDark,
     },
     username: {
-        color: '#aaa',
+        color: THEME.text.secondary,
         fontSize: 12,
-        marginBottom: 4,
+        marginBottom: THEME.spacing.sm,
     },
     messageText: {
-        color: '#fff',
+        color: THEME.text.primary,
         fontSize: 16,
     },
     messageImage: {
         width: 200,
         height: 150,
-        borderRadius: 8,
-        marginVertical: 4,
+        borderRadius: THEME.borderRadius.md,
+        marginVertical: THEME.spacing.md,
     },
     timestamp: {
-        color: '#aaa',
+        color: THEME.text.secondary,
         fontSize: 10,
-        marginTop: 4,
+        marginTop: THEME.spacing.sm,
         alignSelf: 'flex-end',
     },
     imagePreviewContainer: {
         position: 'relative',
-        padding: 12,
-        backgroundColor: '#111',
+        padding: THEME.spacing.md,
+        backgroundColor: THEME.surfaceDark,
         borderTopWidth: 1,
-        borderTopColor: '#333',
+        borderTopColor: THEME.borderLight,
     },
     imagePreview: {
         width: 100,
         height: 100,
-        borderRadius: 8,
+        borderRadius: THEME.borderRadius.md,
     },
     removeImageButton: {
         position: 'absolute',
-        top: 8,
-        right: 8,
+        top: THEME.spacing.md,
+        right: THEME.spacing.md,
         backgroundColor: 'rgba(0,0,0,0.7)',
         width: 24,
         height: 24,
@@ -317,15 +318,15 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         flexDirection: 'row',
-        padding: 12,
+        padding: THEME.spacing.md,
         borderTopWidth: 1,
-        borderTopColor: '#333',
-        backgroundColor: '#000',
+        borderTopColor: THEME.borderLight,
+        backgroundColor: THEME.secondary,
     },
     imageButton: {
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        marginRight: 8,
+        paddingHorizontal: THEME.spacing.md,
+        paddingVertical: THEME.spacing.sm,
+        marginRight: THEME.spacing.md,
         justifyContent: 'center',
     },
     imageButtonText: {
@@ -333,23 +334,23 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        backgroundColor: '#111',
-        color: '#fff',
+        backgroundColor: THEME.surfaceDark,
+        color: THEME.text.primary,
         borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        marginRight: 8,
+        paddingHorizontal: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.md,
+        marginRight: THEME.spacing.md,
         maxHeight: 100,
     },
     sendButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: THEME.primary,
         borderRadius: 20,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingHorizontal: THEME.spacing.xl,
+        paddingVertical: THEME.spacing.md,
         justifyContent: 'center',
     },
     sendButtonDisabled: {
-        backgroundColor: '#555',
+        backgroundColor: THEME.text.muted,
     },
     sendButtonText: {
         color: '#fff',

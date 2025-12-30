@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
+import { THEME } from '../constants/appTheme';
 
 function Friends() {
     const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'requests', 'sent'
@@ -268,31 +269,31 @@ function Friends() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: THEME.secondary,
     },
     tabBar: {
         flexDirection: 'row',
-        backgroundColor: '#111',
+        backgroundColor: THEME.surfaceDark,
         borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        borderBottomColor: THEME.borderLight,
     },
     tab: {
         flex: 1,
-        paddingVertical: 16,
+        paddingVertical: THEME.spacing.lg,
         alignItems: 'center',
         borderBottomWidth: 2,
         borderBottomColor: 'transparent',
     },
     activeTab: {
-        borderBottomColor: '#1a73e8',
+        borderBottomColor: THEME.primary,
     },
     tabText: {
-        color: '#888',
+        color: THEME.text.secondary,
         fontSize: 14,
         fontWeight: '600',
     },
     activeTabText: {
-        color: '#1a73e8',
+        color: THEME.primary,
     },
     loadingContainer: {
         flex: 1,
@@ -303,41 +304,41 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
+        padding: THEME.spacing.xl,
     },
     emptyText: {
-        color: '#888',
+        color: THEME.text.secondary,
         fontSize: 18,
-        marginBottom: 8,
+        marginBottom: THEME.spacing.md,
     },
     emptySubtext: {
-        color: '#666',
+        color: THEME.text.muted,
         fontSize: 14,
     },
     listContainer: {
-        padding: 16,
+        padding: THEME.spacing.lg,
     },
     card: {
-        backgroundColor: '#111',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
+        backgroundColor: THEME.surfaceDark,
+        borderRadius: THEME.borderRadius.lg,
+        padding: THEME.spacing.lg,
+        marginBottom: THEME.spacing.md,
         borderWidth: 1,
-        borderColor: '#333',
+        borderColor: THEME.borderLight,
     },
     userInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: THEME.spacing.md,
     },
     avatar: {
         width: 50,
         height: 50,
         borderRadius: 25,
-        marginRight: 12,
+        marginRight: THEME.spacing.md,
     },
     avatarPlaceholder: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: THEME.primary,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -350,41 +351,41 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     username: {
-        color: '#fff',
+        color: THEME.text.primary,
         fontSize: 16,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: THEME.spacing.sm,
     },
     email: {
-        color: '#888',
+        color: THEME.text.secondary,
         fontSize: 14,
     },
     pendingText: {
-        color: '#ffa500',
+        color: THEME.accent,
         fontSize: 12,
-        marginTop: 4,
+        marginTop: THEME.spacing.md,
         fontStyle: 'italic',
     },
     buttonRow: {
         flexDirection: 'row',
-        gap: 12,
+        gap: THEME.spacing.md,
     },
     acceptButton: {
         flex: 1,
-        backgroundColor: '#28a745',
-        paddingVertical: 10,
-        borderRadius: 8,
+        backgroundColor: THEME.primary,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
         alignItems: 'center',
     },
     rejectButton: {
         flex: 1,
-        backgroundColor: '#dc3545',
-        paddingVertical: 10,
-        borderRadius: 8,
+        backgroundColor: THEME.button.danger,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
         alignItems: 'center',
     },
     buttonDisabled: {
-        backgroundColor: '#555',
+        backgroundColor: THEME.text.muted,
     },
     buttonText: {
         color: '#fff',

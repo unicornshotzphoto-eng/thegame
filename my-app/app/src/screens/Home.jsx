@@ -1,11 +1,186 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Text } from "react-native";
+import React, { useEffect } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+  Dimensions,
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { THEME } from '../constants/appTheme';
 
-function Home() {
-    return (
-        <SafeAreaView>
-            <Text>Home Screen</Text>
-        </SafeAreaView>
-    );
+const { width, height } = Dimensions.get('window');
+
+function Home({ navigation }) {
+  const router = useRouter();
+  return (
+    <ImageBackground
+      source={{
+        uri: 'data:image/svg+xml,%3Csvg width="1" height="1" xmlns="http://www.w3.org/2000/svg"%3E%3Crect fill="%230F1419" width="1" height="1"/%3E%3C/svg%3E',
+      }}
+      style={styles.container}
+    >
+      {/* Sparkle overlay effect */}
+      <View style={styles.sparkleOverlay} />
+
+      <SafeAreaView style={styles.safeArea}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.logo}>Know Me Grow Us</Text>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity
+              style={styles.signInButton}
+              onPress={() => router.push('/signin')}
+            >
+              <Text style={styles.signInText}>Sign In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.signUpButton}
+              onPress={() => router.push('/Signup')}
+            >
+              <Text style={styles.signUpText}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Main Content */}
+        <View style={styles.contentContainer}>
+          {/* Main Headline */}
+          <View style={styles.headlineContainer}>
+            <Text style={styles.mainHeadline}>
+              An intimate game for
+            </Text>
+            <Text style={[styles.mainHeadline, styles.highlightText]}>
+              couples
+            </Text>
+          </View>
+
+          {/* Subheadline */}
+          <Text style={styles.subheadline}>
+            Challenge yourself with fun and engaging quizzes designed to deepen your connection.
+          </Text>
+
+          {/* CTA Button */}
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={() => router.push('/(tabs)/Questions')}
+          >
+            <Text style={styles.ctaButtonText}>Start a Game</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: THEME.secondary,
+  },
+  sparkleOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(209, 67, 91, 0.05)',
+    zIndex: 0,
+  },
+  safeArea: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: THEME.spacing.xl,
+    paddingVertical: THEME.spacing.lg,
+    zIndex: 1,
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: THEME.text.primary,
+    letterSpacing: 0.5,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: THEME.spacing.lg,
+    alignItems: 'center',
+  },
+  signInButton: {
+    paddingVertical: THEME.spacing.md,
+    paddingHorizontal: THEME.spacing.lg,
+  },
+  signInText: {
+    color: THEME.text.primary,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  signUpButton: {
+    paddingVertical: THEME.spacing.md,
+    paddingHorizontal: THEME.spacing.xl,
+    borderWidth: 2,
+    borderColor: THEME.primary,
+    borderRadius: THEME.borderRadius.lg,
+    backgroundColor: 'transparent',
+  },
+  signUpText: {
+    color: THEME.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: THEME.spacing.xl,
+    zIndex: 1,
+  },
+  headlineContainer: {
+    marginBottom: THEME.spacing.xl,
+    alignItems: 'center',
+  },
+  mainHeadline: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: THEME.text.primary,
+    lineHeight: 56,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  highlightText: {
+    color: THEME.primary,
+  },
+  subheadline: {
+    fontSize: 16,
+    color: THEME.text.secondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: THEME.spacing.xxl,
+    maxWidth: width - THEME.spacing.xl * 2,
+  },
+  ctaButton: {
+    paddingVertical: THEME.spacing.lg,
+    paddingHorizontal: THEME.spacing.xxl,
+    backgroundColor: THEME.primary,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: THEME.primary,
+    elevation: 5,
+    shadowColor: THEME.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  ctaButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: THEME.text.primary,
+    letterSpacing: 0.3,
+  },
+});
+
 export default Home;
