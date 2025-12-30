@@ -26,7 +26,7 @@ logout: () => {
   });
   console.log('State after logout:', useStore.getState());
   console.log('========== ZUSTAND LOGOUT COMPLETE ==========');
-}
+},
 }))
 
 export default useStore;

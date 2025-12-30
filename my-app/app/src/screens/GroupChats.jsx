@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
 
@@ -8,23 +9,30 @@ function GroupChats({ navigation }) {
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeGames, setActiveGames] = useState([]);
 
-    useEffect(() => {
-        loadGroups();
-    }, []);
-
-    const loadGroups = async () => {
+    const loadGroups = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await api.get('/quiz/groups/');
-            setGroups(response.data.groups || []);
+            const [groupsResponse, gamesResponse] = await Promise.all([
+                api.get('/quiz/groups/'),
+                api.get('/quiz/game/active/')
+            ]);
+            setGroups(groupsResponse.data.groups || []);
+            setActiveGames(gamesResponse.data.sessions || []);
         } catch (error) {
             console.error('Load groups error:', error);
             showAlert('Error', 'Failed to load groups');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadGroups();
+        }, [loadGroups])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -36,29 +44,83 @@ function GroupChats({ navigation }) {
         navigation.navigate('GroupChat', { groupId: group.id, groupName: group.name });
     };
 
+    const startGame = async (group) => {
+        try {
+            // First check if there's an active game session for this group
+            const activeGamesResponse = await api.get('/quiz/game/active/');
+            const existingGame = activeGamesResponse.data.sessions?.find(session => {
+                // Check if this is a group game with this specific group
+                return session.session_type === 'group' && 
+                       session.group?.id === group.id;
+            });
+
+            if (existingGame) {
+                console.log('Found existing game session:', existingGame.id);
+                navigation.navigate('GamePlay', { sessionId: existingGame.id });
+            } else {
+                // Create new game session
+                console.log('Creating new game session for group:', group.id);
+                const response = await api.post('/quiz/game/create/', {
+                    session_type: 'group',
+                    group_id: group.id
+                });
+                
+                navigation.navigate('GamePlay', { sessionId: response.data.id });
+            }
+        } catch (error) {
+            console.error('Start game error:', error);
+            showAlert('Error', 'Failed to start game');
+        }
+    };
+
     const createNewGroup = () => {
         navigation.navigate('CreateGroup');
     };
 
-    const renderGroupItem = ({ item }) => (
-        <TouchableOpacity style={styles.groupCard} onPress={() => openGroup(item)}>
-            <View style={styles.groupIcon}>
-                <Text style={styles.groupIconText}>👥</Text>
-            </View>
-            <View style={styles.groupInfo}>
-                <Text style={styles.groupName}>{item.name}</Text>
-                <Text style={styles.memberCount}>{item.member_count} members</Text>
-                {item.last_message && (
-                    <Text style={styles.lastMessage} numberOfLines={1}>
-                        {item.last_message.sender}: {item.last_message.content}
-                    </Text>
+    const renderGroupItem = ({ item }) => {
+        // Check if there's an active game for this group
+        const activeGame = activeGames.find(session => 
+            session.session_type === 'group' && 
+            session.group?.id === item.id
+        );
+
+        return (
+            <View style={styles.groupCard}>
+                <TouchableOpacity style={styles.groupMainContent} onPress={() => openGroup(item)}>
+                    <View style={styles.groupIcon}>
+                        <Text style={styles.groupIconText}>👥</Text>
+                    </View>
+                    <View style={styles.groupInfo}>
+                        <Text style={styles.groupName}>{item.name}</Text>
+                        <Text style={styles.memberCount}>{item.member_count} members</Text>
+                        {activeGame && (
+                            <Text style={styles.activeGameIndicator}>🎮 Game in progress</Text>
+                        )}
+                        {item.last_message && (
+                            <Text style={styles.lastMessage} numberOfLines={1}>
+                                {item.last_message.sender}: {item.last_message.content}
+                            </Text>
+                        )}
+                    </View>
+                    <View style={styles.arrow}>
+                        <Text style={styles.arrowText}>›</Text>
+                    </View>
+                </TouchableOpacity>
+                {activeGame ? (
+                    <TouchableOpacity 
+                        style={[styles.startGameButton, styles.joinGameButton]} 
+                        onPress={() => navigation.navigate('GamePlay', { sessionId: activeGame.id })}
+                    >
+                        <Text style={styles.startGameText}>🎮 Join Game</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity style={styles.startGameButton} onPress={() => startGame(item)}>
+                        <Text style={styles.startGameText}>🎮 Start Game</Text>
+                    </TouchableOpacity>
                 )}
             </View>
-            <View style={styles.arrow}>
-                <Text style={styles.arrowText}>›</Text>
-            </View>
-        </TouchableOpacity>
-    );
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -162,14 +224,38 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     groupCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
         backgroundColor: '#111',
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
         borderWidth: 1,
         borderColor: '#333',
+    },
+    groupMainContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    startGameButton: {
+        backgroundColor: '#007AFF',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignItems: 'center',
+    },
+    joinGameButton: {
+        backgroundColor: '#28a745',
+    },
+    startGameText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    activeGameIndicator: {
+        color: '#28a745',
+        fontSize: 12,
+        marginTop: 2,
+        fontWeight: '600',
     },
     groupIcon: {
         width: 50,

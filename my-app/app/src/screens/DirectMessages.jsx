@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
 
@@ -8,23 +9,30 @@ function DirectMessages({ navigation }) {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeGames, setActiveGames] = useState([]);
 
-    useEffect(() => {
-        loadFriends();
-    }, []);
-
-    const loadFriends = async () => {
+    const loadFriends = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await api.get('/quiz/friends/');
-            setFriends(response.data.friends || []);
+            const [friendsResponse, gamesResponse] = await Promise.all([
+                api.get('/quiz/friends/'),
+                api.get('/quiz/game/active/')
+            ]);
+            setFriends(friendsResponse.data.friends || []);
+            setActiveGames(gamesResponse.data.sessions || []);
         } catch (error) {
             console.error('Load friends error:', error);
             showAlert('Error', 'Failed to load friends');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadFriends();
+        }, [loadFriends])
+    );
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -41,31 +49,90 @@ function DirectMessages({ navigation }) {
         });
     };
 
-    const renderFriendItem = ({ item }) => (
-        <TouchableOpacity style={styles.friendCard} onPress={() => openChat(item)}>
-            <View style={styles.friendInfo}>
-                {item.thumbnail ? (
-                    <Image source={{ uri: item.thumbnail }} style={styles.avatar} />
-                ) : (
-                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
-                        <Text style={styles.avatarText}>{item.username.charAt(0).toUpperCase()}</Text>
+    const startGame = async (friend) => {
+        try {
+            // First check if there's an active game session with this friend
+            const activeGamesResponse = await api.get('/quiz/game/active/');
+            const existingGame = activeGamesResponse.data.sessions?.find(session => {
+                // Check if this is a direct game with this specific friend
+                return session.session_type === 'direct' && 
+                       session.participants.some(p => p.id === friend.id);
+            });
+
+            if (existingGame) {
+                console.log('Found existing game session:', existingGame.id);
+                navigation.navigate('GamePlay', { sessionId: existingGame.id });
+            } else {
+                // Create new game session
+                console.log('Creating new game session with friend:', friend.id);
+                const response = await api.post('/quiz/game/create/', {
+                    session_type: 'direct',
+                    participant_ids: [friend.id]
+                });
+                
+                navigation.navigate('GamePlay', { sessionId: response.data.id });
+            }
+        } catch (error) {
+            console.error('Start game error:', error);
+            showAlert('Error', 'Failed to start game');
+        }
+    };
+
+    const renderFriendItem = ({ item }) => {
+        // Check if there's an active game with this friend
+        const activeGame = activeGames.find(session => 
+            session.session_type === 'direct' && 
+            session.participants.some(p => p.id === item.id)
+        );
+
+        return (
+            <View style={styles.friendCard}>
+                <TouchableOpacity style={styles.friendInfo} onPress={() => openChat(item)}>
+                    {item.thumbnail ? (
+                        <Image source={{ uri: item.thumbnail }} style={styles.avatar} />
+                    ) : (
+                        <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                            <Text style={styles.avatarText}>{item.username.charAt(0).toUpperCase()}</Text>
+                        </View>
+                    )}
+                    <View style={styles.friendDetails}>
+                        <Text style={styles.username}>{item.username}</Text>
+                        <Text style={styles.email}>{item.email}</Text>
+                        {activeGame && (
+                            <Text style={styles.activeGameIndicator}>🎮 Game in progress</Text>
+                        )}
                     </View>
+                    <View style={styles.arrow}>
+                        <Text style={styles.arrowText}>›</Text>
+                    </View>
+                </TouchableOpacity>
+                {activeGame ? (
+                    <TouchableOpacity 
+                        style={[styles.startGameButton, styles.joinGameButton]} 
+                        onPress={() => navigation.navigate('GamePlay', { sessionId: activeGame.id })}
+                    >
+                        <Text style={styles.startGameText}>🎮 Join Game</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity style={styles.startGameButton} onPress={() => startGame(item)}>
+                        <Text style={styles.startGameText}>🎮 Start Game</Text>
+                    </TouchableOpacity>
                 )}
-                <View style={styles.friendDetails}>
-                    <Text style={styles.username}>{item.username}</Text>
-                    <Text style={styles.email}>{item.email}</Text>
-                </View>
-                <View style={styles.arrow}>
-                    <Text style={styles.arrowText}>›</Text>
-                </View>
             </View>
-        </TouchableOpacity>
-    );
+        );
+    };
+
+    const navigateToSearch = () => {
+        navigation.navigate('Search');
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Direct Messages</Text>
+                <TouchableOpacity style={styles.addButton} onPress={navigateToSearch}>
+                    <Text style={styles.addButtonText}>+ Add Friends</Text>
+                </TouchableOpacity>
             </View>
 
             {loading && !refreshing ? (
@@ -76,6 +143,9 @@ function DirectMessages({ navigation }) {
                 <View style={styles.emptyContainer}>
                     <Text style={styles.emptyText}>No friends to message</Text>
                     <Text style={styles.emptySubtext}>Add friends to start chatting</Text>
+                    <TouchableOpacity style={styles.emptyButton} onPress={navigateToSearch}>
+                        <Text style={styles.emptyButtonText}>Search Users</Text>
+                    </TouchableOpacity>
                 </View>
             ) : (
                 <FlatList
@@ -98,6 +168,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#000',
     },
     header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         padding: 16,
         backgroundColor: '#111',
         borderBottomWidth: 1,
@@ -107,6 +180,17 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 24,
         fontWeight: 'bold',
+    },
+    addButton: {
+        backgroundColor: '#1a73e8',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
     },
     loadingContainer: {
         flex: 1,
@@ -127,6 +211,18 @@ const styles = StyleSheet.create({
     emptySubtext: {
         color: '#666',
         fontSize: 14,
+        marginBottom: 16,
+    },
+    emptyButton: {
+        backgroundColor: '#1a73e8',
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+    },
+    emptyButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
     listContainer: {
         padding: 16,
@@ -142,6 +238,28 @@ const styles = StyleSheet.create({
     friendInfo: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 12,
+    },
+    startGameButton: {
+        backgroundColor: '#007AFF',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignItems: 'center',
+    },
+    joinGameButton: {
+        backgroundColor: '#28a745',
+    },
+    startGameText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    activeGameIndicator: {
+        color: '#28a745',
+        fontSize: 12,
+        marginTop: 2,
+        fontWeight: '600',
     },
     avatar: {
         width: 50,

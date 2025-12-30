@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
 import { THEME } from '../constants/appTheme';
@@ -17,6 +18,12 @@ function Friends() {
     useEffect(() => {
         loadData();
     }, [activeTab]);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [activeTab])
+    );
 
     const loadData = async () => {
         try {

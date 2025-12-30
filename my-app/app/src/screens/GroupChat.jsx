@@ -35,8 +35,29 @@ function GroupChat({ route, navigation }) {
     const typingTimeoutRef = useRef(null);
     const typingPollInterval = useRef(null);
 
+    const startGame = async () => {
+        try {
+            const response = await api.post('/quiz/game/create/', {
+                session_type: 'group',
+                group_id: groupId
+            });
+            
+            navigation.navigate('GamePlay', { sessionId: response.data.id });
+        } catch (error) {
+            console.error('Start game error:', error);
+            showAlert('Error', 'Failed to start game');
+        }
+    };
+
     useEffect(() => {
-        navigation.setOptions({ title: groupName });
+        navigation.setOptions({ 
+            title: groupName,
+            headerRight: () => (
+                <TouchableOpacity onPress={startGame} style={{ marginRight: 10 }}>
+                    <Text style={{ color: '#007AFF', fontSize: 16, fontWeight: '600' }}>🎮 Play</Text>
+                </TouchableOpacity>
+            )
+        });
         loadMessages();
         
         // Poll for new messages every 3 seconds

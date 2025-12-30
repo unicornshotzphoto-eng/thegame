@@ -6,10 +6,14 @@ import {
     StyleSheet, 
     TextInput, 
     View, 
+<<<<<<< HEAD
     ScrollView, 
     Keyboard,
     KeyboardAvoidingView,
     SafeAreaView
+=======
+    Keyboard
+>>>>>>> main
     } from 'react-native';
 import { useRouter } from 'expo-router';
 import { showAlert } from '../utils/alert';
@@ -118,6 +122,7 @@ function Signin(props) {
     };
 
     return (
+<<<<<<< HEAD
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <KeyboardAvoidingView behavior='padding' style={styles.keyboardView}>
@@ -125,39 +130,45 @@ function Signin(props) {
                         <View style={styles.cardContainer}>
                     <View style={styles.content}>
                         <Text style={styles.title}>Sign in</Text>
+=======
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <Text style={styles.title}>Sign in</Text>
+>>>>>>> main
 
-                        <View style={styles.field}>
-                            <Text style={styles.label}>Username</Text>
-                            <TextInput
-                                value={username}
-                                onChangeText={setUsername}
-                                placeholder="Your username"
-                                placeholderTextColor="#999"
-                                style={styles.input}
-                                autoCapitalize="none"
-                            />
-                        </View>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Username</Text>
+                    <TextInput
+                        value={username}
+                        onChangeText={setUsername}
+                        placeholder="Your username"
+                        placeholderTextColor="#999"
+                        style={styles.input}
+                        autoCapitalize="none"
+                    />
+                </View>
 
-                        <View style={styles.field}>
-                            <Text style={styles.label}>Password</Text>
-                            <TextInput
-                                autoComplete='off'
-                                autoCapitalize='none'
-                                value={password}
-                                onChangeText={setPassword}
-                                placeholder="At least 6 characters"
-                                placeholderTextColor="#999"
-                                style={styles.input}
-                                secureTextEntry
-                            />
-                        </View>
+                <View style={styles.field}>
+                    <Text style={styles.label}>Password</Text>
+                    <TextInput
+                        autoComplete='off'
+                        autoCapitalize='none'
+                        value={password}
+                        onChangeText={setPassword}
+                        placeholder="At least 6 characters"
+                        placeholderTextColor="#999"
+                        style={styles.input}
+                        secureTextEntry
+                    />
+                </View>
 
-                        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                            <Text style={styles.buttonText}>Sign in</Text>
-                        </TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                    <Text style={styles.buttonText}>Sign in</Text>
+                </TouchableOpacity>
 
-                        <View style={styles.divider} />
+                <View style={styles.divider} />
 
+<<<<<<< HEAD
                         <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
                             <Text style={styles.signupText}>Don't have an account? <Text style={styles.signupLink}>Sign up</Text></Text>
                         </TouchableOpacity>
@@ -167,12 +178,20 @@ function Signin(props) {
                 </KeyboardAvoidingView>
             </ScrollView>
         </SafeAreaView>
+=======
+                <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
+                    <Text style={styles.signupText}>Don't have an account? <Text style={styles.signupLink}>Sign up</Text></Text>
+                </TouchableOpacity>
+            </View>
+        </TouchableWithoutFeedback>
+>>>>>>> main
     );
 }
 
 export default Signin;
 
 const styles = StyleSheet.create({
+<<<<<<< HEAD
     container: { 
         flex: 1, 
         backgroundColor: THEME.secondary,
@@ -268,4 +287,19 @@ const styles = StyleSheet.create({
         color: THEME.primary, 
         fontWeight: '700' 
     },
+=======
+    container: { flex: 1, backgroundColor: '#000', padding: 20, paddingTop: 40 },
+    title: { color: '#fff', fontSize: 22, fontWeight: '600', marginBottom: 20, textAlign: 'center' },
+    field: { marginBottom: 12 },
+    label: { color: '#ddd', marginBottom: 6 },
+    input: { backgroundColor: '#111', color: '#fff', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 6 },
+    button: { marginTop: 16, backgroundColor: '#1a73e8', paddingVertical: 12, borderRadius: 6, alignItems: 'center' },
+    buttonText: { color: '#fff', fontWeight: '600' },
+    ghostButton: { marginTop: 12, alignItems: 'center' },
+    ghostText: { color: '#aaa' },
+    divider: { marginTop: 20, marginBottom: 20, height: 1, backgroundColor: '#333' },
+    signupButton: { alignItems: 'center' },
+    signupText: { color: '#999', fontSize: 14 },
+    signupLink: { color: '#1a73e8', fontWeight: '600' },
+>>>>>>> main
 });

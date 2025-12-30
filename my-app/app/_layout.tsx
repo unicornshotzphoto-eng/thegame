@@ -1,5 +1,5 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
+<<<<<<< HEAD
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import React from 'react';
@@ -45,4 +45,9 @@ export default function RootLayout() {
       </ThemeProvider>
     </DrawerProvider>
   );
+=======
+
+export default function RootLayout() {
+  return <Stack screenOptions={{ headerShown: false }} />;
+>>>>>>> main
 }
