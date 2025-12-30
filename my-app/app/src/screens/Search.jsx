@@ -3,6 +3,7 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, Image, StyleSheet, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
+import { THEME } from '../constants/appTheme';
 
 function Search() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -128,13 +129,13 @@ function Search() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: THEME.secondary,
     },
     searchContainer: {
         padding: 16,
-        backgroundColor: '#111',
+        backgroundColor: THEME.surfaceDark,
         borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        borderBottomColor: THEME.borderLight,
     },
     searchInput: {
         backgroundColor: '#222',

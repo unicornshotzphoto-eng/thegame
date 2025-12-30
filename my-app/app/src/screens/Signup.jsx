@@ -7,18 +7,20 @@ import {
     TextInput, 
     View, 
     ScrollView, 
-    KeyboardAvoidingView 
+    KeyboardAvoidingView,
+    SafeAreaView
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { showAlert } from '../utils/alert';
 import api from '../core/api';
 import { log } from '../core/utils';
 import useStore from '../core/global';
 import { storeUserData, storeAuthToken } from '../core/secureStorage';
+import { THEME } from '../constants/appTheme';
 
 function Signup(props) {
     console.log('Signup component rendered');
-    console.log('Signup props:', props);
-    console.log('Signup navigation:', props?.navigation);
+    const router = useRouter();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -90,21 +92,8 @@ function Signup(props) {
             setPassword('');
             setConfirmPassword('');
             
-            // Navigate to Home screen
-            console.log('Attempting navigation...');
-            console.log('props:', props);
-            console.log('props.navigation:', props?.navigation);
-            if (props && props.navigation) {
-                console.log('Navigating to Home...');
-                try {
-                    props.navigation.navigate('Home');
-                    console.log('Navigation called successfully');
-                } catch (error) {
-                    console.error('Navigation error:', error);
-                }
-            } else {
-                console.warn('Navigation not available');
-            }
+            // Navigate to Home screen using Expo Router
+            router.replace('/(tabs)');
             
             showAlert('Sign up successful', `Welcome ${currentUsername}!`);
         })
@@ -128,15 +117,15 @@ function Signup(props) {
     };
 
     const handleSignIn = () => {
-        if (props && props.navigation) {
-            props.navigation.navigate('Signin');
-        }
+        router.push('/signin');
     };
 
     return (
-        <ScrollView style={styles.container}>
-            <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
-               
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <KeyboardAvoidingView behavior='padding' style={styles.keyboardView}>
+                    <View style={styles.centerContainer}>
+                        <View style={styles.cardContainer}>
                     <View style={styles.content}>
                         <Text style={styles.title}>Create account</Text>
 
@@ -199,27 +188,110 @@ function Signup(props) {
                             <Text style={styles.signinText}>Already have an account? <Text style={styles.signinLink}>Sign in</Text></Text>
                         </TouchableOpacity>
                     </View>
-                
-            </KeyboardAvoidingView>
-        </ScrollView>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
 export default Signup;
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#000' },
-    content: { padding: 20, paddingTop: 40 },
-    title: { color: '#fff', fontSize: 22, fontWeight: '600', marginBottom: 20, textAlign: 'center' },
-    field: { marginBottom: 12 },
-    label: { color: '#ddd', marginBottom: 6 },
-    input: { backgroundColor: '#111', color: '#fff', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 6 },
-    button: { marginTop: 16, backgroundColor: '#1a73e8', paddingVertical: 12, borderRadius: 6, alignItems: 'center' },
-    buttonText: { color: '#fff', fontWeight: '600' },
-    ghostButton: { marginTop: 12, alignItems: 'center' },
-    ghostText: { color: '#aaa' },
-    divider: { marginTop: 20, marginBottom: 20, height: 1, backgroundColor: '#333' },
-    signinButton: { alignItems: 'center' },
-    signinText: { color: '#999', fontSize: 14 },
-    signinLink: { color: '#1a73e8', fontWeight: '600' },
+    container: { 
+        flex: 1, 
+        backgroundColor: THEME.secondary,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: THEME.spacing.xl,
+    },
+    keyboardView: {
+        flex: 1,
+        width: '100%',
+    },
+    centerContainer: {
+        width: '85%',
+        maxWidth: 500,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    content: { 
+        padding: THEME.spacing.xl, 
+        paddingTop: THEME.spacing.xl,
+    },
+    cardContainer: {
+        width: '100%',
+        backgroundColor: THEME.surfaceDark,
+        borderRadius: THEME.borderRadius.lg,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 8,
+        overflow: 'hidden',
+    },
+    title: { 
+        color: THEME.text.primary, 
+        fontSize: 28, 
+        fontWeight: '700', 
+        marginBottom: THEME.spacing.xl, 
+        textAlign: 'center' 
+    },
+    field: { 
+        marginBottom: THEME.spacing.lg 
+    },
+    label: { 
+        color: THEME.text.secondary, 
+        marginBottom: THEME.spacing.sm,
+        fontWeight: '500'
+    },
+    input: { 
+        backgroundColor: THEME.surfaceDark, 
+        color: THEME.text.primary,
+        paddingHorizontal: THEME.spacing.md, 
+        paddingVertical: THEME.spacing.md, 
+        borderRadius: THEME.borderRadius.md,
+        borderWidth: 1,
+        borderColor: THEME.borderLight
+    },
+    button: { 
+        marginTop: THEME.spacing.lg, 
+        backgroundColor: THEME.primary, 
+        paddingVertical: THEME.spacing.md, 
+        borderRadius: THEME.borderRadius.md, 
+        alignItems: 'center' 
+    },
+    buttonText: { 
+        color: THEME.text.primary, 
+        fontWeight: '700',
+        fontSize: 16
+    },
+    ghostButton: { 
+        marginTop: THEME.spacing.md, 
+        alignItems: 'center' 
+    },
+    ghostText: { 
+        color: THEME.text.tertiary 
+    },
+    divider: { 
+        marginTop: THEME.spacing.xl, 
+        marginBottom: THEME.spacing.xl, 
+        height: 1, 
+        backgroundColor: THEME.borderLight 
+    },
+    signinButton: { 
+        alignItems: 'center' 
+    },
+    signinText: { 
+        color: THEME.text.secondary, 
+        fontSize: 14 
+    },
+    signinLink: { 
+        color: THEME.primary, 
+        fontWeight: '700' 
+    },
 });
