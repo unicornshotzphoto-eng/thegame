@@ -61,7 +61,6 @@ class GroupMessage(models.Model):
     def __str__(self):
         return f'{self.sender.username} in {self.group.name}: {self.content[:50]}'
 
-<<<<<<< HEAD
 
 class SharedCalendar(models.Model):
     name = models.CharField(max_length=100)
@@ -148,60 +147,9 @@ class GameSession(models.Model):
     current_round = models.IntegerField(default=1)
     current_question = models.ForeignKey(Question, null=True, blank=True, on_delete=models.SET_NULL)
     category_picker = models.ForeignKey(User, null=True, blank=True, related_name='picked_categories', on_delete=models.SET_NULL)
-=======
-class Question(models.Model):
-    CATEGORY_CHOICES = [
-        ('spiritual_knowing', 'Spiritual Knowing'),
-        ('mental_knowing', 'Mental Knowing'),
-        ('physical_knowing', 'Physical Knowing'),
-        ('disagreeables_truth', 'Disagreeables & Truth Checks'),
-        ('romantic_knowing', 'Romantic Knowing'),
-        ('erotic_knowing', 'Erotic Knowing'),
-        ('creative_fun', 'Creative & Fun'),
-    ]
-    
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='spiritual_knowing')
-    question_number = models.IntegerField()
-    question_text = models.TextField()
-    points = models.IntegerField(default=2)
-    consequence = models.TextField()  # "If wrong" action
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['category', 'question_number']
-        unique_together = ('category', 'question_number')
-    
-    def __str__(self):
-        return f'{self.category} Q{self.question_number}: {self.question_text[:50]}'
-
-class QuestionResponse(models.Model):
-    question = models.ForeignKey(Question, related_name='responses', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name='question_responses', on_delete=models.CASCADE)
-    partner = models.ForeignKey(User, related_name='received_responses', on_delete=models.CASCADE, null=True, blank=True)
-    response_text = models.TextField()
-    is_correct = models.BooleanField(default=False)
-    points_earned = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f'{self.user.username} answered Q{self.question.question_number}'
-
-class GameSession(models.Model):
-    SESSION_TYPE_CHOICES = [
-        ('direct', 'Direct (1v1)'),
-        ('group', 'Group'),
-    ]
-    
-    session_type = models.CharField(max_length=10, choices=SESSION_TYPE_CHOICES)
-    group = models.ForeignKey(GroupChat, related_name='game_sessions', on_delete=models.CASCADE, null=True, blank=True)
-    participants = models.ManyToManyField(User, related_name='game_sessions')
-    current_turn_user = models.ForeignKey(User, related_name='current_turns', on_delete=models.SET_NULL, null=True, blank=True)
-    turn_order = models.JSONField(default=list)  # List of user IDs in turn order
-    is_active = models.BooleanField(default=True)
->>>>>>> main
+    current_turn_user = models.ForeignKey(User, null=True, blank=True, related_name='current_turn_games', on_delete=models.SET_NULL)
+    game_code = models.CharField(max_length=6, unique=True, null=True, blank=True)
+    categories = models.ManyToManyField(QuestionCategory, related_name='game_sessions', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -209,8 +157,8 @@ class GameSession(models.Model):
         ordering = ['-created_at']
     
     def __str__(self):
-<<<<<<< HEAD
         return f"Game #{self.id} - {self.status}"
+
 
 
 class PlayerAnswer(models.Model):
@@ -228,54 +176,93 @@ class PlayerAnswer(models.Model):
     
     def __str__(self):
         return f"{self.player.username} - {self.question.question_text[:30]}"
-=======
-        return f'{self.session_type} session - {self.created_at}'
-    
-    def next_turn(self):
-        """Move to the next player's turn"""
-        if not self.turn_order:
-            return
-        
-        current_index = -1
-        if self.current_turn_user:
-            try:
-                current_index = self.turn_order.index(self.current_turn_user.id)
-            except ValueError:
-                pass
-        
-        next_index = (current_index + 1) % len(self.turn_order)
-        next_user_id = self.turn_order[next_index]
-        self.current_turn_user = User.objects.get(id=next_user_id)
-        self.save()
 
-class GameRound(models.Model):
-    """A round represents one question that all players answer"""
-    session = models.ForeignKey(GameSession, related_name='rounds', on_delete=models.CASCADE)
-    question = models.ForeignKey(Question, related_name='game_rounds', on_delete=models.CASCADE)
-    picker = models.ForeignKey(User, related_name='picked_rounds', on_delete=models.CASCADE)  # Player who picked the category
-    picker_answer = models.TextField(blank=True, null=True)
-    is_completed = models.BooleanField(default=False)
+
+class JournalPrompt(models.Model):
+    """Journal prompts for connecting with others"""
+    DIFFICULTY_CHOICES = [
+        ('easy', 'Easy'),
+        ('medium', 'Medium'),
+        ('challenging', 'Challenging'),
+    ]
+    
+    prompt_text = models.TextField()
+    category = models.CharField(max_length=50, default='connect')
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES, default='medium')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['created_at']
+        ordering = ['id']
     
     def __str__(self):
-        return f'Round {self.id} - Q{self.question.question_number} picked by {self.picker.username}'
+        return f"{self.prompt_text[:50]}... ({self.difficulty})"
 
-class GameTurn(models.Model):
-    """Each player's answer to a round's question"""
-    round = models.ForeignKey(GameRound, related_name='answers', on_delete=models.CASCADE, null=True, blank=True)
-    player = models.ForeignKey(User, related_name='game_turns', on_delete=models.CASCADE)
-    answer = models.TextField(blank=True, null=True)
-    points_earned = models.IntegerField(default=0)
-    answered_at = models.DateTimeField(null=True, blank=True)
+class SharedJournal(models.Model):
+    """Shared journal that multiple users can contribute to"""
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, related_name='created_journals', on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='shared_journals')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['created_at']
-        unique_together = ('round', 'player')
+        ordering = ['-updated_at']
     
     def __str__(self):
-        return f'{self.player.username} - Round {self.round.id if self.round else "None"}'
->>>>>>> main
+        return self.name
+    
+    def members_count(self):
+        return self.members.count()
+
+
+class JournalEntry(models.Model):
+    """Individual entries in a shared journal"""
+    journal = models.ForeignKey(SharedJournal, related_name='entries', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name='journal_entries', on_delete=models.CASCADE)
+    title = models.CharField(max_length=200, blank=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.author.username} - {self.journal.name}: {self.content[:50]}"
+
+
+class SharedPromptSession(models.Model):
+    """Shared prompt session that multiple users can respond to"""
+    prompt = models.ForeignKey(JournalPrompt, related_name='shared_sessions', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, related_name='created_prompt_sessions', on_delete=models.CASCADE)
+    members = models.ManyToManyField(User, related_name='shared_prompt_sessions')
+    title = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-updated_at']
+    
+    def __str__(self):
+        return f"Prompt Session: {self.prompt.text[:50]} by {self.created_by.username}"
+    
+    def members_count(self):
+        return self.members.count()
+
+
+class PromptResponse(models.Model):
+    """Individual responses to a shared prompt session"""
+    session = models.ForeignKey(SharedPromptSession, related_name='responses', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, related_name='prompt_responses', on_delete=models.CASCADE)
+    response = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('session', 'author')
+    
+    def __str__(self):
+        return f"{self.author.username} - {self.session.prompt.text[:50]}"

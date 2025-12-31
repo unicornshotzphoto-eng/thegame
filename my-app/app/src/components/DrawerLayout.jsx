@@ -5,13 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Text,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerContext, DrawerMenu, DrawerOverlay } from './DrawerNavigator';
 import { THEME } from '../constants/appTheme';
 
 const { width } = Dimensions.get('window');
-const DRAWER_WIDTH = width * 0.75;
+const DRAWER_WIDTH = width * 0.125;
 
 export function DrawerLayout({ children, tabs }) {
   const { slideAnim, isOpen, toggleDrawer, closeDrawer } = React.useContext(DrawerContext);
@@ -60,18 +61,21 @@ export function DrawerLayout({ children, tabs }) {
         {children}
       </View>
 
-      {/* Overlay */}
-      <Animated.View
-        style={[
-          styles.overlayWrapper,
-          {
-            opacity: overlayOpacity,
-            pointerEvents: isOpen ? 'auto' : 'none',
-          },
-        ]}
-      >
-        <DrawerOverlay isOpen={isOpen} onPress={closeDrawer} />
-      </Animated.View>
+      {/* Overlay - Only render when drawer is open */}
+      {isOpen && (
+        <Animated.View
+          style={[
+            styles.overlayWrapper,
+            { opacity: overlayOpacity },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.overlayTouchable}
+            activeOpacity={1}
+            onPress={closeDrawer}
+          />
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -79,7 +83,6 @@ export function DrawerLayout({ children, tabs }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
     backgroundColor: THEME.background,
   },
   drawerWrapper: {
@@ -113,6 +116,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 99,
+    zIndex: 98,
+  },
+  overlayTouchable: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });

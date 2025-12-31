@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
@@ -14,6 +14,10 @@ function Friends() {
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [processingRequest, setProcessingRequest] = useState({});
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [friendIds, setFriendIds] = useState(new Set()); // Track friend IDs for quick lookup
 
     useEffect(() => {
         loadData();
@@ -44,11 +48,44 @@ function Friends() {
         try {
             const response = await api.get('/quiz/friends/');
             setFriends(response.data.friends || []);
+            // Update friendIds set for quick lookup
+            const ids = new Set(response.data.friends.map(f => f.id));
+            setFriendIds(ids);
         } catch (error) {
             console.error('Load friends error:', error);
             showAlert('Error', 'Failed to load friends');
         }
     };
+
+    const searchUsers = useCallback(async (query) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+        
+        try {
+            setSearchLoading(true);
+            console.log('Searching for users with query:', query);
+            const response = await api.get('/quiz/search/users/', {
+                params: { q: query }
+            });
+            console.log('Search response:', response.data);
+            console.log('Users returned:', response.data.users);
+            setSearchResults(response.data.users || []);
+        } catch (error) {
+            console.error('Search users error:', error);
+            console.error('Error response:', error.response?.data);
+            showAlert('Error', 'Failed to search users');
+        } finally {
+            setSearchLoading(false);
+        }
+    }, []);
+
+    const debouncedSearch = useCallback((query) => {
+        console.log('Debounced search called with query:', query);
+        setSearchQuery(query);
+        searchUsers(query);
+    }, [searchUsers]);
 
     const loadRequests = async () => {
         try {
@@ -84,6 +121,36 @@ function Friends() {
         }
     };
 
+    const addFriend = async (userId) => {
+        try {
+            setProcessingRequest(prev => ({ ...prev, [userId]: true }));
+            await api.post('/quiz/friends/request/send/', { to_user_id: userId });
+            showAlert('Success', 'Friend request sent!');
+            // Remove from search results or update status
+            setSearchResults(searchResults.filter(u => u.id !== userId));
+        } catch (error) {
+            console.error('Add friend error:', error);
+            const errorMessage = error.response?.data?.error || 'Failed to send friend request';
+            showAlert('Error', errorMessage);
+        } finally {
+            setProcessingRequest(prev => ({ ...prev, [userId]: false }));
+        }
+    };
+
+    const removeFriend = async (friendId) => {
+        try {
+            setProcessingRequest(prev => ({ ...prev, [friendId]: true }));
+            await api.post(`/quiz/friends/${friendId}/remove/`, {});
+            showAlert('Success', 'Friend removed');
+            await loadFriends();
+        } catch (error) {
+            console.error('Remove friend error:', error);
+            showAlert('Error', 'Failed to remove friend');
+        } finally {
+            setProcessingRequest(prev => ({ ...prev, [friendId]: false }));
+        }
+    };
+
     const renderFriendItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.userInfo}>
@@ -99,6 +166,17 @@ function Friends() {
                     <Text style={styles.email}>{item.email}</Text>
                 </View>
             </View>
+            <TouchableOpacity
+                style={[styles.removeButton, processingRequest[item.id] && styles.buttonDisabled]}
+                onPress={() => removeFriend(item.id)}
+                disabled={processingRequest[item.id]}
+            >
+                {processingRequest[item.id] ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Text style={styles.buttonText}>Remove</Text>
+                )}
+            </TouchableOpacity>
         </View>
     );
 
@@ -159,16 +237,81 @@ function Friends() {
         </View>
     );
 
+    const renderSearchResultItem = ({ item }) => (
+        <View style={styles.card}>
+            <View style={styles.userInfo}>
+                {item.thumbnail ? (
+                    <Image source={{ uri: item.thumbnail }} style={styles.avatar} />
+                ) : (
+                    <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                        <Text style={styles.avatarText}>{item.username.charAt(0).toUpperCase()}</Text>
+                    </View>
+                )}
+                <View style={styles.userDetails}>
+                    <Text style={styles.username}>{item.username}</Text>
+                    <Text style={styles.email}>{item.email}</Text>
+                </View>
+            </View>
+            <TouchableOpacity
+                style={[
+                    styles.actionButton,
+                    friendIds.has(item.id) ? styles.removeButton : styles.addButton,
+                    processingRequest[item.id] && styles.buttonDisabled
+                ]}
+                onPress={() => friendIds.has(item.id) ? removeFriend(item.id) : addFriend(item.id)}
+                disabled={processingRequest[item.id]}
+            >
+                {processingRequest[item.id] ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <Text style={styles.buttonText}>
+                        {friendIds.has(item.id) ? 'Remove' : 'Add'}
+                    </Text>
+                )}
+            </TouchableOpacity>
+        </View>
+    );
+
     const renderContent = () => {
         if (loading && !refreshing) {
             return (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#1a73e8" />
+                    <ActivityIndicator size="large" color={THEME.primary} />
                 </View>
             );
         }
 
         if (activeTab === 'friends') {
+            // If there's a search query, show search results
+            if (searchQuery.trim()) {
+                if (searchLoading) {
+                    return (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={THEME.primary} />
+                        </View>
+                    );
+                }
+
+                if (searchResults.length === 0) {
+                    return (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>No users found</Text>
+                            <Text style={styles.emptySubtext}>Try searching with a different name or email</Text>
+                        </View>
+                    );
+                }
+
+                return (
+                    <FlatList
+                        data={searchResults}
+                        renderItem={renderSearchResultItem}
+                        keyExtractor={(item) => item.id.toString()}
+                        contentContainerStyle={styles.listContainer}
+                    />
+                );
+            }
+
+            // Otherwise show friends list
             if (friends.length === 0) {
                 return (
                     <View style={styles.emptyContainer}>
@@ -177,6 +320,7 @@ function Friends() {
                     </View>
                 );
             }
+
             return (
                 <FlatList
                     data={friends}
@@ -184,7 +328,7 @@ function Friends() {
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.listContainer}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a73e8" />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={THEME.primary} />
                     }
                 />
             );
@@ -205,7 +349,7 @@ function Friends() {
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.listContainer}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a73e8" />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={THEME.primary} />
                     }
                 />
             );
@@ -226,7 +370,7 @@ function Friends() {
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.listContainer}
                     refreshControl={
-                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a73e8" />
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={THEME.primary} />
                     }
                 />
             );
@@ -261,6 +405,20 @@ function Friends() {
                     </Text>
                 </TouchableOpacity>
             </View>
+            
+            {activeTab === 'friends' && (
+                <View style={styles.searchContainer}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Search by name or email..."
+                        placeholderTextColor={THEME.text.secondary}
+                        value={searchQuery}
+                        onChangeText={debouncedSearch}
+                        clearButtonMode="while-editing"
+                    />
+                </View>
+            )}
+            
             {renderContent()}
         </SafeAreaView>
     );
@@ -269,7 +427,7 @@ function Friends() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.secondary,
+        backgroundColor: THEME.background,
     },
     tabBar: {
         flexDirection: 'row',
@@ -294,6 +452,22 @@ const styles = StyleSheet.create({
     },
     activeTabText: {
         color: THEME.primary,
+    },
+    searchContainer: {
+        padding: THEME.spacing.lg,
+        backgroundColor: THEME.surfaceDark,
+        borderBottomWidth: 1,
+        borderBottomColor: THEME.borderLight,
+    },
+    searchInput: {
+        backgroundColor: THEME.background,
+        borderRadius: THEME.borderRadius.lg,
+        paddingHorizontal: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.md,
+        color: THEME.text.primary,
+        fontSize: 14,
+        borderWidth: 1,
+        borderColor: THEME.borderLight,
     },
     loadingContainer: {
         flex: 1,
@@ -380,6 +554,26 @@ const styles = StyleSheet.create({
     rejectButton: {
         flex: 1,
         backgroundColor: THEME.button.danger,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
+        alignItems: 'center',
+    },
+    removeButton: {
+        backgroundColor: THEME.button.danger,
+        paddingHorizontal: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
+        alignItems: 'center',
+    },
+    addButton: {
+        backgroundColor: THEME.primary,
+        paddingHorizontal: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
+        alignItems: 'center',
+    },
+    actionButton: {
+        paddingHorizontal: THEME.spacing.lg,
         paddingVertical: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
         alignItems: 'center',

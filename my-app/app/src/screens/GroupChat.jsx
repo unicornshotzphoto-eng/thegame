@@ -37,12 +37,16 @@ function GroupChat({ route, navigation }) {
 
     const startGame = async () => {
         try {
-            const response = await api.post('/quiz/game/create/', {
+            const response = await api.post('/quiz/games/create/', {
                 session_type: 'group',
                 group_id: groupId
             });
             
-            navigation.navigate('GamePlay', { sessionId: response.data.id });
+            if (navigation?.push) {
+                navigation.push({ pathname: 'GamePlay', params: { sessionId: response.data.id } });
+            } else if (navigation?.navigate) {
+                navigation.navigate('GamePlay', { sessionId: response.data.id });
+            }
         } catch (error) {
             console.error('Start game error:', error);
             showAlert('Error', 'Failed to start game');

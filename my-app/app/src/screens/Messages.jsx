@@ -193,13 +193,13 @@ function Messages() {
                         value={inputMessage}
                         onChangeText={setInputMessage}
                         placeholder={selectedImage ? "Add a caption..." : "Type a message..."}
-                        placeholderTextColor="#999"
+                        placeholderTextColor={THEME.text.secondary}
                         multiline
                         maxLength={500}
                     />
                     
                     {isUploading ? (
-                        <ActivityIndicator size="small" color="#1a73e8" style={styles.sendButton} />
+                        <ActivityIndicator size="small" color={THEME.primary} style={styles.sendButton} />
                     ) : (
                         <TouchableOpacity
                             style={[
@@ -221,7 +221,7 @@ function Messages() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.secondary,
+        backgroundColor: THEME.background,
     },
     header: {
         flexDirection: 'row',
@@ -252,6 +252,7 @@ const styles = StyleSheet.create({
     },
     messagesContent: {
         padding: THEME.spacing.lg,
+        backgroundColor: THEME.background,
     },
     messageContainer: {
         maxWidth: '80%',
@@ -321,7 +322,7 @@ const styles = StyleSheet.create({
         padding: THEME.spacing.md,
         borderTopWidth: 1,
         borderTopColor: THEME.borderLight,
-        backgroundColor: THEME.secondary,
+        backgroundColor: THEME.background,
     },
     imageButton: {
         paddingHorizontal: THEME.spacing.md,

@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, TextInput, Clipboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../core/api';
 import useStore from '../core/global';
+import { useLocalSearchParams } from 'expo-router';
 
 function GamePlay({ route, navigation }) {
-    const { sessionId } = route.params;
+    const localParams = useLocalSearchParams?.() || {};
+    const sessionId = (route && route.params && route.params.sessionId) || localParams.sessionId;
+    if (!sessionId) {
+        return (
+            <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: 'red', fontWeight: '600' }}>Missing sessionId for GamePlay</Text>
+                <TouchableOpacity onPress={() => navigation?.back?.()} style={{ marginTop: 12 }}>
+                    <Text>Go Back</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
     const user = useStore((state) => state.user);
     const [session, setSession] = useState(null);
     const [rounds, setRounds] = useState([]);
@@ -18,15 +30,16 @@ function GamePlay({ route, navigation }) {
     const [submitting, setSubmitting] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [hasAnswered, setHasAnswered] = useState(false);
+    const [copiedCode, setCopiedCode] = useState(false);
 
     const categories = [
-        { id: 'spiritual_knowing', label: 'Spiritual', range: '1-20' },
-        { id: 'mental_knowing', label: 'Mental', range: '21-40' },
-        { id: 'physical_knowing', label: 'Physical', range: '41-60' },
-        { id: 'disagreeables_truth', label: 'Truth Checks', range: '61-80' },
-        { id: 'romantic_knowing', label: 'Romantic', range: '81-100' },
-        { id: 'erotic_knowing', label: 'Erotic', range: '101-160' },
-        { id: 'creative_fun', label: 'Creative', range: '161-200' },
+        { id: 'spiritual', label: 'Spiritual', range: '1-20' },
+        { id: 'mental', label: 'Mental', range: '21-40' },
+        { id: 'physical', label: 'Physical', range: '41-60' },
+        { id: 'disagreeables', label: 'Truth Checks', range: '61-80' },
+        { id: 'romantic', label: 'Romantic', range: '81-100' },
+        { id: 'erotic', label: 'Erotic', range: '101-160' },
+        { id: 'creative', label: 'Creative', range: '161-200' },
     ];
 
     useEffect(() => {
@@ -37,10 +50,11 @@ function GamePlay({ route, navigation }) {
 
     const fetchGameSession = async () => {
         try {
-            const response = await api.get(`/quiz/game/${sessionId}/`);
+            const response = await api.get(`/quiz/games/${sessionId}/`);
             console.log('=== FETCH GAME SESSION ===');
             console.log('Current user:', user?.username, 'ID:', user?.id);
             console.log('Session data:', response.data.session);
+            console.log('Game Code:', response.data.session?.game_code || 'NOT FOUND');
             console.log('Current round:', response.data.current_round);
             console.log('Rounds count:', response.data.rounds?.length || 0);
             
@@ -91,6 +105,8 @@ function GamePlay({ route, navigation }) {
         } catch (error) {
             console.error('Error fetching game session:', error);
             console.error('Error details:', error.response?.data);
+            console.error('Error status:', error.response?.status);
+            console.error('Error message:', error.message);
             // Don't set loading to false on error to prevent UI flickering
             // Only set to false on successful load
         } finally {
@@ -104,18 +120,18 @@ function GamePlay({ route, navigation }) {
         setSelectedCategory(categoryId);
         console.log('Selecting category:', categoryId, 'for session:', sessionId);
         try {
-            const response = await api.post('/quiz/game/random-question/', {
-                session_id: sessionId,
+            const response = await api.post(`/quiz/games/${sessionId}/start-round/`, {
                 category: categoryId
             });
-            console.log('Random question response:', response.data);
-            setCurrentRound(response.data.round);
-            setCurrentQuestion(response.data.round.question);
-            setCurrentRoundId(response.data.round.id);
+            console.log('Start round response:', response.data);
+            // Response shape: { session, current_round, rounds, scores }
+            setSession(response.data.session);
+            setCurrentQuestion(response.data.current_round?.question || null);
+            setCurrentRoundId(response.data.current_round?.id || null);
             setHasAnswered(false);
             fetchGameSession(); // Refresh to show the question to all players
         } catch (error) {
-            console.error('Error getting random question:', error);
+            console.error('Error starting round:', error);
             console.error('Error response:', error.response?.data);
             if (error.response?.status === 403) {
                 Alert.alert('Error', `Not your turn! ${error.response?.data?.error || ''}`);
@@ -124,6 +140,14 @@ function GamePlay({ route, navigation }) {
             } else {
                 Alert.alert('Error', error.response?.data?.error || 'Failed to get question');
             }
+        }
+    };
+
+    const copyGameCode = async () => {
+        if (session?.game_code) {
+            Clipboard.setString(session.game_code);
+            setCopiedCode(true);
+            setTimeout(() => setCopiedCode(false), 2000);
         }
     };
 
@@ -138,7 +162,7 @@ function GamePlay({ route, navigation }) {
         
         try {
             console.log('Submitting answer:', answerText, 'for round:', currentRoundId);
-            const response = await api.post('/quiz/game/answer/', {
+            const response = await api.post('/quiz/games/submit-answer/', {
                 round_id: currentRoundId,
                 answer: answerText
             });
@@ -187,7 +211,7 @@ function GamePlay({ route, navigation }) {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            await api.delete(`/quiz/game/${sessionId}/delete/`);
+                            await api.delete(`/quiz/games/${sessionId}/delete/`);
                             Alert.alert('Success', 'Game ended', [
                                 { text: 'OK', onPress: () => navigation.goBack() }
                             ]);
@@ -217,17 +241,39 @@ function GamePlay({ route, navigation }) {
         );
     }
 
-    const isMyTurn = session.current_turn_user?.id === user?.id;
+    const currentTurnId = session?.current_turn_user?.id;
+    const myUserId = user?.id;
+    const isMyTurn = (
+        (currentTurnId != null && myUserId != null && String(currentTurnId) === String(myUserId)) ||
+        (session?.current_turn_user?.username && user?.username && session.current_turn_user.username === user.username)
+    );
     
     console.log('GamePlay Debug:', {
         currentTurnUserId: session.current_turn_user?.id,
         currentUserId: user?.id,
         isMyTurn,
-        currentQuestion: currentQuestion ? 'Present' : 'None'
+        currentQuestion: currentQuestion ? 'Present' : 'None',
+        shouldShowCategories: isMyTurn && !currentQuestion,
+        categoriesCount: categories.length
     });
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* VISIBLE INDICATOR - GamePlay IS RENDERING */}
+            <View style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                backgroundColor: '#ff0000',
+                padding: 8,
+                zIndex: 1000
+            }}>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold', textAlign: 'center' }}>
+                    ✓ GamePlay Component Loaded
+                </Text>
+            </View>
+
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Text style={styles.backButtonText}>← Back</Text>
@@ -254,6 +300,22 @@ function GamePlay({ route, navigation }) {
                     ))}
                 </View>
 
+                {/* Game Code Display */}
+                <View style={styles.gameCodeCard}>
+                    <Text style={styles.gameCodeLabel}>Game Code</Text>
+                    <View style={styles.gameCodeContainer}>
+                        <Text style={styles.gameCodeText}>{session.game_code}</Text>
+                        <TouchableOpacity 
+                            style={styles.copyButton}
+                            onPress={copyGameCode}
+                        >
+                            <Text style={styles.copyButtonText}>
+                                {copiedCode ? '✓ Copied!' : 'Copy'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
                 {/* Current Turn Indicator */}
                 <View style={styles.turnIndicator}>
                     {currentQuestion ? (
@@ -268,26 +330,61 @@ function GamePlay({ route, navigation }) {
                     )}
                 </View>
 
-                {/* Category Selection */}
-                {isMyTurn && !currentQuestion && (
-                    <ScrollView 
-                        horizontal 
-                        showsHorizontalScrollIndicator={false}
-                        style={styles.categoryScrollView}
-                        contentContainerStyle={styles.categoryContainer}
-                    >
-                        {categories.map((category) => (
-                            <TouchableOpacity
-                                key={category.id}
-                                style={styles.categoryButton}
-                                onPress={() => selectCategory(category.id)}
-                            >
-                                <Text style={styles.categoryButtonText}>{category.label}</Text>
-                                <Text style={styles.categoryRange}>Q{category.range}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                )}
+                {/* Always-visible debug info */}
+                <View style={{ 
+                    backgroundColor: '#444', 
+                    padding: 12, 
+                    borderRadius: 8, 
+                    marginBottom: 16 
+                }}>
+                    <Text style={{ color: '#fff', fontSize: 12, marginBottom: 4 }}>
+                        DEBUG: isMyTurn={String(isMyTurn)}
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 12, marginBottom: 4 }}>
+                        currentTurnUserId={String(session?.current_turn_user?.id || 'NULL')}
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 12, marginBottom: 4 }}>
+                        myUserId={String(user?.id || 'NULL')}
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 12, marginBottom: 4 }}>
+                        currentQuestion={currentQuestion === null ? 'NULL' : (typeof currentQuestion)}
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 12, marginBottom: 4 }}>
+                        !currentQuestion={String(!currentQuestion)}
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 12 }}>
+                        condition={String(isMyTurn && !currentQuestion)}
+                    </Text>
+                </View>
+
+                {/* Category Selection - visible to all when no question; only current player can pick */}
+                {!currentQuestion ? (
+                    <View style={{ backgroundColor: isMyTurn ? '#2a2' : '#444', padding: 16, borderRadius: 8, marginBottom: 16 }}>
+                        <Text style={{ color: '#fff', fontSize: 14, fontWeight: 'bold', marginBottom: 12 }}>
+                            {isMyTurn ? `It's your turn! Pick a category:` : `Categories (only ${session.current_turn_user?.username} can pick)`}
+                        </Text>
+                        <ScrollView 
+                            horizontal 
+                            showsHorizontalScrollIndicator={false}
+                            style={styles.categoryScrollView}
+                            contentContainerStyle={styles.categoryContainer}
+                        >
+                            {categories.map((category) => (
+                                <TouchableOpacity
+                                    key={category.id}
+                                    style={[
+                                        styles.categoryButton,
+                                        !isMyTurn && { opacity: 0.5 }
+                                    ]}
+                                    onPress={() => selectCategory(category.id)}
+                                >
+                                    <Text style={styles.categoryButtonText}>{category.label}</Text>
+                                    <Text style={styles.categoryRange}>Q{category.range}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                ) : null}
 
                 {/* Current Question */}
                 {currentQuestion && (
@@ -450,6 +547,47 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: '#1a73e8',
+    },
+    gameCodeCard: {
+        backgroundColor: '#1a1a1a',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 20,
+        borderWidth: 2,
+        borderColor: '#28a745',
+    },
+    gameCodeLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#999',
+        marginBottom: 12,
+    },
+    gameCodeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#111',
+        borderRadius: 8,
+        padding: 12,
+    },
+    gameCodeText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#28a745',
+        letterSpacing: 2,
+        flex: 1,
+        fontFamily: 'Courier New',
+    },
+    copyButton: {
+        backgroundColor: '#28a745',
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 6,
+        marginLeft: 12,
+    },
+    copyButtonText: {
+        color: '#000',
+        fontWeight: 'bold',
+        fontSize: 12,
     },
     turnIndicator: {
         backgroundColor: '#1a73e8',

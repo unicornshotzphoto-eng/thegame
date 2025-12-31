@@ -79,7 +79,7 @@ const MultiplayerQuestions = ({ navigation }) => {
 
     try {
       setIsSubmitting(true);
-      const response = await api.post('/api/games/create/', {
+      const response = await api.post('/quiz/games/create/', {
         friend_ids: selectedFriends.map(f => f.id),
       });
       setGameSession(response.data);
@@ -96,7 +96,7 @@ const MultiplayerQuestions = ({ navigation }) => {
   const selectCategory = async (category) => {
     try {
       setIsSubmitting(true);
-      const response = await api.post(`/api/games/${gameSession.id}/start-round/`, {
+      const response = await api.post(`/quiz/games/${gameSession.id}/start-round/`, {
         category: category.category,
       });
       setGameSession(response.data);
@@ -118,7 +118,7 @@ const MultiplayerQuestions = ({ navigation }) => {
 
     try {
       setIsSubmitting(true);
-      await api.post(`/api/games/${gameSession.id}/submit-answer/`, {
+      await api.post(`/quiz/games/${gameSession.id}/submit-answer/`, {
         answer: userAnswer,
       });
       
@@ -135,7 +135,7 @@ const MultiplayerQuestions = ({ navigation }) => {
 
   const loadAnswers = async () => {
     try {
-      const response = await api.get(`/api/games/${gameSession.id}/answers/`);
+      const response = await api.get(`/quiz/games/${gameSession.id}/answers/`);
       setAnswers(response.data.answers || []);
       setScreen('answers');
     } catch (error) {
@@ -146,7 +146,7 @@ const MultiplayerQuestions = ({ navigation }) => {
   const nextRound = async () => {
     try {
       setIsSubmitting(true);
-      const response = await api.post(`/api/games/${gameSession.id}/next-round/`);
+      const response = await api.post(`/quiz/games/${gameSession.id}/next-round/`);
       setGameSession(response.data);
       setCurrentPlayer(response.data.category_picker);
       setAnswers([]);
@@ -167,7 +167,7 @@ const MultiplayerQuestions = ({ navigation }) => {
         onPress: async () => {
           try {
             setIsSubmitting(true);
-            const response = await api.post(`/api/games/${gameSession.id}/end/`);
+            const response = await api.post(`/quiz/games/${gameSession.id}/end/`);
             setGameSession(response.data);
             setScreen('summary');
           } catch (error) {
@@ -195,7 +195,7 @@ const MultiplayerQuestions = ({ navigation }) => {
             <Text style={styles.emptyText}>No friends yet</Text>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate('Profile')}
+              onPress={() => navigation.navigate('Friends')}
             >
               <Text style={styles.buttonText}>Add Friends</Text>
             </TouchableOpacity>
@@ -474,7 +474,7 @@ const MultiplayerQuestions = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.secondary,
+    backgroundColor: THEME.background,
     paddingHorizontal: THEME.spacing.lg,
     paddingVertical: THEME.spacing.md,
   },

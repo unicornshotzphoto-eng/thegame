@@ -6,6 +6,7 @@ from .views import (
     SearchUsersView,
     SendFriendRequestView,
     RespondFriendRequestView,
+    RemoveFriendView,
     FriendsListView,
     PendingRequestsView,
     CreateGroupChatView,
@@ -13,7 +14,6 @@ from .views import (
     GroupChatDetailView,
     GroupMessagesView,
     AddGroupMembersView,
-<<<<<<< HEAD
     CalendarListCreateView,
     CalendarDetailView,
     CalendarInviteView,
@@ -29,19 +29,18 @@ from .views import (
     SubmitAnswerView,
     GetAnswersView,
     NextRoundView,
-    EndGameView
-=======
-    QuestionsListView,
-    QuestionDetailView,
-    SubmitAnswerView,
-    UserResponsesView,
-    CreateGameSessionView,
-    GetRandomQuestionView,
-    SubmitGameAnswerView,
-    GameSessionDetailView,
-    ActiveGameSessionsView,
-    DeleteGameSessionView
->>>>>>> main
+    EndGameView,
+    JoinGameByCodeView,
+    JournalPromptsListView,
+    RandomJournalPromptView,
+    SharedJournalListCreateView,
+    SharedJournalDetailView,
+    SharedJournalMembersView,
+    JournalEntryListCreateView,
+    SharedPromptSessionListCreateView,
+    SharedPromptSessionDetailView,
+    SharedPromptSessionMembersView,
+    PromptResponseListCreateView
 )
 
 urlpatterns = [
@@ -51,13 +50,13 @@ urlpatterns = [
     path('search/users/', SearchUsersView.as_view(), name='search-users'),
     path('friends/request/send/', SendFriendRequestView.as_view(), name='send-friend-request'),
     path('friends/request/<int:request_id>/respond/', RespondFriendRequestView.as_view(), name='respond-friend-request'),
+    path('friends/<int:friend_id>/remove/', RemoveFriendView.as_view(), name='remove-friend'),
     path('friends/', FriendsListView.as_view(), name='friends-list'),
     path('friends/requests/', PendingRequestsView.as_view(), name='pending-requests'),
     path('groups/create/', CreateGroupChatView.as_view(), name='create-group'),
     path('groups/', GroupChatListView.as_view(), name='group-list'),
     path('groups/<int:group_id>/', GroupChatDetailView.as_view(), name='group-detail'),
     path('groups/<int:group_id>/messages/', GroupMessagesView.as_view(), name='group-messages'),
-<<<<<<< HEAD
     path('groups/<int:group_id>/add-members/', AddGroupMembersView.as_view(), name='add-group-members'),
     # Calendar routes
     path('calendars/', CalendarListCreateView.as_view(), name='calendar-list-create'),
@@ -80,17 +79,18 @@ urlpatterns = [
     path('games/<int:game_id>/answers/', GetAnswersView.as_view(), name='get-answers'),
     path('games/<int:game_id>/next-round/', NextRoundView.as_view(), name='next-round'),
     path('games/<int:game_id>/end/', EndGameView.as_view(), name='end-game'),
-=======
-    path('groups/<int:group_id>/members/add/', AddGroupMembersView.as_view(), name='add-group-members'),
-    path('questions/', QuestionsListView.as_view(), name='questions-list'),
-    path('questions/<int:question_id>/', QuestionDetailView.as_view(), name='question-detail'),
-    path('questions/answer/', SubmitAnswerView.as_view(), name='submit-answer'),
-    path('questions/responses/', UserResponsesView.as_view(), name='user-responses'),
-    path('game/create/', CreateGameSessionView.as_view(), name='create-game-session'),
-    path('game/<int:session_id>/', GameSessionDetailView.as_view(), name='game-session-detail'),
-    path('game/<int:session_id>/delete/', DeleteGameSessionView.as_view(), name='delete-game-session'),
-    path('game/random-question/', GetRandomQuestionView.as_view(), name='get-random-question'),
-    path('game/answer/', SubmitGameAnswerView.as_view(), name='submit-game-answer'),
-    path('game/active/', ActiveGameSessionsView.as_view(), name='active-game-sessions'),
->>>>>>> main
+    path('games/join/', JoinGameByCodeView.as_view(), name='join-game'),
+    # Journal prompts routes (specific routes first)
+    path('prompts/random/', RandomJournalPromptView.as_view(), name='random-journal-prompt'),
+    path('prompts/', JournalPromptsListView.as_view(), name='journal-prompts-list'),
+    # Shared journals routes
+    path('journals/', SharedJournalListCreateView.as_view(), name='shared-journals-list-create'),
+    path('journals/<int:journal_id>/', SharedJournalDetailView.as_view(), name='shared-journal-detail'),
+    path('journals/<int:journal_id>/members/', SharedJournalMembersView.as_view(), name='shared-journal-members'),
+    path('journals/<int:journal_id>/entries/', JournalEntryListCreateView.as_view(), name='journal-entries'),
+    # Shared prompt sessions routes
+    path('prompt-sessions/', SharedPromptSessionListCreateView.as_view(), name='shared-prompt-sessions-list-create'),
+    path('prompt-sessions/<int:session_id>/', SharedPromptSessionDetailView.as_view(), name='shared-prompt-session-detail'),
+    path('prompt-sessions/<int:session_id>/members/', SharedPromptSessionMembersView.as_view(), name='shared-prompt-session-members'),
+    path('prompt-sessions/<int:session_id>/responses/', PromptResponseListCreateView.as_view(), name='prompt-responses'),
 ]

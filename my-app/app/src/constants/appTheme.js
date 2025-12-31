@@ -7,6 +7,7 @@ export const THEME = {
   
   // Background Colors
   background: '#0F1419',   // Almost Black with slight warmth
+  surface: '#1A1D26',      // Slightly lighter than background
   surfaceDark: '#2A2A34',  // Sophisticated Dark Gray
   
   // Text Colors
@@ -16,15 +17,20 @@ export const THEME = {
     accent: '#D4AF37',     // Champagne Gold
     muted: '#808080',      // Sophisticated Muted
   },
+  subtext: '#B8B8B8',      // Elegant Gray
+  white: '#FFFFFF',        // Pure white
   
   // Border Colors
-  border: '#D1435B',       // Rich Red
+  border: '#4A4A52',       // Subtle Gray (changed from red for better UX)
   borderLight: '#4A4A52',  // Subtle Gray
+  
+  // Backdrop/Modal
+  backdrop: 'rgba(0, 0, 0, 0.7)',  // Semi-transparent black
   
   // Button Colors
   button: {
     primary: '#D1435B',    // Rich Red
-    secondary: '#4A4A52',  // Sophisticated Gray
+    secondary: '#C65D7B',  // Muted Rose Pink
     danger: '#C41E3A',     // Deep Crimson
   },
   

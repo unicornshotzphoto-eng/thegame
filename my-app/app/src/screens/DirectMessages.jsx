@@ -16,7 +16,7 @@ function DirectMessages({ navigation }) {
             setLoading(true);
             const [friendsResponse, gamesResponse] = await Promise.all([
                 api.get('/quiz/friends/'),
-                api.get('/quiz/game/active/')
+                api.get('/quiz/games/')
             ]);
             setFriends(friendsResponse.data.friends || []);
             setActiveGames(gamesResponse.data.sessions || []);
@@ -52,7 +52,7 @@ function DirectMessages({ navigation }) {
     const startGame = async (friend) => {
         try {
             // First check if there's an active game session with this friend
-            const activeGamesResponse = await api.get('/quiz/game/active/');
+            const activeGamesResponse = await api.get('/quiz/games/');
             const existingGame = activeGamesResponse.data.sessions?.find(session => {
                 // Check if this is a direct game with this specific friend
                 return session.session_type === 'direct' && 
@@ -61,16 +61,24 @@ function DirectMessages({ navigation }) {
 
             if (existingGame) {
                 console.log('Found existing game session:', existingGame.id);
-                navigation.navigate('GamePlay', { sessionId: existingGame.id });
+                if (navigation?.push) {
+                    navigation.push({ pathname: 'GamePlay', params: { sessionId: existingGame.id } });
+                } else if (navigation?.navigate) {
+                    navigation.navigate('GamePlay', { sessionId: existingGame.id });
+                }
             } else {
                 // Create new game session
                 console.log('Creating new game session with friend:', friend.id);
-                const response = await api.post('/quiz/game/create/', {
+                const response = await api.post('/quiz/games/create/', {
                     session_type: 'direct',
                     participant_ids: [friend.id]
                 });
                 
-                navigation.navigate('GamePlay', { sessionId: response.data.id });
+                if (navigation?.push) {
+                    navigation.push({ pathname: 'GamePlay', params: { sessionId: response.data.id } });
+                } else if (navigation?.navigate) {
+                    navigation.navigate('GamePlay', { sessionId: response.data.id });
+                }
             }
         } catch (error) {
             console.error('Start game error:', error);
@@ -109,7 +117,13 @@ function DirectMessages({ navigation }) {
                 {activeGame ? (
                     <TouchableOpacity 
                         style={[styles.startGameButton, styles.joinGameButton]} 
-                        onPress={() => navigation.navigate('GamePlay', { sessionId: activeGame.id })}
+                        onPress={() => {
+                            if (navigation?.push) {
+                                navigation.push({ pathname: 'GamePlay', params: { sessionId: activeGame.id } });
+                            } else if (navigation?.navigate) {
+                                navigation.navigate('GamePlay', { sessionId: activeGame.id });
+                            }
+                        }}
                     >
                         <Text style={styles.startGameText}>🎮 Join Game</Text>
                     </TouchableOpacity>

@@ -396,7 +396,7 @@ function Calendar({ navigation }) {
             <TextInput
               style={styles.input}
               placeholder="Calendar Name"
-              placeholderTextColor="#666"
+              placeholderTextColor={THEME.text.secondary}
               value={newCalendarName}
               onChangeText={setNewCalendarName}
             />
@@ -449,7 +449,7 @@ function Calendar({ navigation }) {
 
             {loadingFriends ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#1a73e8" />
+                <ActivityIndicator size="large" color={THEME.primary} />
               </View>
             ) : friends.length === 0 ? (
               <View style={styles.emptyContainer}>
@@ -549,7 +549,7 @@ function Calendar({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.secondary,
+    backgroundColor: THEME.background,
   },
   header: {
     flexDirection: 'row',
@@ -958,13 +958,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   noteModalContent: {
-    backgroundColor: '#111111',
+    backgroundColor: THEME.surfaceDark,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
+    padding: THEME.spacing.lg,
     maxHeight: '80%',
     borderTopWidth: 1,
-    borderTopColor: '#333333',
+    borderTopColor: THEME.borderLight,
   },
   noteModalHeader: {
     flexDirection: 'row',
@@ -973,55 +973,55 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   noteModalTitle: {
-    color: '#fff',
+    color: THEME.text.primary,
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   noteModalClose: {
-    color: '#fff',
+    color: THEME.text.primary,
     fontSize: 24,
     fontWeight: 'bold',
   },
   noteModalDate: {
-    color: '#999',
+    color: THEME.text.secondary,
     fontSize: 12,
-    marginBottom: 15,
+    marginBottom: THEME.spacing.lg,
     fontFamily: 'montserrat-regular',
   },
   noteInput: {
-    backgroundColor: '#222222',
-    color: '#fff',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: THEME.background,
+    color: THEME.text.primary,
+    borderRadius: THEME.borderRadius.md,
+    padding: THEME.spacing.md,
     height: 150,
-    marginBottom: 15,
+    marginBottom: THEME.spacing.lg,
     borderWidth: 1,
-    borderColor: '#333333',
+    borderColor: THEME.border,
     textAlignVertical: 'top',
     fontFamily: 'montserrat-regular',
   },
   noteModalFooter: {
     flexDirection: 'row',
-    gap: 10,
+    gap: THEME.spacing.md,
   },
   noteCancelButton: {
     flex: 1,
-    backgroundColor: '#333333',
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: THEME.borderLight,
+    paddingVertical: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
   },
   noteCancelButtonText: {
-    color: '#fff',
+    color: THEME.text.primary,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   noteSaveButton: {
     flex: 1,
-    backgroundColor: '#1a73e8',
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: THEME.primary,
+    paddingVertical: THEME.spacing.md,
+    borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
   },
   noteSaveButtonText: {

@@ -3,12 +3,9 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, Image, StyleSheet, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
-<<<<<<< HEAD
 import { THEME } from '../constants/appTheme';
-=======
 import { getAuthToken } from '../core/secureStorage';
 import useStore from '../core/global';
->>>>>>> main
 
 function Search({ navigation }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -165,7 +162,7 @@ function Search({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.secondary,
+        backgroundColor: THEME.background,
     },
     searchContainer: {
         padding: 16,
@@ -174,11 +171,13 @@ const styles = StyleSheet.create({
         borderBottomColor: THEME.borderLight,
     },
     searchInput: {
-        backgroundColor: '#222',
-        color: '#fff',
-        padding: 12,
-        borderRadius: 8,
+        backgroundColor: THEME.background,
+        color: THEME.text.primary,
+        padding: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
         fontSize: 16,
+        borderWidth: 1,
+        borderColor: THEME.border,
     },
     loadingContainer: {
         flex: 1,
@@ -195,15 +194,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     listContainer: {
-        padding: 16,
+        padding: THEME.spacing.lg,
     },
     userCard: {
-        backgroundColor: '#111',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
+        backgroundColor: THEME.surfaceDark,
+        borderRadius: THEME.borderRadius.lg,
+        padding: THEME.spacing.lg,
+        marginBottom: THEME.spacing.md,
         borderWidth: 1,
-        borderColor: '#333',
+        borderColor: THEME.borderLight,
     },
     userInfo: {
         flexDirection: 'row',
@@ -213,10 +212,10 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 25,
-        marginRight: 12,
+        marginRight: THEME.spacing.md,
     },
     avatarPlaceholder: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: THEME.primary,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -229,25 +228,25 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     username: {
-        color: '#fff',
+        color: THEME.text.primary,
         fontSize: 16,
         fontWeight: 'bold',
-        marginBottom: 4,
+        marginBottom: THEME.spacing.sm,
     },
     email: {
-        color: '#888',
+        color: THEME.text.secondary,
         fontSize: 14,
     },
     addButton: {
-        backgroundColor: '#1a73e8',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 8,
+        backgroundColor: THEME.primary,
+        paddingHorizontal: THEME.spacing.lg,
+        paddingVertical: THEME.spacing.md,
+        borderRadius: THEME.borderRadius.md,
         minWidth: 100,
         alignItems: 'center',
     },
     addButtonDisabled: {
-        backgroundColor: '#555',
+        backgroundColor: THEME.text.muted,
     },
     addButtonText: {
         color: '#fff',

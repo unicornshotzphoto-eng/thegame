@@ -1,3 +1,21 @@
+import React from 'react';
+import { useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 import Messages from '@/app/src/screens/Messages';
+import { THEME } from '@/app/src/constants/appTheme';
+import MiniNav from '@/app/components/MiniNav';
 
-export default Messages;
+const styles = StyleSheet.create({
+  placeholder: {},
+});
+
+export default function MessagesWithDrawer() {
+  const router = useRouter();
+
+  return (
+    <View style={{ flex: 1 }}>
+      <MiniNav router={router} />
+      <Messages />
+    </View>
+  );
+}

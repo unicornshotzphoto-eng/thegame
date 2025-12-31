@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ export const DrawerContext = React.createContext();
 export function DrawerProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const slideAnim = React.useRef(new Animated.Value(0)).current;
+  const router = useRouter();
 
   const toggleDrawer = () => {
     const toValue = isOpen ? 0 : DRAWER_WIDTH;
@@ -42,6 +43,8 @@ export function DrawerProvider({ children }) {
     }
   };
 
+
+
   return (
     <DrawerContext.Provider value={{ isOpen, toggleDrawer, closeDrawer, slideAnim }}>
       {children}
@@ -57,6 +60,7 @@ export function DrawerMenu({ tabs }) {
     // Routes relative to app root with proper Expo Router syntax
     const routeMap = {
       'index': '/(tabs)',
+      'GameHub': '/(tabs)/GameHub',
       'explore': '/(tabs)/explore',
       'Questions': '/(tabs)/Questions',
       'MultiplayerQuestions': '/(tabs)/MultiplayerQuestions',
@@ -127,15 +131,17 @@ const styles = StyleSheet.create({
     width: DRAWER_WIDTH,
   },
   drawerHeader: {
-    paddingVertical: 20,
+    paddingVertical: 24,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: THEME.borderLight,
+    marginBottom: THEME.spacing.md,
   },
   drawerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: THEME.text.primary,
+    fontSize: 22,
+    fontWeight: '800',
+    color: THEME.primary,
+    letterSpacing: 0.5,
   },
   drawerContent: {
     flex: 1,
@@ -144,26 +150,36 @@ const styles = StyleSheet.create({
   drawerItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    marginVertical: 4,
     borderLeftWidth: 3,
     borderLeftColor: 'transparent',
+    borderRadius: THEME.borderRadius.md,
   },
   drawerItemActive: {
-    backgroundColor: 'rgba(209, 67, 91, 0.1)',
+    backgroundColor: 'rgba(209, 67, 91, 0.15)',
     borderLeftColor: THEME.primary,
+    borderLeftWidth: 4,
   },
   drawerItemIcon: {
-    marginRight: 16,
+    marginRight: THEME.spacing.md,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   drawerItemText: {
-    fontSize: 16,
+    fontSize: 15,
     color: THEME.text.primary,
     fontWeight: '500',
+    marginLeft: THEME.spacing.md,
   },
   drawerFooter: {
-    paddingBottom: 20,
+    paddingVertical: 20,
     paddingHorizontal: 16,
+    marginTop: 'auto',
     borderTopWidth: 1,
     borderTopColor: THEME.borderLight,
   },
@@ -172,12 +188,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: 'rgba(196, 30, 58, 0.1)',
+    marginHorizontal: 8,
+    backgroundColor: 'rgba(196, 30, 58, 0.15)',
     borderRadius: THEME.borderRadius.md,
+    borderLeftWidth: 3,
+    borderLeftColor: THEME.button.danger,
   },
   logoutText: {
-    marginLeft: 12,
-    fontSize: 16,
+    marginLeft: THEME.spacing.md,
+    fontSize: 15,
     color: THEME.button.danger,
     fontWeight: '600',
   },

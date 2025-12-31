@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
   Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -16,15 +15,7 @@ const { width, height } = Dimensions.get('window');
 function Home({ navigation }) {
   const router = useRouter();
   return (
-    <ImageBackground
-      source={{
-        uri: 'data:image/svg+xml,%3Csvg width="1" height="1" xmlns="http://www.w3.org/2000/svg"%3E%3Crect fill="%230F1419" width="1" height="1"/%3E%3C/svg%3E',
-      }}
-      style={styles.container}
-    >
-      {/* Sparkle overlay effect */}
-      <View style={styles.sparkleOverlay} />
-
+    <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         {/* Header */}
         <View style={styles.header}>
@@ -71,21 +62,14 @@ function Home({ navigation }) {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.secondary,
-  },
-  sparkleOverlay: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(209, 67, 91, 0.05)',
-    zIndex: 0,
+    backgroundColor: THEME.background,
   },
   safeArea: {
     flex: 1,
@@ -97,7 +81,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: THEME.spacing.xl,
     paddingVertical: THEME.spacing.lg,
-    zIndex: 1,
   },
   logo: {
     fontSize: 24,
@@ -137,7 +120,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: THEME.spacing.xl,
-    zIndex: 1,
   },
   headlineContainer: {
     marginBottom: THEME.spacing.xl,

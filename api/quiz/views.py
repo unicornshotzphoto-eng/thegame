@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer, QuestionCategorySerializer, GameSessionSerializer, GameSessionListSerializer, PlayerAnswerSerializer
-from .models import User, GameSession, PlayerAnswer, Question, QuestionCategory
+from .models import User, GameSession, PlayerAnswer, Question, QuestionCategory, JournalPrompt
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db.models import Q
 
@@ -187,6 +187,33 @@ class RespondFriendRequestView(APIView):
         friend_request.save()
         
         return Response({'message': message}, status=200)
+
+class RemoveFriendView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, friend_id):
+        from .models import FriendRequest
+        
+        try:
+            friend_user = User.objects.get(id=friend_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=404)
+        
+        if friend_user == request.user:
+            return Response({'error': 'Cannot remove yourself'}, status=400)
+        
+        # Find and delete the friendship (works both ways)
+        friend_request = FriendRequest.objects.filter(
+            Q(from_user=request.user, to_user=friend_user) |
+            Q(from_user=friend_user, to_user=request.user),
+            status='accepted'
+        ).first()
+        
+        if not friend_request:
+            return Response({'error': 'Friend connection not found'}, status=404)
+        
+        friend_request.delete()
+        return Response({'message': 'Friend removed successfully'}, status=200)
 
 class FriendsListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -384,7 +411,6 @@ class AddGroupMembersView(APIView):
         
         return Response({'message': f'{members.count()} members added'}, status=200)
 
-<<<<<<< HEAD
 
 # Calendar Views
 class CalendarListCreateView(APIView):
@@ -630,51 +656,45 @@ class RandomQuestionView(APIView):
 
 
 # Multiplayer Game Views
-class CreateGameSessionView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request):
-        """Create a new multiplayer game session"""
-        friend_ids = request.data.get('friend_ids', [])
-        
-        if not friend_ids:
-            return Response({'error': 'At least one friend is required'}, status=400)
-        
-        # Verify all friends exist
-        friends = User.objects.filter(id__in=friend_ids)
-        if friends.count() != len(friend_ids):
-            return Response({'error': 'Some users not found'}, status=404)
-        
-        # Create game session
-        game = GameSession.objects.create(
-            creator=request.user,
-            status='waiting'
-        )
-        
-        # Add creator and friends
-        game.players.add(request.user)
-        game.players.add(*friends)
-        
-        # Set first player as category picker
-        game.category_picker = request.user
-        game.save()
-        
-        serializer = GameSessionSerializer(game)
-        return Response(serializer.data, status=201)
-
-
 class GameSessionDetailView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request, game_id):
         """Get game session details"""
         try:
-            game = GameSession.objects.get(id=game_id, players=request.user)
+            game = GameSession.objects.get(id=game_id)
+            # Check if user is a player
+            if request.user not in game.players.all():
+                return Response({'error': 'Game not found or access denied'}, status=404)
         except GameSession.DoesNotExist:
             return Response({'error': 'Game not found or access denied'}, status=404)
         
         serializer = GameSessionSerializer(game)
-        return Response(serializer.data)
+        game_data = serializer.data
+        
+        # Get all answers for this session (rounds are tracked by current_round field)
+        all_answers = game.answers.all()
+        
+        # Get current round question and answers
+        current_round = None
+        if game.current_question:
+            current_answers = all_answers.filter(question=game.current_question)
+            current_round = {
+                'id': game.current_round,
+                'question': {
+                    'id': game.current_question.id,
+                    'question_text': game.current_question.question_text
+                },
+                'answers': list(PlayerAnswerSerializer(current_answers, many=True).data)
+            }
+        
+        # Return structured response
+        return Response({
+            'session': game_data,
+            'rounds': [{'round': game.current_round, 'question': game.current_question.question_text if game.current_question else None}],
+            'current_round': current_round,
+            'scores': game_data.get('player_scores', {})
+        })
 
 
 class GameSessionListView(APIView):
@@ -693,13 +713,15 @@ class StartGameRoundView(APIView):
     def post(self, request, game_id):
         """Start a new round - category picker selects a category"""
         try:
-            game = GameSession.objects.get(id=game_id, players=request.user)
+            game = GameSession.objects.get(id=game_id)
+            if request.user not in game.players.all():
+                return Response({'error': 'Game not found or access denied'}, status=404)
         except GameSession.DoesNotExist:
             return Response({'error': 'Game not found or access denied'}, status=404)
         
-        # Only category picker can start round
-        if game.category_picker != request.user:
-            return Response({'error': 'Only the category picker can start the round'}, status=403)
+        # Only current turn user can start round
+        if game.current_turn_user != request.user:
+            return Response({'error': 'Only the current player can pick a category'}, status=403)
         
         category_name = request.data.get('category')
         if not category_name:
@@ -722,46 +744,40 @@ class StartGameRoundView(APIView):
         game.status = 'in_progress'
         game.save()
         
+        # Return structured response matching GameSessionDetailView format
         serializer = GameSessionSerializer(game)
-        return Response(serializer.data)
-
-=======
-class QuestionsListView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request):
-        from .models import Question
-        from .serializers import QuestionSerializer
+        game_data = serializer.data
         
-        category = request.query_params.get('category', 'spiritual_knowing')
-        questions = Question.objects.filter(category=category)
-        serializer = QuestionSerializer(questions, many=True)
+        # Get current round data
+        all_answers = game.answers.all()
+        current_round = None
+        if game.current_question:
+            current_answers = all_answers.filter(question=game.current_question)
+            current_round = {
+                'id': game.current_round,
+                'question': {
+                    'id': game.current_question.id,
+                    'question_text': game.current_question.question_text
+                },
+                'answers': list(PlayerAnswerSerializer(current_answers, many=True).data)
+            }
         
-        return Response({'questions': serializer.data}, status=200)
-
-class QuestionDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request, question_id):
-        from .models import Question
-        from .serializers import QuestionSerializer
-        
-        try:
-            question = Question.objects.get(id=question_id)
-            serializer = QuestionSerializer(question)
-            return Response(serializer.data, status=200)
-        except Question.DoesNotExist:
-            return Response({'error': 'Question not found'}, status=404)
->>>>>>> main
+        return Response({
+            'session': game_data,
+            'rounds': [{'round': game.current_round, 'question': game.current_question.question_text if game.current_question else None}],
+            'current_round': current_round,
+            'scores': game_data.get('player_scores', {})
+        })
 
 class SubmitAnswerView(APIView):
     permission_classes = [IsAuthenticated]
     
-<<<<<<< HEAD
     def post(self, request, game_id):
         """Player submits an answer to the current question"""
         try:
-            game = GameSession.objects.get(id=game_id, players=request.user)
+            game = GameSession.objects.get(id=game_id)
+            if request.user not in game.players.all():
+                return Response({'error': 'Game not found or access denied'}, status=404)
         except GameSession.DoesNotExist:
             return Response({'error': 'Game not found or access denied'}, status=404)
         
@@ -801,7 +817,9 @@ class GetAnswersView(APIView):
     def get(self, request, game_id):
         """Get all answers for the current question from all players"""
         try:
-            game = GameSession.objects.get(id=game_id, players=request.user)
+            game = GameSession.objects.get(id=game_id)
+            if request.user not in game.players.all():
+                return Response({'error': 'Game not found or access denied'}, status=404)
         except GameSession.DoesNotExist:
             return Response({'error': 'Game not found or access denied'}, status=404)
         
@@ -869,36 +887,35 @@ class EndGameView(APIView):
         
         serializer = GameSessionSerializer(game)
         return Response(serializer.data)
-=======
+
+
+class JoinGameByCodeView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
-        from .models import Question, QuestionResponse
-        from .serializers import QuestionResponseSerializer
-        
-        question_id = request.data.get('question_id')
-        response_text = request.data.get('response_text')
-        partner_id = request.data.get('partner_id')
-        
-        if not question_id or not response_text:
-            return Response({'error': 'Question ID and response text are required'}, status=400)
-        
+        """Join an existing game session using a 6-character code"""
+        code = request.data.get('game_code') or request.data.get('code')
+        if not code or len(str(code).strip()) != 6:
+            return Response({'error': 'Valid 6-character game code is required'}, status=400)
+
+        code = str(code).strip().upper()
+
         try:
-            question = Question.objects.get(id=question_id)
-            partner = User.objects.get(id=partner_id) if partner_id else None
-            
-            # Create response
-            response = QuestionResponse.objects.create(
-                question=question,
-                user=request.user,
-                partner=partner,
-                response_text=response_text
-            )
-            
-            serializer = QuestionResponseSerializer(response)
-            return Response(serializer.data, status=201)
-        except Question.DoesNotExist:
-            return Response({'error': 'Question not found'}, status=404)
-        except User.DoesNotExist:
-            return Response({'error': 'Partner not found'}, status=404)
+            session = GameSession.objects.get(game_code=code)
+        except GameSession.DoesNotExist:
+            return Response({'error': 'Game not found. Check the code and try again.'}, status=404)
+
+        if session.status == 'completed':
+            return Response({'error': 'Game has already completed'}, status=400)
+
+        # Add the user as a player if not already joined
+        if request.user not in session.players.all():
+            session.players.add(request.user)
+            session.save()
+
+        serializer = GameSessionSerializer(session)
+        return Response(serializer.data, status=200)
+
 
 class UserResponsesView(APIView):
     permission_classes = [IsAuthenticated]
@@ -916,50 +933,50 @@ class CreateGameSessionView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        from .models import GameSession, GroupChat
+        from .models import GameSession, QuestionCategory
         from .serializers import GameSessionSerializer
         import random
+        import string
         
-        session_type = request.data.get('session_type')  # 'direct' or 'group'
-        group_id = request.data.get('group_id')
         participant_ids = request.data.get('participant_ids', [])
-        
-        if session_type not in ['direct', 'group']:
-            return Response({'error': 'Invalid session type'}, status=400)
+        categories = request.data.get('categories', [])
         
         try:
+            # Generate unique 6-character game code
+            game_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            while GameSession.objects.filter(game_code=game_code).exists():
+                game_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            
             # Create game session
-            session = GameSession.objects.create(session_type=session_type)
+            session = GameSession.objects.create(
+                creator=request.user,
+                game_code=game_code,
+                status='waiting'
+            )
             
-            # Add participants
-            participants = []
-            if session_type == 'group' and group_id:
-                group = GroupChat.objects.get(id=group_id)
-                session.group = group
-                participants = list(group.members.all())
-            elif session_type == 'direct' and participant_ids:
-                # Add current user and other participants, avoiding duplicates
-                participant_set = set([request.user.id] + participant_ids)
-                participants = list(User.objects.filter(id__in=participant_set))
-            else:
-                return Response({'error': 'Invalid participants'}, status=400)
+            # Add creator as player
+            session.players.add(request.user)
             
-            # Use set to ensure no duplicate participants
-            session.participants.set(participants)
+            # Add other participants if provided
+            if participant_ids:
+                other_participants = User.objects.filter(id__in=participant_ids)
+                session.players.add(*other_participants)
             
-            # Set turn order (randomize)
-            turn_order = [p.id for p in participants]
-            random.shuffle(turn_order)
-            session.turn_order = turn_order
-            session.current_turn_user = User.objects.get(id=turn_order[0])
+            # Add selected categories
+            if categories:
+                category_objects = QuestionCategory.objects.filter(category__in=categories)
+                session.categories.add(*category_objects)
+            
+            # Set creator as category picker and current turn user for first round
+            session.category_picker = request.user
+            session.current_turn_user = request.user
             session.save()
             
             serializer = GameSessionSerializer(session)
             return Response(serializer.data, status=201)
-        except GroupChat.DoesNotExist:
-            return Response({'error': 'Group not found'}, status=404)
-        except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
 
 class GetRandomQuestionView(APIView):
     permission_classes = [IsAuthenticated]
@@ -1121,88 +1138,415 @@ class SubmitGameAnswerView(APIView):
         except GameTurn.DoesNotExist:
             return Response({'error': 'Turn not found'}, status=404)
 
-class GameSessionDetailView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request, session_id):
-        from .models import GameSession, GameRound, GameTurn
-        from .serializers import GameSessionSerializer, GameRoundSerializer
-        
-        try:
-            session = GameSession.objects.get(id=session_id)
-            
-            # Check if user is participant
-            if request.user not in session.participants.all():
-                return Response({'error': 'Not a participant'}, status=403)
-            
-            rounds = GameRound.objects.filter(session=session).prefetch_related(
-                'answers__player', 'question', 'picker'
-            )
-            
-            session_serializer = GameSessionSerializer(session)
-            rounds_serializer = GameRoundSerializer(rounds, many=True)
-            
-            # Get current active round (if any)
-            current_round = rounds.filter(is_completed=False).first()
-            if current_round:
-                print(f"Current round found: {current_round.id}, Question: {current_round.question.question_number}, Answers: {current_round.answers.count()}")
-                for answer in current_round.answers.all():
-                    print(f"  - Player: {answer.player.username}, Answered: {answer.answered_at is not None}")
-            current_round_data = GameRoundSerializer(current_round).data if current_round else None
-            
-            # Calculate scores
-            scores = {}
-            for participant in session.participants.all():
-                player_turns = GameTurn.objects.filter(
-                    round__session=session,
-                    player=participant,
-                    answered_at__isnull=False
-                )
-                total_points = sum(t.points_earned for t in player_turns)
-                scores[participant.username] = total_points
-            
-            return Response({
-                'session': session_serializer.data,
-                'rounds': rounds_serializer.data,
-                'current_round': current_round_data,
-                'scores': scores
-            }, status=200)
-        except GameSession.DoesNotExist:
-            return Response({'error': 'Session not found'}, status=404)
 
-class ActiveGameSessionsView(APIView):
+# Journal Prompt Views
+class JournalPromptsListView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """Get all journal prompts with optional filtering"""
+        from .serializers import JournalPromptSerializer
+        
+        difficulty = request.query_params.get('difficulty')
+        
+        prompts = JournalPrompt.objects.all()
+        if difficulty:
+            prompts = prompts.filter(difficulty=difficulty)
+        
+        serializer = JournalPromptSerializer(prompts, many=True)
+        return Response({'prompts': serializer.data, 'count': prompts.count()})
+
+
+class RandomJournalPromptView(APIView):
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        """Get a random journal prompt"""
+        import random
+        from .serializers import JournalPromptSerializer
+        
+        difficulty = request.query_params.get('difficulty')
+        
+        prompts = JournalPrompt.objects.all()
+        if difficulty:
+            prompts = prompts.filter(difficulty=difficulty)
+        
+        prompts = list(prompts)
+        if not prompts:
+            return Response({'error': 'No prompts available'}, status=404)
+        
+        prompt = random.choice(prompts)
+        serializer = JournalPromptSerializer(prompt)
+        return Response(serializer.data)
+
+# Shared Journal Views
+class SharedJournalListCreateView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        from .models import GameSession
-        from .serializers import GameSessionSerializer
+        """Get all shared journals where user is a member or creator"""
+        from .serializers import SharedJournalListSerializer
+        from .models import SharedJournal
         
-        sessions = GameSession.objects.filter(
-            participants=request.user,
-            is_active=True
+        journals = SharedJournal.objects.filter(
+            Q(created_by=request.user) | Q(members=request.user)
+        ).distinct()
+        
+        serializer = SharedJournalListSerializer(journals, many=True)
+        return Response({'journals': serializer.data, 'count': journals.count()})
+    
+    def post(self, request):
+        """Create a new shared journal"""
+        from .serializers import SharedJournalSerializer
+        from .models import SharedJournal
+        
+        name = request.data.get('name')
+        description = request.data.get('description', '')
+        
+        if not name:
+            return Response({'error': 'Journal name is required'}, status=400)
+        
+        journal = SharedJournal.objects.create(
+            name=name,
+            description=description,
+            created_by=request.user
         )
+        journal.members.add(request.user)
         
-        serializer = GameSessionSerializer(sessions, many=True)
-        return Response({'sessions': serializer.data}, status=200)
+        serializer = SharedJournalSerializer(journal)
+        return Response(serializer.data, status=201)
 
-class DeleteGameSessionView(APIView):
+
+class SharedJournalDetailView(APIView):
     permission_classes = [IsAuthenticated]
     
-    def delete(self, request, session_id):
-        from .models import GameSession
+    def get(self, request, journal_id):
+        """Get journal details"""
+        from .serializers import SharedJournalSerializer
+        from .models import SharedJournal
         
         try:
-            session = GameSession.objects.get(id=session_id)
+            journal = SharedJournal.objects.get(id=journal_id)
             
-            # Check if user is a participant
-            if request.user not in session.participants.all():
-                return Response({'error': 'Not a participant'}, status=403)
+            # Check if user is member or creator
+            if request.user != journal.created_by and request.user not in journal.members.all():
+                return Response({'error': 'Access denied'}, status=403)
             
-            # Delete the session (cascades to rounds and turns)
-            session.delete()
-            print(f"Game session {session_id} deleted by {request.user.username}")
+            serializer = SharedJournalSerializer(journal)
+            return Response(serializer.data)
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+    
+    def put(self, request, journal_id):
+        """Update journal details (creator only)"""
+        from .serializers import SharedJournalSerializer
+        from .models import SharedJournal
+        
+        try:
+            journal = SharedJournal.objects.get(id=journal_id)
             
-            return Response({'message': 'Game session deleted'}, status=200)
-        except GameSession.DoesNotExist:
+            if request.user != journal.created_by:
+                return Response({'error': 'Only creator can update journal'}, status=403)
+            
+            journal.name = request.data.get('name', journal.name)
+            journal.description = request.data.get('description', journal.description)
+            journal.save()
+            
+            serializer = SharedJournalSerializer(journal)
+            return Response(serializer.data)
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+    
+    def delete(self, request, journal_id):
+        """Delete journal (creator only)"""
+        from .models import SharedJournal
+        
+        try:
+            journal = SharedJournal.objects.get(id=journal_id)
+            
+            if request.user != journal.created_by:
+                return Response({'error': 'Only creator can delete journal'}, status=403)
+            
+            journal.delete()
+            return Response({'message': 'Journal deleted'}, status=204)
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+
+
+class SharedJournalMembersView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, journal_id):
+        """Add a member to the journal"""
+        from .models import SharedJournal, User
+        
+        try:
+            journal = SharedJournal.objects.get(id=journal_id)
+            
+            if request.user != journal.created_by:
+                return Response({'error': 'Only creator can add members'}, status=403)
+            
+            member_id = request.data.get('member_id')
+            if not member_id:
+                return Response({'error': 'member_id is required'}, status=400)
+            
+            try:
+                member = User.objects.get(id=member_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=404)
+            
+            journal.members.add(member)
+            
+            from .serializers import SharedJournalSerializer
+            serializer = SharedJournalSerializer(journal)
+            return Response(serializer.data)
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+    
+    def delete(self, request, journal_id):
+        """Remove a member from the journal"""
+        from .models import SharedJournal, User
+        
+        try:
+            journal = SharedJournal.objects.get(id=journal_id)
+            
+            if request.user != journal.created_by:
+                return Response({'error': 'Only creator can remove members'}, status=403)
+            
+            member_id = request.data.get('member_id')
+            if not member_id:
+                return Response({'error': 'member_id is required'}, status=400)
+            
+            try:
+                member = User.objects.get(id=member_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=404)
+            
+            journal.members.remove(member)
+            
+            from .serializers import SharedJournalSerializer
+            serializer = SharedJournalSerializer(journal)
+            return Response(serializer.data)
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+
+
+class JournalEntryListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, journal_id):
+        """Get all entries for a journal"""
+        from .serializers import JournalEntrySerializer
+        from .models import SharedJournal, JournalEntry
+        
+        try:
+            journal = SharedJournal.objects.get(id=journal_id)
+            
+            # Check if user is member or creator
+            if request.user != journal.created_by and request.user not in journal.members.all():
+                return Response({'error': 'Access denied'}, status=403)
+            
+            entries = JournalEntry.objects.filter(journal=journal).order_by('-created_at')
+            serializer = JournalEntrySerializer(entries, many=True)
+            return Response({'entries': serializer.data, 'count': entries.count()})
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+    
+    def post(self, request, journal_id):
+        """Add a new entry to the journal"""
+        from .serializers import JournalEntrySerializer
+        from .models import SharedJournal, JournalEntry
+        
+        try:
+            journal = SharedJournal.objects.get(id=journal_id)
+            
+            # Check if user is member or creator
+            if request.user != journal.created_by and request.user not in journal.members.all():
+                return Response({'error': 'Access denied'}, status=403)
+            
+            title = request.data.get('title', '')
+            content = request.data.get('content')
+            
+            if not content:
+                return Response({'error': 'Content is required'}, status=400)
+            
+            entry = JournalEntry.objects.create(
+                journal=journal,
+                author=request.user,
+                title=title,
+                content=content
+            )
+            
+            serializer = JournalEntrySerializer(entry)
+            return Response(serializer.data, status=201)
+        except SharedJournal.DoesNotExist:
+            return Response({'error': 'Journal not found'}, status=404)
+
+
+# Shared Prompt Session Views
+class SharedPromptSessionListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Get all shared prompt sessions where user is a member or creator"""
+        from .serializers import SharedPromptSessionListSerializer
+        from .models import SharedPromptSession
+        
+        sessions = SharedPromptSession.objects.filter(
+            Q(created_by=request.user) | Q(members=request.user)
+        ).distinct().order_by('-created_at')
+        
+        serializer = SharedPromptSessionListSerializer(sessions, many=True)
+        return Response({'sessions': serializer.data, 'count': sessions.count()})
+    
+    def post(self, request):
+        """Create a new shared prompt session"""
+        from .serializers import SharedPromptSessionSerializer
+        from .models import SharedPromptSession, JournalPrompt
+        
+        prompt_id = request.data.get('prompt_id')
+        title = request.data.get('title', '')
+        
+        if not prompt_id:
+            return Response({'error': 'prompt_id is required'}, status=400)
+        
+        try:
+            prompt = JournalPrompt.objects.get(id=prompt_id)
+        except JournalPrompt.DoesNotExist:
+            return Response({'error': 'Prompt not found'}, status=404)
+        
+        session = SharedPromptSession.objects.create(
+            prompt=prompt,
+            created_by=request.user,
+            title=title or prompt.prompt_text[:50]
+        )
+        session.members.add(request.user)
+        
+        serializer = SharedPromptSessionSerializer(session)
+        return Response(serializer.data, status=201)
+
+
+class SharedPromptSessionDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, session_id):
+        """Get prompt session details with all responses"""
+        from .serializers import SharedPromptSessionSerializer
+        from .models import SharedPromptSession
+        
+        try:
+            session = SharedPromptSession.objects.get(id=session_id)
+            
+            # Check if user is member or creator
+            if request.user != session.created_by and request.user not in session.members.all():
+                return Response({'error': 'Access denied'}, status=403)
+            
+            serializer = SharedPromptSessionSerializer(session)
+            return Response(serializer.data)
+        except SharedPromptSession.DoesNotExist:
             return Response({'error': 'Session not found'}, status=404)
->>>>>>> main
+    
+    def delete(self, request, session_id):
+        """Delete session (creator only)"""
+        from .models import SharedPromptSession
+        
+        try:
+            session = SharedPromptSession.objects.get(id=session_id)
+            
+            if request.user != session.created_by:
+                return Response({'error': 'Only creator can delete session'}, status=403)
+            
+            session.delete()
+            return Response({'message': 'Session deleted'}, status=204)
+        except SharedPromptSession.DoesNotExist:
+            return Response({'error': 'Session not found'}, status=404)
+
+
+class SharedPromptSessionMembersView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, session_id):
+        """Add a member to the prompt session"""
+        from .models import SharedPromptSession, User
+        
+        try:
+            session = SharedPromptSession.objects.get(id=session_id)
+            
+            if request.user != session.created_by:
+                return Response({'error': 'Only creator can add members'}, status=403)
+            
+            member_id = request.data.get('member_id')
+            if not member_id:
+                return Response({'error': 'member_id is required'}, status=400)
+            
+            try:
+                member = User.objects.get(id=member_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=404)
+            
+            session.members.add(member)
+            
+            from .serializers import SharedPromptSessionSerializer
+            serializer = SharedPromptSessionSerializer(session)
+            return Response(serializer.data)
+        except SharedPromptSession.DoesNotExist:
+            return Response({'error': 'Session not found'}, status=404)
+    
+    def delete(self, request, session_id):
+        """Remove a member from the prompt session"""
+        from .models import SharedPromptSession, User
+        
+        try:
+            session = SharedPromptSession.objects.get(id=session_id)
+            
+            if request.user != session.created_by:
+                return Response({'error': 'Only creator can remove members'}, status=403)
+            
+            member_id = request.data.get('member_id')
+            if not member_id:
+                return Response({'error': 'member_id is required'}, status=400)
+            
+            try:
+                member = User.objects.get(id=member_id)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=404)
+            
+            session.members.remove(member)
+            
+            from .serializers import SharedPromptSessionSerializer
+            serializer = SharedPromptSessionSerializer(session)
+            return Response(serializer.data)
+        except SharedPromptSession.DoesNotExist:
+            return Response({'error': 'Session not found'}, status=404)
+
+
+class PromptResponseListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, session_id):
+        """Create or update a response to a prompt session"""
+        from .serializers import PromptResponseSerializer
+        from .models import SharedPromptSession, PromptResponse
+        
+        try:
+            session = SharedPromptSession.objects.get(id=session_id)
+            
+            # Check if user is member or creator
+            if request.user != session.created_by and request.user not in session.members.all():
+                return Response({'error': 'Access denied'}, status=403)
+            
+            response_text = request.data.get('response')
+            if not response_text:
+                return Response({'error': 'Response is required'}, status=400)
+            
+            # Create or update response
+            response_obj, created = PromptResponse.objects.update_or_create(
+                session=session,
+                author=request.user,
+                defaults={'response': response_text}
+            )
+            
+            serializer = PromptResponseSerializer(response_obj)
+            return Response(serializer.data, status=201 if created else 200)
+        except SharedPromptSession.DoesNotExist:
+            return Response({'error': 'Session not found'}, status=404)

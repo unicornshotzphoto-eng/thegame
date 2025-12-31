@@ -16,7 +16,7 @@ function GroupChats({ navigation }) {
             setLoading(true);
             const [groupsResponse, gamesResponse] = await Promise.all([
                 api.get('/quiz/groups/'),
-                api.get('/quiz/game/active/')
+                api.get('/quiz/games/')
             ]);
             setGroups(groupsResponse.data.groups || []);
             setActiveGames(gamesResponse.data.sessions || []);
@@ -47,7 +47,7 @@ function GroupChats({ navigation }) {
     const startGame = async (group) => {
         try {
             // First check if there's an active game session for this group
-            const activeGamesResponse = await api.get('/quiz/game/active/');
+            const activeGamesResponse = await api.get('/quiz/games/');
             const existingGame = activeGamesResponse.data.sessions?.find(session => {
                 // Check if this is a group game with this specific group
                 return session.session_type === 'group' && 
@@ -56,16 +56,24 @@ function GroupChats({ navigation }) {
 
             if (existingGame) {
                 console.log('Found existing game session:', existingGame.id);
-                navigation.navigate('GamePlay', { sessionId: existingGame.id });
+                if (navigation?.push) {
+                    navigation.push({ pathname: 'GamePlay', params: { sessionId: existingGame.id } });
+                } else if (navigation?.navigate) {
+                    navigation.navigate('GamePlay', { sessionId: existingGame.id });
+                }
             } else {
                 // Create new game session
                 console.log('Creating new game session for group:', group.id);
-                const response = await api.post('/quiz/game/create/', {
+                const response = await api.post('/quiz/games/create/', {
                     session_type: 'group',
                     group_id: group.id
                 });
                 
-                navigation.navigate('GamePlay', { sessionId: response.data.id });
+                if (navigation?.push) {
+                    navigation.push({ pathname: 'GamePlay', params: { sessionId: response.data.id } });
+                } else if (navigation?.navigate) {
+                    navigation.navigate('GamePlay', { sessionId: response.data.id });
+                }
             }
         } catch (error) {
             console.error('Start game error:', error);
@@ -109,7 +117,13 @@ function GroupChats({ navigation }) {
                 {activeGame ? (
                     <TouchableOpacity 
                         style={[styles.startGameButton, styles.joinGameButton]} 
-                        onPress={() => navigation.navigate('GamePlay', { sessionId: activeGame.id })}
+                        onPress={() => {
+                            if (navigation?.push) {
+                                navigation.push({ pathname: 'GamePlay', params: { sessionId: activeGame.id } });
+                            } else if (navigation?.navigate) {
+                                navigation.navigate('GamePlay', { sessionId: activeGame.id });
+                            }
+                        }}
                     >
                         <Text style={styles.startGameText}>🎮 Join Game</Text>
                     </TouchableOpacity>

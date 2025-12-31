@@ -1,10 +1,6 @@
 from rest_framework import serializers
-<<<<<<< HEAD
 from django.db import models
-from .models import User, GroupChat, GroupMessage, SharedCalendar, CalendarEvent, Question, QuestionCategory, GameSession, PlayerAnswer
-=======
-from .models import User, GroupChat, GroupMessage, Question, QuestionResponse, GameSession, GameRound, GameTurn
->>>>>>> main
+from .models import User, GroupChat, GroupMessage, SharedCalendar, CalendarEvent, Question, QuestionCategory, GameSession, PlayerAnswer, JournalPrompt, SharedJournal, JournalEntry, SharedPromptSession, PromptResponse
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -59,7 +55,6 @@ class GroupMessageSerializer(serializers.ModelSerializer):
         model = GroupMessage
         fields = ('id', 'group', 'sender', 'content', 'image', 'created_at')
 
-<<<<<<< HEAD
 
 class CalendarEventSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)
@@ -118,16 +113,22 @@ class QuestionListSerializer(serializers.ModelSerializer):
 class PlayerAnswerSerializer(serializers.ModelSerializer):
     player = UserSerializer(read_only=True)
     question = QuestionSerializer(read_only=True)
+    answered_at = serializers.SerializerMethodField()
     
     class Meta:
         model = PlayerAnswer
-        fields = ('id', 'player', 'question', 'answer_text', 'points_awarded', 'created_at')
+        fields = ('id', 'player', 'question', 'answer_text', 'points_awarded', 'created_at', 'answered_at')
+    
+    def get_answered_at(self, obj):
+        """Return created_at as answered_at for frontend compatibility"""
+        return obj.created_at
 
 
 class GameSessionSerializer(serializers.ModelSerializer):
     creator = UserSerializer(read_only=True)
     players = UserSerializer(many=True, read_only=True)
     category_picker = UserSerializer(read_only=True)
+    current_turn_user = UserSerializer(read_only=True)
     current_question = QuestionSerializer(read_only=True)
     answers = PlayerAnswerSerializer(many=True, read_only=True)
     player_scores = serializers.SerializerMethodField()
@@ -135,7 +136,7 @@ class GameSessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameSession
         fields = ('id', 'creator', 'players', 'status', 'current_round', 'current_question', 
-                  'category_picker', 'answers', 'player_scores', 'created_at', 'updated_at')
+                  'category_picker', 'current_turn_user', 'answers', 'player_scores', 'game_code', 'created_at', 'updated_at')
     
     def get_player_scores(self, obj):
         """Calculate total points for each player"""
@@ -159,43 +160,83 @@ class GameSessionListSerializer(serializers.ModelSerializer):
     
     def get_player_count(self, obj):
         return obj.players.count()
-=======
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = ('id', 'category', 'question_number', 'question_text', 'points', 'consequence', 'created_at')
 
-class QuestionResponseSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    partner = UserSerializer(read_only=True)
-    question = QuestionSerializer(read_only=True)
+class JournalPromptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JournalPrompt
+        fields = ('id', 'prompt_text', 'category', 'difficulty', 'created_at')
+
+
+class JournalEntrySerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
     
     class Meta:
-        model = QuestionResponse
-        fields = ('id', 'question', 'user', 'partner', 'response_text', 'is_correct', 'points_earned', 'created_at')
+        model = JournalEntry
+        fields = ('id', 'journal', 'author', 'title', 'content', 'created_at', 'updated_at')
 
-class GameSessionSerializer(serializers.ModelSerializer):
-    participants = UserSerializer(many=True, read_only=True)
-    current_turn_user = UserSerializer(read_only=True)
-    group = GroupChatSerializer(read_only=True)
+
+class SharedJournalSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    members = UserSerializer(many=True, read_only=True)
+    members_count = serializers.SerializerMethodField()
+    entries = JournalEntrySerializer(many=True, read_only=True)
     
     class Meta:
-        model = GameSession
-        fields = ('id', 'session_type', 'group', 'participants', 'current_turn_user', 'turn_order', 'is_active', 'created_at', 'updated_at')
+        model = SharedJournal
+        fields = ('id', 'name', 'description', 'created_by', 'members', 'members_count', 'entries', 'created_at', 'updated_at')
+    
+    def get_members_count(self, obj):
+        return obj.members.count()
 
-class GameTurnSerializer(serializers.ModelSerializer):
-    player = UserSerializer(read_only=True)
+
+class SharedJournalListSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    members_count = serializers.SerializerMethodField()
     
     class Meta:
-        model = GameTurn
-        fields = ('id', 'round', 'player', 'answer', 'points_earned', 'answered_at', 'created_at')
+        model = SharedJournal
+        fields = ('id', 'name', 'description', 'created_by', 'members_count', 'created_at', 'updated_at')
+    
+    def get_members_count(self, obj):
+        return obj.members.count()
 
-class GameRoundSerializer(serializers.ModelSerializer):
-    question = QuestionSerializer(read_only=True)
-    picker = UserSerializer(read_only=True)
-    answers = GameTurnSerializer(many=True, read_only=True)
+
+class PromptResponseSerializer(serializers.ModelSerializer):
+    author = UserSerializer(read_only=True)
     
     class Meta:
-        model = GameRound
-        fields = ('id', 'session', 'question', 'picker', 'picker_answer', 'answers', 'is_completed', 'created_at')
->>>>>>> main
+        model = PromptResponse
+        fields = ('id', 'session', 'author', 'response', 'created_at')
+        read_only_fields = ('created_at',)
+
+
+class SharedPromptSessionSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    members = UserSerializer(many=True, read_only=True)
+    prompt = JournalPromptSerializer(read_only=True)
+    responses = PromptResponseSerializer(many=True, read_only=True, source='promptresponse_set')
+    members_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SharedPromptSession
+        fields = ('id', 'prompt', 'created_by', 'members', 'members_count', 'title', 'responses', 'created_at', 'updated_at')
+    
+    def get_members_count(self, obj):
+        return obj.members.count()
+
+
+class SharedPromptSessionListSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    prompt = JournalPromptSerializer(read_only=True)
+    members_count = serializers.SerializerMethodField()
+    response_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SharedPromptSession
+        fields = ('id', 'prompt', 'created_by', 'members_count', 'response_count', 'title', 'created_at', 'updated_at')
+    
+    def get_members_count(self, obj):
+        return obj.members.count()
+    
+    def get_response_count(self, obj):
+        return obj.promptresponse_set.count()
