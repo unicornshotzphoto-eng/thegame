@@ -106,6 +106,7 @@ class QuestionCategory(models.Model):
         ('romantic', 'Romantic Knowing (81-100)'),
         ('erotic', 'Desirable Knowing (101-160)'),
         ('creative', 'Creative & Fun (161-200)'),
+        ('general', 'General Knowing (1-40)'),
     ]
     
     category = models.CharField(max_length=20, choices=CATEGORIES, unique=True)
