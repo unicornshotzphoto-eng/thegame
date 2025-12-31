@@ -38,6 +38,7 @@ export const THEME = {
   categories: {
     spiritual: '#9B6B8D',
     mental: '#5B7C99',
+    general: '#6F8CAD',
     physical: '#B85C6F',
     disagreeables: '#D9915E',
     romantic: '#C76B6B',

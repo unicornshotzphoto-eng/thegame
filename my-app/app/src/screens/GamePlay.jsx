@@ -35,10 +35,11 @@ function GamePlay({ route, navigation }) {
     const categories = [
         { id: 'spiritual', label: 'Spiritual', range: '1-20' },
         { id: 'mental', label: 'Mental', range: '21-40' },
+        { id: 'general', label: 'General', range: '1-40' },
         { id: 'physical', label: 'Physical', range: '41-60' },
         { id: 'disagreeables', label: 'Truth Checks', range: '61-80' },
         { id: 'romantic', label: 'Romantic', range: '81-100' },
-        { id: 'erotic', label: 'Erotic', range: '101-160' },
+        { id: 'erotic', label: 'Desirable', range: '101-160' },
         { id: 'creative', label: 'Creative', range: '161-200' },
     ];
 

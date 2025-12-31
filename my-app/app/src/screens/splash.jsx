@@ -92,8 +92,8 @@ const SplashScreen = () => {
               designed for couples and partners of all dynamics. The game
                 blends playful discovery with meaningful connection by
                 inviting players to guess each other’s truths across multiple
-                dimensions: spiritual, mental, physical, romantic, honest, and
-                erotic.
+                dimensions: spiritual, mental, physical, romantic, truth checks,
+                desirable, and general.
             </Text>
             <Text style={styles.text}>
                 The purpose of this game is to strengthen awareness, deepen

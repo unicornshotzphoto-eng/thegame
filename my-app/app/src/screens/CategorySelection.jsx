@@ -31,10 +31,11 @@ function CategorySelection({ navigation, route }) {
   const categories = [
     { id: 'spiritual', label: 'Spiritual Knowing', range: '(1-20)', emoji: '✨' },
     { id: 'mental', label: 'Mental Knowing', range: '(21-40)', emoji: '🧠' },
+    { id: 'general', label: 'General Knowing', range: '(1-40)', emoji: '📘' },
     { id: 'physical', label: 'Physical Knowing', range: '(41-60)', emoji: '💪' },
     { id: 'disagreeables', label: 'Disagreeables & Truth Checks', range: '(61-80)', emoji: '⚡' },
     { id: 'romantic', label: 'Romantic Knowing', range: '(81-100)', emoji: '💕' },
-    { id: 'erotic', label: 'Erotic Knowing', range: '(101-160)', emoji: '🔥' },
+    { id: 'erotic', label: 'Desirable Knowing', range: '(101-160)', emoji: '🔥' },
     { id: 'creative', label: 'Creative & Fun', range: '(161-200)', emoji: '🎨' },
   ];
 
