@@ -104,7 +104,7 @@ class QuestionCategory(models.Model):
         ('physical', 'Physical Knowing (41-60)'),
         ('disagreeables', 'Disagreeables & Truth Checks (61-80)'),
         ('romantic', 'Romantic Knowing (81-100)'),
-        ('erotic', 'Erotic Knowing (101-160)'),
+        ('erotic', 'Desirable Knowing (101-160)'),
         ('creative', 'Creative & Fun (161-200)'),
     ]
     
