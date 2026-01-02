@@ -102,7 +102,7 @@ function Calendar({ navigation }) {
   const loadFriends = async () => {
     try {
       setLoadingFriends(true);
-      const response = await api.get('/quiz/friends/');
+      const response = await api.get('/quiz/direct-messages/friends/');
       setFriends(response.data.friends || []);
       setSelectedFriends([]);
     } catch (error) {

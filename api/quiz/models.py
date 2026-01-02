@@ -267,3 +267,40 @@ class PromptResponse(models.Model):
     
     def __str__(self):
         return f"{self.author.username} - {self.session.prompt.text[:50]}"
+
+
+class Friendship(models.Model):
+    """Tracks friendships between users"""
+    user1 = models.ForeignKey(User, related_name='friendships_initiated', on_delete=models.CASCADE)
+    user2 = models.ForeignKey(User, related_name='friendships_received', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('user1', 'user2')
+        indexes = [
+            models.Index(fields=['user1', 'user2']),
+            models.Index(fields=['user2', 'user1']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user1.username} <-> {self.user2.username}"
+
+
+class DirectMessage(models.Model):
+    """Direct messages between two users"""
+    sender = models.ForeignKey(User, related_name='sent_direct_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, related_name='received_direct_messages', on_delete=models.CASCADE)
+    content = models.TextField(blank=True)
+    image = models.TextField(blank=True, null=True)  # Base64 encoded image
+    created_at = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['sender', 'recipient', 'created_at']),
+            models.Index(fields=['recipient', 'read']),
+        ]
+    
+    def __str__(self):
+        return f"DM from {self.sender.username} to {self.recipient.username}: {self.content[:50]}"

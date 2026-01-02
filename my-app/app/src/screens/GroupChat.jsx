@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { 
     View, 
     Text, 
@@ -21,6 +22,7 @@ import TypingIndicator from '../components/TypingIndicator';
 
 function GroupChat({ route, navigation }) {
     const { groupId, groupName } = route.params;
+    const params = useLocalSearchParams?.() || {};
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -62,6 +64,10 @@ function GroupChat({ route, navigation }) {
                 </TouchableOpacity>
             )
         });
+        // Prefill invite text if provided via route params
+        if (params.prefillText && typeof params.prefillText === 'string') {
+            setInputMessage(params.prefillText);
+        }
         loadMessages();
         
         // Poll for new messages every 3 seconds
@@ -187,11 +193,37 @@ function GroupChat({ route, navigation }) {
 
     const renderMessage = ({ item }) => {
         const isOwn = item.sender.id === user?.id;
+        const inviteMatch = item.content ? item.content.match(/(?:thegame:\/\/)?\/?GamePlay\?sessionId=([^&\s]+)(?:&gameCode=([^\s]+))?/) : null;
+        const hasInvite = !!inviteMatch;
+        const sessionIdFromMsg = inviteMatch ? inviteMatch[1] : null;
+        const gameCodeFromMsg = inviteMatch ? inviteMatch[2] : null;
+
+        const openInvite = () => {
+            if (!sessionIdFromMsg) return;
+            try {
+                if (navigation?.push) {
+                    navigation.push({ pathname: 'GamePlay', params: { sessionId: sessionIdFromMsg, gameCode: gameCodeFromMsg } });
+                } else if (navigation?.navigate) {
+                    navigation.navigate('GamePlay', { sessionId: sessionIdFromMsg, gameCode: gameCodeFromMsg });
+                }
+            } catch (e) {
+                Alert.alert('Error', 'Failed to open game from invite');
+            }
+        };
         
         return (
             <View style={[styles.messageContainer, isOwn ? styles.ownMessage : styles.otherMessage]}>
                 {!isOwn && <Text style={styles.username}>{item.sender.username}</Text>}
-                {item.content ? <Text style={styles.messageText}>{item.content}</Text> : null}
+                {item.content ? (
+                    <View>
+                        <Text style={styles.messageText}>{item.content}</Text>
+                        {hasInvite ? (
+                            <TouchableOpacity style={styles.inviteLinkButton} onPress={openInvite}>
+                                <Text style={styles.inviteLinkText}>Open Game</Text>
+                            </TouchableOpacity>
+                        ) : null}
+                    </View>
+                ) : null}
                 {item.image && (
                     <Image source={{ uri: item.image }} style={styles.messageImage} resizeMode="cover" />
                 )}
@@ -328,6 +360,19 @@ const styles = StyleSheet.create({
         fontSize: 10,
         marginTop: 4,
         alignSelf: 'flex-end',
+    },
+    inviteLinkButton: {
+        marginTop: 6,
+        alignSelf: 'flex-start',
+        backgroundColor: '#1a73e8',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    inviteLinkText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 12,
     },
     imagePreviewContainer: {
         position: 'relative',

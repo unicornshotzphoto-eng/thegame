@@ -4,12 +4,60 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response 
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, QuestionCategorySerializer, GameSessionSerializer, GameSessionListSerializer, PlayerAnswerSerializer
-from .models import User, GameSession, PlayerAnswer, Question, QuestionCategory, JournalPrompt
+from .serializers import UserSerializer, QuestionCategorySerializer, GameSessionSerializer, GameSessionListSerializer, PlayerAnswerSerializer, DirectMessageSerializer, FriendshipSerializer
+from .models import User, GameSession, PlayerAnswer, Question, QuestionCategory, JournalPrompt, Friendship, DirectMessage, PromptResponse, SharedPromptSession
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db.models import Q
+from difflib import SequenceMatcher
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+import re
 
 # Create your views here.
+
+def normalize_answer(text: str) -> str:
+    """Normalize an answer string: lowercase, strip, collapse whitespace, remove punctuation."""
+    if not text:
+        return ''
+    s = str(text).lower().strip()
+    # Replace punctuation (anything not word or whitespace) with space, collapse multiple spaces
+    s = re.sub(r"[^\w\s]", " ", s)
+    s = re.sub(r"\s+", " ", s)
+    return s
+
+def similarity_ratio(a: str, b: str) -> float:
+    """Compute similarity ratio between two normalized strings."""
+    return SequenceMatcher(None, a, b).ratio()
+
+def award_points(submitted: str, canonical: str, max_points: int) -> int:
+    """Award points based on fuzzy similarity to canonical answer.
+    - Full points for strong match (>= 0.85)
+    - Partial points (rounded) for decent match (>= 0.6)
+    - Otherwise 0
+    """
+    if not submitted or not canonical:
+        return 0
+    try:
+        ratio = similarity_ratio(submitted, canonical)
+    except Exception:
+        return 0
+    if ratio >= 0.85:
+        return int(max_points)
+    if ratio >= 0.6:
+        return int(round(max_points * ratio))
+    return 0
+
+def broadcast_game_update(game_id, data: dict):
+    """Broadcast a game update to all websocket clients in the game group."""
+    try:
+        layer = get_channel_layer()
+        async_to_sync(layer.group_send)(
+            f"game_{game_id}",
+            {"type": "game_update", "data": data}
+        )
+    except Exception:
+        # Non-fatal: websocket broadcasting should not break HTTP flow
+        pass
 
 def get_auth_user(user):
     tokens = RefreshToken.for_user(user)
@@ -675,18 +723,40 @@ class GameSessionDetailView(APIView):
         # Get all answers for this session (rounds are tracked by current_round field)
         all_answers = game.answers.all()
         
+        print(f"[DEBUG] Fetching game {game_id}")
+        print(f"[DEBUG] Current question: {game.current_question}")
+        print(f"[DEBUG] Current round: {game.current_round}")
+        print(f"[DEBUG] Total answers in game: {all_answers.count()}")
+        
         # Get current round question and answers
         current_round = None
         if game.current_question:
             current_answers = all_answers.filter(question=game.current_question)
+            print(f"[DEBUG] Answers for current question: {current_answers.count()}")
             current_round = {
                 'id': game.current_round,
                 'question': {
                     'id': game.current_question.id,
-                    'question_text': game.current_question.question_text
+                    'question_text': game.current_question.question_text,
+                    'turnPicker': {
+                        'id': game.category_picker.id if game.category_picker else None,
+                        'username': game.category_picker.username if game.category_picker else None
+                    }
                 },
                 'answers': list(PlayerAnswerSerializer(current_answers, many=True).data)
             }
+        else:
+            print(f"[DEBUG] No current question! Looking for most recent round answers...")
+            # If current_question is None, the round may have just been marked complete
+            # Try to get answers from the most recent round for the current_turn_user
+            # For now, return empty for debugging
+            current_round = {
+                'id': game.current_round,
+                'question': None,
+                'answers': []
+            }
+        
+        print(f"[DEBUG] Returning current_round with {len(current_round.get('answers', []))} answers")
         
         # Return structured response
         return Response({
@@ -720,8 +790,24 @@ class StartGameRoundView(APIView):
             return Response({'error': 'Game not found or access denied'}, status=404)
         
         # Only current turn user can start round
+        print(f"[DEBUG StartGameRound] Checking turn permission:")
+        print(f"[DEBUG] game.current_turn_user: {game.current_turn_user} (type={type(game.current_turn_user)})")
+        if game.current_turn_user:
+            print(f"[DEBUG] current_turn_user id={game.current_turn_user.id}, username={game.current_turn_user.username}")
+        else:
+            print(f"[DEBUG] WARNING: current_turn_user is None! Defaulting to creator")
+            game.current_turn_user = game.creator
+            game.save()
+        
+        print(f"[DEBUG] request.user: {request.user} (id={request.user.id}, username={request.user.username})")
+        print(f"[DEBUG] game.creator: {game.creator} (id={game.creator.id}, username={game.creator.username})")
+        print(f"[DEBUG] Are they equal? {game.current_turn_user == request.user}")
+        
         if game.current_turn_user != request.user:
+            print(f"[DEBUG] DENIED: User {request.user.username} is not current turn user {game.current_turn_user.username}")
             return Response({'error': 'Only the current player can pick a category'}, status=403)
+        
+        print(f"[DEBUG] ALLOWED: User is current turn user")
         
         category_name = request.data.get('category')
         if not category_name:
@@ -739,9 +825,12 @@ class StartGameRoundView(APIView):
             return Response({'error': 'No questions in this category'}, status=404)
         
         question = random.choice(questions)
+        # Set up round state
         game.current_question = question
         game.current_round += 1
         game.status = 'in_progress'
+        # Ensure the category picker is the current turn user for this round
+        game.category_picker = game.current_turn_user
         game.save()
         
         # Return structured response matching GameSessionDetailView format
@@ -762,6 +851,19 @@ class StartGameRoundView(APIView):
                 'answers': list(PlayerAnswerSerializer(current_answers, many=True).data)
             }
         
+        # Broadcast round start to websocket clients
+        broadcast_game_update(game.id, {
+            'type': 'round_started',
+            'game_id': game.id,
+            'round_id': game.current_round,
+            'question': {
+                'id': game.current_question.id,
+                'text': game.current_question.question_text,
+                'points': game.current_question.points,
+            },
+            'picker': game.category_picker.username if game.category_picker else None,
+        })
+
         return Response({
             'session': game_data,
             'rounds': [{'round': game.current_round, 'question': game.current_question.question_text if game.current_question else None}],
@@ -774,41 +876,166 @@ class SubmitAnswerView(APIView):
     
     def post(self, request, game_id):
         """Player submits an answer to the current question"""
+        import time
+        request_time = time.time()
+        print(f"\n[DEBUG SubmitAnswerView] ===== REQUEST RECEIVED at {request_time} =====")
+        print(f"[DEBUG SubmitAnswerView] Request received from {request.user.username}")
+        print(f"[DEBUG] Game ID: {game_id}")
+        print(f"[DEBUG] Request data: {request.data}")
+        
         try:
             game = GameSession.objects.get(id=game_id)
+            print(f"[DEBUG] Game found: ID={game.id}, Current question: {game.current_question}")
             if request.user not in game.players.all():
-                return Response({'error': 'Game not found or access denied'}, status=404)
+                print(f"[DEBUG] ERROR: User {request.user.username} not in players: {[p.username for p in game.players.all()]}")
+                return Response({'error': 'Game not found or access denied. You are not a player in this game.'}, status=404)
         except GameSession.DoesNotExist:
-            return Response({'error': 'Game not found or access denied'}, status=404)
+            print(f"[DEBUG] ERROR: Game {game_id} not found")
+            return Response({'error': 'Game not found or access denied. Invalid game ID.'}, status=404)
         
         if not game.current_question:
+            print(f"[DEBUG] ERROR: No current question in game {game.id}")
             return Response({'error': 'No current question'}, status=400)
         
         answer_text = request.data.get('answer')
         if not answer_text:
+            print(f"[DEBUG] ERROR: No answer text provided")
             return Response({'error': 'Answer is required'}, status=400)
         
+        print(f"[DEBUG] SubmitAnswer: Player {request.user.username} submitting answer '{answer_text}' to Q{game.current_question.id}")
+        print(f"[DEBUG] Game ID: {game.id}, Round: {game.current_round}, Current Question ID: {game.current_question.id}")
+        
         # Check if player already answered this question
-        existing_answer = PlayerAnswer.objects.filter(
+        player_answer, created = PlayerAnswer.objects.get_or_create(
             game_session=game,
             player=request.user,
+            question=game.current_question,
+            defaults={'answer_text': answer_text}
+        )
+        
+        print(f"[DEBUG] PlayerAnswer object: ID={player_answer.id}, Created={created}")
+        print(f"[DEBUG] Player: {player_answer.player.username}, Question: {player_answer.question.id}, Answer: {player_answer.answer_text}")
+
+        if not created:
+            print(f"[DEBUG] Answer already existed, updating...")
+            player_answer.answer_text = answer_text
+            # Reset points for re-submission; will be recomputed below
+            player_answer.points_awarded = 0
+            player_answer.save()
+
+        print(f"[DEBUG] Answer saved. Created: {created}, Answer ID: {player_answer.id}")
+        
+        # IMMEDIATELY re-check the count after saving
+        all_answers_for_question = PlayerAnswer.objects.filter(
+            game_session=game,
             question=game.current_question
-        ).first()
-        
-        if existing_answer:
-            # Update existing answer
-            existing_answer.answer_text = answer_text
-            existing_answer.save()
-        else:
-            # Create new answer
-            player_answer = PlayerAnswer.objects.create(
+        )
+        print(f"[DEBUG] RE-CHECK: Total PlayerAnswer records for this question: {all_answers_for_question.count()}")
+        for pa in all_answers_for_question:
+            print(f"[DEBUG]   - Player: {pa.player.username}, Answer: {pa.answer_text[:30]}, ID: {pa.id}")
+
+        points_earned = 0
+
+        # Determine canonical answer: category picker defines the round's correct answer
+        try:
+            picker = game.category_picker or game.current_turn_user
+        except Exception:
+            picker = game.current_turn_user
+
+        canonical_answer = None
+        if picker:
+            canonical = PlayerAnswer.objects.filter(
                 game_session=game,
-                player=request.user,
-                question=game.current_question,
-                answer_text=answer_text
-            )
+                player=picker,
+                question=game.current_question
+            ).first()
+            if canonical:
+                canonical_answer = normalize_answer(canonical.answer_text)
+
+        submitted_answer_norm = normalize_answer(player_answer.answer_text)
+
+        # If the submitting player is the picker, set/refresh canonical and recompute others' points
+        if picker and request.user == picker:
+            canonical_answer = submitted_answer_norm
+            # Update points for all other players who already answered (fuzzy)
+            others = PlayerAnswer.objects.filter(
+                game_session=game,
+                question=game.current_question
+            ).exclude(player=picker)
+            for ans in others:
+                ans.points_awarded = award_points(
+                    normalize_answer(ans.answer_text),
+                    canonical_answer,
+                    game.current_question.points
+                )
+                ans.save()
+            # Picker does not earn points for defining the answer
+            player_answer.points_awarded = 0
+            player_answer.save()
+        else:
+            # Non-picker submissions earn points based on fuzzy similarity to canonical
+            if canonical_answer is not None and submitted_answer_norm:
+                points_earned = award_points(submitted_answer_norm, canonical_answer, game.current_question.points)
+                player_answer.points_awarded = points_earned
+                player_answer.save()
+
+        # Round completion metrics
+        total_players = game.players.count()
+        answered_count = PlayerAnswer.objects.filter(
+            game_session=game,
+            question=game.current_question
+        ).count()
+        round_completed = answered_count >= total_players if total_players > 0 else False
         
-        return Response({'message': 'Answer submitted'}, status=201)
+        print(f"[DEBUG] Round metrics: {answered_count}/{total_players} answered")
+        print(f"[DEBUG] Round completed: {round_completed}")
+
+        # Broadcast answer submission
+        broadcast_game_update(game.id, {
+            'type': 'answer_submitted',
+            'game_id': game.id,
+            'round_id': game.current_round,
+            'player': request.user.username,
+            'answered_count': answered_count,
+            'total_players': total_players,
+            'points_earned': points_earned,
+        })
+
+        # If round completed, broadcast completion
+        if round_completed:
+            print(f"[DEBUG] Round is complete! Answers: {answered_count}/{total_players}")
+            print(f"[DEBUG] NOT clearing current_question yet - let frontend fetch all answers first")
+            # NOTE: We do NOT clear current_question here anymore!
+            # The frontend needs to fetch answers while current_question is still set
+            # NextRoundView will clear it when actually advancing to next round
+
+            # Compute latest scores to include in broadcast
+            from .serializers import GameSessionSerializer
+            scores = GameSessionSerializer(game).data.get('player_scores', {})
+
+            broadcast_game_update(game.id, {
+                'type': 'round_completed',
+                'game_id': game.id,
+                'round_id': game.current_round,
+                'scores': scores,
+            })
+
+        # Include updated scores in the response for immediate UI refresh
+        from .serializers import GameSessionSerializer
+        response_scores = GameSessionSerializer(game).data.get('player_scores', {})
+
+        print(f"[DEBUG SubmitAnswerView] ===== SENDING RESPONSE at {time.time()} =====")
+        print(f"[DEBUG] answered_count in response: {answered_count}, total_players: {total_players}")
+        print(f"[DEBUG] Response: message='Answer submitted', points={points_earned}, answered={answered_count}/{total_players}")
+
+        return Response({
+            'message': 'Answer submitted',
+            'points_earned': points_earned,
+            'answered_count': answered_count,
+            'total_players': total_players,
+            'round_completed': round_completed,
+            'scores': response_scores,
+        }, status=200)
 
 
 class GetAnswersView(APIView):
@@ -849,22 +1076,44 @@ class NextRoundView(APIView):
         if game.creator != request.user:
             return Response({'error': 'Only the game creator can advance to next round'}, status=403)
         
+        print(f"\n[DEBUG] NextRound: Creator {request.user.username} advancing to next round")
+        print(f"[DEBUG] Current round: {game.current_round}, Current question: {game.current_question.id if game.current_question else None}")
+        
         # Get list of players and find next picker
         players = list(game.players.all())
         current_index = players.index(game.category_picker) if game.category_picker in players else -1
         next_index = (current_index + 1) % len(players)
         
         game.category_picker = players[next_index]
+        # Align current_turn_user with the new picker
+        game.current_turn_user = players[next_index]
+        
+        # NOW we can clear the old question
         game.current_question = None
+        
+        # Increment round counter
+        game.current_round += 1
+        
+        print(f"[DEBUG] Advanced to round {game.current_round}")
+        print(f"[DEBUG] Next picker: {game.category_picker.username}")
         
         # Check if game should end (after all players have picked once per round)
         max_rounds = 3  # Configurable
-        if game.current_round >= max_rounds * len(players):
+        if game.current_round > max_rounds * len(players):
             game.status = 'completed'
+            print(f"[DEBUG] Game completed! Max rounds ({max_rounds * len(players)}) reached")
         
         game.save()
         
         serializer = GameSessionSerializer(game)
+
+        broadcast_game_update(game.id, {
+            'type': 'next_round',
+            'game_id': game.id,
+            'current_round': game.current_round,
+            'next_picker': game.category_picker.username if game.category_picker else None,
+        })
+
         return Response(serializer.data)
 
 
@@ -886,6 +1135,13 @@ class EndGameView(APIView):
         game.save()
         
         serializer = GameSessionSerializer(game)
+
+        broadcast_game_update(game.id, {
+            'type': 'game_ended',
+            'game_id': game.id,
+            'scores': serializer.data.get('player_scores', {}),
+        })
+
         return Response(serializer.data)
 
 
@@ -971,6 +1227,12 @@ class CreateGameSessionView(APIView):
             session.category_picker = request.user
             session.current_turn_user = request.user
             session.save()
+            
+            print(f"[DEBUG CreateGame] Game created:")
+            print(f"[DEBUG] Code: {session.game_code}")
+            print(f"[DEBUG] Creator: {session.creator.username} (id={session.creator.id})")
+            print(f"[DEBUG] Current turn user: {session.current_turn_user.username} (id={session.current_turn_user.id})")
+            print(f"[DEBUG] Category picker: {session.category_picker.username} (id={session.category_picker.id})")
             
             serializer = GameSessionSerializer(session)
             return Response(serializer.data, status=201)
@@ -1550,3 +1812,172 @@ class PromptResponseListCreateView(APIView):
             return Response(serializer.data, status=201 if created else 200)
         except SharedPromptSession.DoesNotExist:
             return Response({'error': 'Session not found'}, status=404)
+
+
+class AddFriendView(APIView):
+    """Add or create a friendship between two users"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            friend_id = request.data.get('friend_id')
+            if not friend_id:
+                return Response({'error': 'friend_id required'}, status=400)
+            
+            friend = User.objects.get(id=friend_id)
+            
+            # Prevent self-friendship
+            if friend.id == request.user.id:
+                return Response({'error': 'Cannot add yourself as a friend'}, status=400)
+            
+            # Create friendship (bidirectional)
+            friendship1, created1 = Friendship.objects.get_or_create(
+                user1_id=min(request.user.id, friend.id),
+                user2_id=max(request.user.id, friend.id)
+            )
+            
+            if created1:
+                return Response({
+                    'status': 'Friend added',
+                    'friendship_id': friendship1.id
+                }, status=201)
+            else:
+                return Response({
+                    'status': 'Already friends',
+                    'friendship_id': friendship1.id
+                }, status=200)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=404)
+
+
+class RemoveFriendView(APIView):
+    """Remove friendship between two users"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            friend_id = request.data.get('friend_id')
+            if not friend_id:
+                return Response({'error': 'friend_id required'}, status=400)
+            
+            # Delete friendship (works because we store bidirectional with min/max)
+            Friendship.objects.filter(
+                user1_id=min(request.user.id, friend_id),
+                user2_id=max(request.user.id, friend_id)
+            ).delete()
+            
+            return Response({'status': 'Friend removed'}, status=200)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+
+class ListFriendsView(APIView):
+    """List all friends of the current user"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            # Get all friendships where current user is involved
+            friendships = Friendship.objects.filter(
+                Q(user1=request.user) | Q(user2=request.user)
+            )
+            
+            # Extract the other user from each friendship
+            friends = []
+            for friendship in friendships:
+                other_user = friendship.user2 if friendship.user1 == request.user else friendship.user1
+                friends.append(UserSerializer(other_user).data)
+            
+            return Response({'friends': friends}, status=200)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+
+class SendDirectMessageView(APIView):
+    """Send a direct message to another user"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            recipient_id = request.data.get('recipient_id')
+            content = request.data.get('content', '')
+            image = request.data.get('image', None)
+            
+            if not recipient_id:
+                return Response({'error': 'recipient_id required'}, status=400)
+            
+            if not content and not image:
+                return Response({'error': 'content or image required'}, status=400)
+            
+            recipient = User.objects.get(id=recipient_id)
+            
+            # Check if users are friends
+            friendship = Friendship.objects.filter(
+                user1_id=min(request.user.id, recipient.id),
+                user2_id=max(request.user.id, recipient.id)
+            ).exists()
+            
+            if not friendship:
+                return Response({'error': 'You must be friends to send messages'}, status=403)
+            
+            # Create message
+            message = DirectMessage.objects.create(
+                sender=request.user,
+                recipient=recipient,
+                content=content,
+                image=image
+            )
+            
+            # Broadcast via WebSocket if available
+            try:
+                channel_layer = get_channel_layer()
+                room_name = f"dm_{min(request.user.id, recipient.id)}_{max(request.user.id, recipient.id)}"
+                async_to_sync(channel_layer.group_send)(
+                    room_name,
+                    {
+                        'type': 'direct_message',
+                        'sender_id': request.user.id,
+                        'sender_username': request.user.username,
+                        'content': content,
+                        'image': image,
+                        'timestamp': message.created_at.isoformat()
+                    }
+                )
+            except Exception as e:
+                print(f"WebSocket broadcast failed: {e}")
+            
+            serializer = DirectMessageSerializer(message)
+            return Response(serializer.data, status=201)
+        except User.DoesNotExist:
+            return Response({'error': 'Recipient not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+
+class GetDirectMessagesView(APIView):
+    """Retrieve direct messages between current user and another user"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_id):
+        try:
+            other_user = User.objects.get(id=user_id)
+            
+            # Get all messages between the two users
+            messages = DirectMessage.objects.filter(
+                Q(sender=request.user, recipient=other_user) |
+                Q(sender=other_user, recipient=request.user)
+            ).order_by('created_at')
+            
+            # Mark received messages as read
+            DirectMessage.objects.filter(
+                sender=other_user,
+                recipient=request.user,
+                read=False
+            ).update(read=True)
+            
+            serializer = DirectMessageSerializer(messages, many=True)
+            return Response({'messages': serializer.data}, status=200)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)

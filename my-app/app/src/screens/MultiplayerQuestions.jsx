@@ -15,10 +15,12 @@ import {
 } from 'react-native';
 import api from '../core/api';
 import { THEME } from '../constants/appTheme';
+import useStore from '../core/global';
 
 const CATEGORY_COLORS = THEME.categories;
 
 const MultiplayerQuestions = ({ navigation }) => {
+  const user = useStore((state) => state.user);
   const [screen, setScreen] = useState('friendSelect'); // friendSelect, lobby, game, answers
   const [friends, setFriends] = useState([]);
   const [selectedFriends, setSelectedFriends] = useState([]);
@@ -28,7 +30,7 @@ const MultiplayerQuestions = ({ navigation }) => {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [userAnswer, setUserAnswer] = useState('');
   const [answers, setAnswers] = useState([]);
-  const [currentPlayer, setCurrentPlayer] = useState(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [gameStats, setGameStats] = useState({});
 
@@ -38,10 +40,52 @@ const MultiplayerQuestions = ({ navigation }) => {
     loadCategories();
   }, []);
 
+  // Poll game session when in lobby to detect when question is ready
+  useEffect(() => {
+    if (screen === 'lobby' && gameSession) {
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await api.get(`/quiz/games/${gameSession.id}/`);
+          // Backend returns { session, rounds, current_round, scores }
+          const updatedGame = response.data.session || response.data;
+          
+          // If a question is now available, move to game screen
+          if (updatedGame.current_question && !gameSession.current_question) {
+            setGameSession(updatedGame);
+            setScreen('game');
+          } else if (updatedGame) {
+            // Keep game session updated even if still in lobby
+            setGameSession(updatedGame);
+          }
+        } catch (error) {
+          console.error('Error polling game session:', error);
+        }
+      }, 1000); // Poll every second
+      
+      return () => clearInterval(pollInterval);
+    }
+  }, [screen, gameSession]);
+
+  // Poll answers when on answers screen to detect when all players have answered
+  useEffect(() => {
+    if (screen === 'answers' && gameSession) {
+      const pollInterval = setInterval(async () => {
+        try {
+          const response = await api.get(`/quiz/games/${gameSession.id}/answers/`);
+          setAnswers(response.data.answers || []);
+        } catch (error) {
+          console.error('Error polling answers:', error);
+        }
+      }, 1000); // Poll every second
+      
+      return () => clearInterval(pollInterval);
+    }
+  }, [screen, gameSession]);
+
   const loadFriends = async () => {
     try {
       setLoadingFriends(true);
-      const response = await api.get('/quiz/friends/');
+      const response = await api.get('/quiz/direct-messages/friends/');
       setFriends(response.data.friends || []);
     } catch (error) {
       console.error('Error loading friends:', error);
@@ -83,7 +127,6 @@ const MultiplayerQuestions = ({ navigation }) => {
         friend_ids: selectedFriends.map(f => f.id),
       });
       setGameSession(response.data);
-      setCurrentPlayer(response.data.category_picker);
       setScreen('lobby');
     } catch (error) {
       console.error('Error creating game:', error);
@@ -99,7 +142,9 @@ const MultiplayerQuestions = ({ navigation }) => {
       const response = await api.post(`/quiz/games/${gameSession.id}/start-round/`, {
         category: category.category,
       });
-      setGameSession(response.data);
+      // Extract the game session from the response (backend returns { session, rounds, current_round, scores })
+      const updatedGame = response.data.session || response.data;
+      setGameSession(updatedGame);
       setUserAnswer('');
       setScreen('game');
     } catch (error) {
@@ -148,7 +193,6 @@ const MultiplayerQuestions = ({ navigation }) => {
       setIsSubmitting(true);
       const response = await api.post(`/quiz/games/${gameSession.id}/next-round/`);
       setGameSession(response.data);
-      setCurrentPlayer(response.data.category_picker);
       setAnswers([]);
       setScreen('lobby');
     } catch (error) {
@@ -253,7 +297,7 @@ const MultiplayerQuestions = ({ navigation }) => {
 
   // Game Lobby - Wait for category picker
   if (screen === 'lobby' && gameSession) {
-    const isMyTurn = currentPlayer?.id === (gameSession.category_picker?.id || gameSession.players[0].id);
+    const isMyTurn = gameSession.category_picker?.id === user?.id;
 
     return (
       <SafeAreaView style={styles.container}>
@@ -267,7 +311,7 @@ const MultiplayerQuestions = ({ navigation }) => {
               key={player.id}
               style={[
                 styles.playerCard,
-                currentPlayer?.id === player.id && styles.playerCardActive,
+                gameSession.category_picker?.id === player.id && styles.playerCardActive,
               ]}
             >
               {player.thumbnail && (
@@ -279,7 +323,7 @@ const MultiplayerQuestions = ({ navigation }) => {
                   Score: {gameSession.player_scores?.[player.username] || 0}
                 </Text>
               </View>
-              {currentPlayer?.id === player.id && (
+              {gameSession.category_picker?.id === player.id && (
                 <Text style={styles.pickerBadge}>Picking</Text>
               )}
             </View>
@@ -312,7 +356,7 @@ const MultiplayerQuestions = ({ navigation }) => {
           <View style={styles.waitingContainer}>
             <ActivityIndicator size="large" color="#0000ff" />
             <Text style={styles.waitingText}>
-              Waiting for {currentPlayer?.username} to pick a category...
+              Waiting for {gameSession.category_picker?.username} to pick a category...
             </Text>
           </View>
         )}
@@ -377,6 +421,9 @@ const MultiplayerQuestions = ({ navigation }) => {
 
   // Answers Screen - View all answers
   if (screen === 'answers') {
+    // Check if all players have answered
+    const allPlayersAnswered = gameSession && answers.length === gameSession.players.length;
+    
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.title}>All Answers</Text>
@@ -390,7 +437,7 @@ const MultiplayerQuestions = ({ navigation }) => {
           </View>
         )}
 
-        <Text style={styles.sectionTitle}>Players' Answers</Text>
+        <Text style={styles.sectionTitle}>Players' Answers ({answers.length}/{gameSession?.players.length})</Text>
         <ScrollView style={styles.answersList}>
           {answers.map((answer, index) => (
             <View key={answer.id} style={styles.answerCard}>
@@ -408,13 +455,24 @@ const MultiplayerQuestions = ({ navigation }) => {
           ))}
         </ScrollView>
 
+        {!allPlayersAnswered && (
+          <View style={styles.waitingContainer}>
+            <ActivityIndicator size="large" color="#0000ff" />
+            <Text style={styles.waitingText}>
+              Waiting for other players to answer... ({answers.length}/{gameSession?.players.length})
+            </Text>
+          </View>
+        )}
+
         <TouchableOpacity
-          style={[styles.nextButton, isSubmitting && styles.buttonDisabled]}
+          style={[styles.nextButton, (isSubmitting || !allPlayersAnswered) && styles.buttonDisabled]}
           onPress={nextRound}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !allPlayersAnswered}
         >
           {isSubmitting ? (
             <ActivityIndicator size="small" color="#fff" />
+          ) : !allPlayersAnswered ? (
+            <Text style={styles.buttonText}>Waiting for other players...</Text>
           ) : (
             <Text style={styles.buttonText}>Next Round</Text>
           )}

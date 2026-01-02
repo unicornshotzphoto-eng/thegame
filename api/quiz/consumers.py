@@ -108,6 +108,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'username': username,
         }))
 
+    async def direct_message(self, event):
+        """
+        Receive direct message from room group and send to WebSocket
+        """
+        sender_id = event.get('sender_id')
+        sender_username = event.get('sender_username')
+        content = event.get('content', '')
+        image = event.get('image', None)
+        timestamp = event.get('timestamp', None)
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps({
+            'type': 'direct_message',
+            'sender_id': sender_id,
+            'sender_username': sender_username,
+            'content': content,
+            'image': image,
+            'timestamp': timestamp,
+        }))
+
 
 class GameConsumer(AsyncWebsocketConsumer):
     """

@@ -14,6 +14,7 @@ const KEYS = {
   AUTH_TOKEN: 'secure_auth_token',
   USER_CREDENTIALS: 'secure_user_credentials',
   INITIATED: 'app_initiated', // Non-sensitive, can use regular storage
+  CURRENT_GAME_SESSION: 'current_game_session', // Store active game session for rejoin
 };
 
 // Check if SecureStore is available (not available on web)
@@ -179,6 +180,67 @@ export const removeSecureItem = async (key) => {
   }
 };
 
+/**
+ * Store current game session for rejoin capability
+ * @param {Object} sessionData - Contains sessionId and gameCode
+ */
+export const storeCurrentGameSession = async (sessionData) => {
+  try {
+    const dataString = JSON.stringify(sessionData);
+    if (isSecureStoreAvailable) {
+      await SecureStore.setItemAsync(KEYS.CURRENT_GAME_SESSION, dataString);
+    } else {
+      await AsyncStorage.setItem(KEYS.CURRENT_GAME_SESSION, dataString);
+    }
+    console.log('[Storage] Current game session stored');
+    return true;
+  } catch (error) {
+    console.error('[Storage] Error storing game session:', error);
+    return false;
+  }
+};
+
+/**
+ * Retrieve current game session
+ * @returns {Object|null} Session data or null if not found
+ */
+export const getCurrentGameSession = async () => {
+  try {
+    let sessionData;
+    if (isSecureStoreAvailable) {
+      sessionData = await SecureStore.getItemAsync(KEYS.CURRENT_GAME_SESSION);
+    } else {
+      sessionData = await AsyncStorage.getItem(KEYS.CURRENT_GAME_SESSION);
+    }
+    if (sessionData) {
+      console.log('[Storage] Current game session retrieved');
+      return JSON.parse(sessionData);
+    }
+    return null;
+  } catch (error) {
+    console.error('[Storage] Error retrieving game session:', error);
+    return null;
+  }
+};
+
+/**
+ * Clear current game session
+ */
+export const clearCurrentGameSession = async () => {
+  try {
+    if (isSecureStoreAvailable) {
+      await SecureStore.deleteItemAsync(KEYS.CURRENT_GAME_SESSION);
+    } else {
+      await AsyncStorage.removeItem(KEYS.CURRENT_GAME_SESSION);
+    }
+    console.log('[Storage] Current game session cleared');
+    return true;
+  } catch (error) {
+    console.error('[Storage] Error clearing game session:', error);
+    return false;
+  }
+};
+
 export default {
   storeUserData,
   getUserData,
@@ -188,5 +250,8 @@ export default {
   getCredentials,
   clearSecureStorage,
   removeSecureItem,
+  storeCurrentGameSession,
+  getCurrentGameSession,
+  clearCurrentGameSession,
   KEYS,
 };

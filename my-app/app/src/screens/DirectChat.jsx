@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { 
     View, 
     Text, 
@@ -15,11 +16,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { ChatWebSocket } from '../core/websocket';
+import api from '../core/api';
 import useStore from '../core/global';
 import TypingIndicator from '../components/TypingIndicator';
 
 function DirectChat({ route, navigation }) {
-    const { friendId, friendName, friendThumbnail } = route.params;
+    const params = useLocalSearchParams();
+    const friendId = parseInt(params.friendId) || route?.params?.friendId;
+    const friendName = params.friendName || route?.params?.friendName;
+    const friendThumbnail = params.friendThumbnail || route?.params?.friendThumbnail;
+    
+    console.log('[DirectChat] Component mounted with params:', { friendId, friendName, friendThumbnail, urlParams: params });
+    
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
@@ -37,7 +45,14 @@ function DirectChat({ route, navigation }) {
     const roomName = `dm_${Math.min(user?.id, friendId)}_${Math.max(user?.id, friendId)}`;
 
     useEffect(() => {
-        navigation.setOptions({ title: friendName });
+        // Set title if navigation.setOptions is available
+        if (navigation?.setOptions) {
+            navigation.setOptions({ title: friendName });
+        }
+        // Prefill invite text if provided via route params
+        if (params.prefillText && typeof params.prefillText === 'string') {
+            setInputMessage(params.prefillText);
+        }
         
         // Initialize WebSocket connection
         wsRef.current = new ChatWebSocket(roomName);
@@ -65,6 +80,27 @@ function DirectChat({ route, navigation }) {
                 image: data.image,
                 timestamp: data.timestamp ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 isOwn: data.username === username,
+            };
+            setMessages(prev => [...prev, newMessage]);
+            
+            // Scroll to bottom after new message
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd();
+            }, 100);
+        });
+
+        // Listen for direct messages from WebSocket
+        wsRef.current.on('direct_message', (data) => {
+            console.log('[DirectChat] Received direct_message via WebSocket:', data);
+            const newMessage = {
+                id: Date.now().toString() + Math.random(),
+                username: data.sender_username,
+                message: data.content,
+                image: data.image,
+                timestamp: new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isOwn: data.sender_username === username,
+                sender: { username: data.sender_username },
+                recipient: { username: friendName },
             };
             setMessages(prev => [...prev, newMessage]);
             
@@ -158,12 +194,7 @@ function DirectChat({ route, navigation }) {
         }
     };
 
-    const sendMessage = () => {
-        if (!wsRef.current || !wsRef.current.isConnected()) {
-            Alert.alert('Not Connected', 'Please wait for connection to establish');
-            return;
-        }
-
+    const sendMessage = async () => {
         if (!inputMessage.trim() && !selectedImage) {
             return;
         }
@@ -175,41 +206,128 @@ function DirectChat({ route, navigation }) {
                 clearTimeout(typingTimeoutRef.current);
             }
 
-            if (selectedImage) {
-                setIsUploading(true);
-                wsRef.current.sendMessage(inputMessage.trim(), username, selectedImage);
-                setSelectedImage(null);
-                setInputMessage('');
-                setIsUploading(false);
-            } else if (inputMessage.trim()) {
-                wsRef.current.sendMessage(inputMessage.trim(), username);
-                setInputMessage('');
-            }
+            console.log('[DirectChat] Sending message to friend:', friendId);
+            setIsUploading(true);
+            
+            // Send message via API to ensure it's persisted
+            await api.post('/quiz/direct-messages/send/', {
+                recipient_id: friendId,
+                content: inputMessage.trim(),
+                image: selectedImage
+            });
+
+            console.log('[DirectChat] Message sent successfully');
+            
+            // Add message to local state immediately for UI feedback
+            const newMessage = {
+                id: Date.now().toString() + Math.random(),
+                username: username,
+                message: inputMessage.trim(),
+                image: selectedImage,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isOwn: true,
+                sender: { username: username },
+                recipient: { username: friendName },
+            };
+            setMessages(prev => [...prev, newMessage]);
+            
+            // Scroll to bottom
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd();
+            }, 100);
+            
+            setSelectedImage(null);
+            setInputMessage('');
         } catch (error) {
-            console.error('Send message error:', error);
+            console.error('[DirectChat] Send message error:', error);
             Alert.alert('Error', 'Failed to send message');
+        } finally {
             setIsUploading(false);
         }
     };
 
-    const renderMessage = ({ item }) => (
-        <View style={[
-            styles.messageContainer,
-            item.isOwn ? styles.ownMessage : styles.otherMessage
-        ]}>
-            {item.image && (
-                <Image 
-                    source={{ uri: item.image }} 
-                    style={styles.messageImage}
-                    resizeMode="cover"
-                />
-            )}
-            {item.message ? (
-                <Text style={styles.messageText}>{item.message}</Text>
-            ) : null}
-            <Text style={styles.timestamp}>{item.timestamp}</Text>
-        </View>
-    );
+    // Load message history when component mounts
+    useEffect(() => {
+        const loadMessages = async () => {
+            try {
+                console.log('[DirectChat] Loading message history with friend:', friendId);
+                const response = await api.get(`/quiz/direct-messages/${friendId}/`);
+                console.log('[DirectChat] Loaded messages:', response.data.messages);
+                
+                const formattedMessages = response.data.messages.map(msg => ({
+                    id: msg.id.toString(),
+                    username: msg.sender.username,
+                    message: msg.content,
+                    image: msg.image,
+                    timestamp: new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isOwn: msg.sender.username === username,
+                    sender: msg.sender,
+                    recipient: msg.recipient,
+                }));
+                
+                setMessages(formattedMessages);
+                setTimeout(() => {
+                    flatListRef.current?.scrollToEnd();
+                }, 100);
+            } catch (error) {
+                console.error('[DirectChat] Load messages error:', error);
+            }
+        };
+
+        loadMessages();
+    }, [friendId, username]);
+
+    const renderMessage = ({ item }) => {
+        const inviteMatch = item.message ? item.message.match(/(?:thegame:\/\/)?\/?GamePlay\?sessionId=([^&\s]+)(?:&gameCode=([^\s]+))?/) : null;
+        const hasInvite = !!inviteMatch;
+        const sessionIdFromMsg = inviteMatch ? inviteMatch[1] : null;
+        const gameCodeFromMsg = inviteMatch ? inviteMatch[2] : null;
+
+        const openInvite = () => {
+            if (!sessionIdFromMsg) return;
+            try {
+                if (navigation?.push) {
+                    navigation.push({ pathname: 'GamePlay', params: { sessionId: sessionIdFromMsg, gameCode: gameCodeFromMsg } });
+                } else if (navigation?.navigate) {
+                    navigation.navigate('GamePlay', { sessionId: sessionIdFromMsg, gameCode: gameCodeFromMsg });
+                }
+            } catch (e) {
+                Alert.alert('Error', 'Failed to open game from invite');
+            }
+        };
+
+        return (
+            <View style={[
+                styles.messageContainer,
+                item.isOwn ? styles.ownMessage : styles.otherMessage
+            ]}>
+                {item.image && (
+                    <Image 
+                        source={{ uri: item.image }} 
+                        style={styles.messageImage}
+                        resizeMode="cover"
+                    />
+                )}
+                {item.message ? (
+                    <View>
+                        <Text style={styles.messageText}>{item.message}</Text>
+                        {hasInvite ? (
+                            <TouchableOpacity style={styles.inviteLinkButton} onPress={openInvite}>
+                                <Text style={styles.inviteLinkText}>Open Game</Text>
+                            </TouchableOpacity>
+                        ) : null}
+                    </View>
+                ) : null}
+                <Text style={styles.timestamp}>{item.timestamp}</Text>
+                {/* Show sender/recipient info to clarify message visibility */}
+                {item.sender && item.recipient && (
+                    <Text style={styles.visibilityText}>
+                        {item.sender.username} → {item.recipient.username}
+                    </Text>
+                )}
+            </View>
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -344,6 +462,25 @@ const styles = StyleSheet.create({
         fontSize: 10,
         marginTop: 4,
         alignSelf: 'flex-end',
+    },
+    visibilityText: {
+        color: '#666',
+        fontSize: 10,
+        marginTop: 2,
+        marginBottom: 8,
+    },
+    inviteLinkButton: {
+        marginTop: 6,
+        alignSelf: 'flex-start',
+        backgroundColor: '#1a73e8',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    inviteLinkText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 12,
     },
     imagePreviewContainer: {
         position: 'relative',

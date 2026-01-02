@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,13 +7,58 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { THEME } from '../constants/appTheme';
+import { getCurrentGameSession, clearCurrentGameSession } from '../core/secureStorage';
 
 const { width, height } = Dimensions.get('window');
 
 function Home({ navigation }) {
   const router = useRouter();
+  const [savedSession, setSavedSession] = useState(null);
+  
+  // Check for saved game session when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const checkSavedSession = async () => {
+        try {
+          const session = await getCurrentGameSession();
+          if (session?.sessionId) {
+            console.log('[Home] Found saved game session:', session.sessionId);
+            setSavedSession(session);
+          } else {
+            setSavedSession(null);
+          }
+        } catch (error) {
+          console.error('[Home] Error loading saved session:', error);
+          setSavedSession(null);
+        }
+      };
+      
+      checkSavedSession();
+    }, [])
+  );
+  
+  const handleResumeGame = async () => {
+    if (savedSession?.sessionId) {
+      console.log('[Home] Resuming game:', savedSession.sessionId);
+      router.push({
+        pathname: '/(tabs)/GamePlay',
+        params: { sessionId: savedSession.sessionId, gameCode: savedSession.gameCode }
+      });
+    }
+  };
+  
+  const handleClearSavedGame = async () => {
+    try {
+      await clearCurrentGameSession();
+      setSavedSession(null);
+      console.log('[Home] Saved game session cleared');
+    } catch (error) {
+      console.error('[Home] Error clearing saved session:', error);
+    }
+  };
+  
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -53,10 +98,28 @@ function Home({ navigation }) {
             Challenge yourself with fun and engaging quizzes designed to deepen your connection.
           </Text>
 
+          {/* Resume Game Button - Show if saved session exists */}
+          {savedSession && (
+            <View style={styles.resumeContainer}>
+              <TouchableOpacity
+                style={[styles.ctaButton, styles.resumeButton]}
+                onPress={handleResumeGame}
+              >
+                <Text style={styles.ctaButtonText}>Resume Game</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={handleClearSavedGame}
+              >
+                <Text style={styles.clearButtonText}>Clear Saved Game</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* CTA Button */}
           <TouchableOpacity
             style={styles.ctaButton}
-            onPress={() => router.push('/(tabs)/Questions')}
+            onPress={() => router.push('/(tabs)/JoinGame')}
           >
             <Text style={styles.ctaButtonText}>Start a Game</Text>
           </TouchableOpacity>
@@ -162,6 +225,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: THEME.text.primary,
     letterSpacing: 0.3,
+  },
+  resumeContainer: {
+    gap: THEME.spacing.md,
+    marginBottom: THEME.spacing.lg,
+  },
+  resumeButton: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+    shadowColor: '#4CAF50',
+  },
+  clearButton: {
+    paddingVertical: THEME.spacing.md,
+    paddingHorizontal: THEME.spacing.lg,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#999',
+    backgroundColor: 'transparent',
+  },
+  clearButtonText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    fontWeight: '500',
   },
 });
 

@@ -44,6 +44,11 @@ api.interceptors.request.use(
     // Add authentication token if available
     try {
       const token = await getAuthToken();
+      // Always log POST requests for debugging
+      if (config.method?.toUpperCase() === 'POST') {
+        console.warn('🚨 POST REQUEST BEING SENT:', config.baseURL + config.url);
+        console.warn('🚨 POST DATA:', JSON.stringify(config.data));
+      }
       if (DEBUG_API) {
         console.log('📤 API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
         console.log('🔍 Token retrieved:', token ? `${token.substring(0, 20)}...` : 'No token found');

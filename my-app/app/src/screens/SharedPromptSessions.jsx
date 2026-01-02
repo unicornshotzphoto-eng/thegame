@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../core/api';
 import { THEME } from '../constants/appTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -41,16 +42,10 @@ const SharedPromptSessions = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/quiz/prompt-sessions/', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.get('/quiz/prompt-sessions/');
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         setSessions(data.sessions || []);
       } else {
         Alert.alert('Error', 'Failed to load prompt sessions');
@@ -68,16 +63,10 @@ const SharedPromptSessions = () => {
       const token = await getAuthToken();
       if (!token) return;
 
-      const response = await fetch('http://localhost:8000/quiz/prompts/', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.get('/quiz/prompts/');
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         const promptsList = Array.isArray(data) ? data : data.prompts || data.results || [];
         setPrompts(promptsList);
       }
@@ -91,16 +80,10 @@ const SharedPromptSessions = () => {
       const token = await getAuthToken();
       if (!token) return;
 
-      const response = await fetch('http://localhost:8000/quiz/friends/', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.get('/quiz/direct-messages/friends/');
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         console.log('Friends loaded:', data);
         const friendsList = Array.isArray(data) ? data : data.friends || [];
         setFriends(friendsList);
@@ -118,33 +101,19 @@ const SharedPromptSessions = () => {
       const token = await getAuthToken();
 
       // Create the session with the selected prompt
-      const response = await fetch('http://localhost:8000/quiz/prompt-sessions/', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt_id: prompt.id,
-          title: prompt.prompt_text.substring(0, 50),
-        }),
+      const response = await api.post('/quiz/prompt-sessions/', {
+        prompt_id: prompt.id,
+        title: prompt.prompt_text.substring(0, 50),
       });
 
-      if (response.ok) {
-        const sessionData = await response.json();
+      if (response.status >= 200 && response.status < 300) {
+        const sessionData = response.data;
         setSelectedPromptForInvite(prompt);
         
         // Invite selected friends
         for (const friendId of selectedFriendsToInvite) {
-          await fetch(`http://localhost:8000/quiz/prompt-sessions/${sessionData.id}/members/`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              member_id: friendId,
-            }),
+          await api.post(`/quiz/prompt-sessions/${sessionData.id}/members/`, {
+            member_id: friendId,
           });
         }
 
@@ -167,16 +136,10 @@ const SharedPromptSessions = () => {
     try {
       const token = await getAuthToken();
 
-      const response = await fetch(`http://localhost:8000/quiz/prompt-sessions/${sessionId}/`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.get(`/quiz/prompt-sessions/${sessionId}/`);
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status === 200) {
+        const data = response.data;
         setSelectedSession(data);
         setResponses(data.responses || []);
       } else {
@@ -198,18 +161,11 @@ const SharedPromptSessions = () => {
       setLoading(true);
       const token = await getAuthToken();
 
-      const response = await fetch(`http://localhost:8000/quiz/prompt-sessions/${selectedSession.id}/responses/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          response: newResponse,
-        }),
+      const response = await api.post(`/quiz/prompt-sessions/${selectedSession.id}/responses/`, {
+        response: newResponse,
       });
 
-      if (response.ok) {
+      if (response.status >= 200 && response.status < 300) {
         setNewResponse('');
         Alert.alert('Success', 'Response submitted');
         loadSessionDetails(selectedSession.id);
@@ -229,19 +185,12 @@ const SharedPromptSessions = () => {
       setLoading(true);
       const token = await getAuthToken();
 
-      const response = await fetch(`http://localhost:8000/quiz/prompt-sessions/${selectedSession.id}/members/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          member_id: friendId,
-        }),
+      const response = await api.post(`/quiz/prompt-sessions/${selectedSession.id}/members/`, {
+        member_id: friendId,
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (response.status >= 200 && response.status < 300) {
+        const data = response.data;
         setSelectedSession(data);
         Alert.alert('Success', 'Friend invited to session');
         setShowInviteModal(false);
@@ -265,15 +214,9 @@ const SharedPromptSessions = () => {
         onPress: async () => {
           try {
             const token = await getAuthToken();
-            const response = await fetch(`http://localhost:8000/quiz/prompt-sessions/${sessionId}/`, {
-              method: 'DELETE',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            });
+            const response = await api.delete(`/quiz/prompt-sessions/${sessionId}/`);
 
-            if (response.ok) {
+            if (response.status >= 200 && response.status < 300) {
               Alert.alert('Success', 'Session deleted');
               setSelectedSession(null);
               loadSessions();

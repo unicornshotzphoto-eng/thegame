@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import Calendar from '@/app/src/screens/Calendar';
-import { THEME } from '@/app/src/constants/appTheme';
+import { THEME } from '../../common/constants/appTheme';
 import MiniNav from '@/app/components/MiniNav';
 
 const styles = StyleSheet.create({

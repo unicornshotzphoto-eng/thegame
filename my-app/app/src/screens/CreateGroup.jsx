@@ -18,7 +18,7 @@ function CreateGroup({ navigation }) {
     const loadFriends = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/quiz/friends/');
+            const response = await api.get('/quiz/direct-messages/friends/');
             setFriends(response.data.friends || []);
         } catch (error) {
             console.error('Load friends error:', error);

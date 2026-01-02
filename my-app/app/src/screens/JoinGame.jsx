@@ -29,16 +29,21 @@ function JoinGame({ navigation }) {
       console.log('Joined game successfully:', response.data);
       const sessionId = response.data.id;
       
+      console.log('Session ID:', sessionId);
+      console.log('Response data keys:', Object.keys(response.data));
+      
       if (!sessionId) {
-        Alert.alert('Error', 'Failed to get session ID');
+        Alert.alert('Error', 'Failed to get session ID from response');
+        console.error('No ID in response:', response.data);
         return;
       }
 
       // Navigate to GamePlay screen
+      console.log('Navigating to GamePlay with sessionId:', sessionId);
       if (navigation?.push) {
-        navigation.push({ pathname: 'GamePlay', params: { sessionId } });
+        navigation.push({ pathname: 'GamePlay', params: { sessionId, gameCode: gameCode.toUpperCase() } });
       } else if (navigation?.navigate) {
-        navigation.navigate('GamePlay', { sessionId });
+        navigation.navigate('GamePlay', { sessionId, gameCode: gameCode.toUpperCase() });
       }
     } catch (error) {
       console.error('Error joining game:', error);

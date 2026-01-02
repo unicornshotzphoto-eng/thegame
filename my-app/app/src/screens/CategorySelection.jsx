@@ -102,6 +102,7 @@ function CategorySelection({ navigation, route }) {
       console.log('Game created successfully:', response.data);
       console.log('Game Code from create response:', response.data.game_code || 'NOT FOUND');
       const sessionId = response.data.id || response.data.session_id;
+      const gameCode = response.data.game_code;
       
       if (!sessionId) {
         showAlert('Error', 'Failed to get session ID from response');
@@ -110,9 +111,9 @@ function CategorySelection({ navigation, route }) {
 
       showAlert('Success', 'Game created! Players will pick categories on their turns.');
       if (navigation?.push) {
-        navigation.push({ pathname: 'GamePlay', params: { sessionId } });
+        navigation.push({ pathname: 'GamePlay', params: { sessionId, gameCode } });
       } else if (navigation?.navigate) {
-        navigation.navigate('GamePlay', { sessionId });
+        navigation.navigate('GamePlay', { sessionId, gameCode });
       }
     } catch (error) {
       console.error('Create game error:', error);

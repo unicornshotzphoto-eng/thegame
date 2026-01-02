@@ -14,20 +14,20 @@ export default function Root({ children }: { children: React.ReactNode }) {
               body {
                 margin: 0;
                 padding: 0;
-                background-color: #ffffff !important;
+                background-color: transparent !important;
               }
               #root {
                 margin: 0;
                 padding: 0;
-                background-color: #ffffff !important;
+                background-color: transparent !important;
               }
             `,
           }}
         />
         <title>My App</title>
       </head>
-      <body style={{ margin: 0, padding: 0, backgroundColor: '#ffffff' }}>
-        <div id="root" style={{ margin: 0, padding: 0, backgroundColor: '#ffffff' }}>
+      <body style={{ margin: 0, padding: 0, backgroundColor: 'transparent' }}>
+        <div id="root" style={{ margin: 0, padding: 0, backgroundColor: 'transparent' }}>
           {children}
         </div>
       </body>

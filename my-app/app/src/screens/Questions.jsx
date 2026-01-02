@@ -1,3 +1,4 @@
+// This file has been removed as the Questions page is no longer part of the app.
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -49,7 +50,7 @@ function Questions({ navigation }) {
   const loadFriends = async () => {
     try {
       setLoadingFriends(true);
-      const response = await api.get('/quiz/friends/');
+      const response = await api.get('/quiz/direct-messages/friends/');
       setFriends(response.data.friends || []);
     } catch (error) {
       console.error('Error loading friends:', error);
@@ -265,10 +266,12 @@ function Questions({ navigation }) {
 
   // Mode Selection Screen
   if (gameScreen === 'modeSelect') {
+    // On web, force transparent background for SafeAreaView
+    const isWeb = typeof window !== 'undefined' && typeof document !== 'undefined';
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]}> 
         {renderTabNavigation()}
-        <ScrollView contentContainerStyle={styles.homeScrollContent}>
+        <ScrollView contentContainerStyle={styles.homeScrollContent} style={{ backgroundColor: 'transparent' }}>
           <View style={styles.header2}>
             <Text style={styles.title}>Quiz Games</Text>
             <Text style={styles.subtitle}>Choose a game mode to play</Text>

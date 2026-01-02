@@ -5,9 +5,13 @@
  * Uncomment the configuration you need based on your testing scenario.
  */
 
-// OPTION 1: Web Browser / Expo Web
-// Use this when running: npm start -> press 'w' for web
-export const API_BASE_URL = 'http://localhost:8000/';
+// OPTION 1: Auto-detect (recommended)
+// Automatically picks the best base URL for platform
+// - Web/iOS simulator: http://localhost:8000/
+// - Android emulator: http://10.0.2.2:8000/
+// - Physical device: set your LAN IP below instead
+// For web on Windows local dev, use 127.0.0.1 instead of localhost
+export const API_BASE_URL = 'http://127.0.0.1:8000/';
 
 // OPTION 2: Android Emulator
 // Use this when running on Android Studio emulator

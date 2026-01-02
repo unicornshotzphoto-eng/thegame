@@ -52,10 +52,10 @@ REST_FRAMEWORK = {
 # Application definition
 
 INSTALLED_APPS = [
-    # 'daphne',  # Disabled for development - causes 127.0.0.1 binding issues
+    'daphne',  # Must be first for ASGI
     'rest_framework_simplejwt',
     'corsheaders',
-    # 'channels',  # Disabled for development
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -155,11 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Channels Configuration
 
-
-# Channel layers configuration
-# ASGI_APPLICATION = 'api.asgi.application'
-# Disabled for development to allow proper 0.0.0.0 binding with runserver
-# Use: python manage.py runserver 0.0.0.0:8000
+ASGI_APPLICATION = 'api.asgi.application'
 
 # Using in-memory channel layer for development (no Redis required)
 # For production, use Redis backend

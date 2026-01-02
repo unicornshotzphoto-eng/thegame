@@ -40,7 +40,11 @@ from .views import (
     SharedPromptSessionListCreateView,
     SharedPromptSessionDetailView,
     SharedPromptSessionMembersView,
-    PromptResponseListCreateView
+    PromptResponseListCreateView,
+    AddFriendView,
+    ListFriendsView,
+    SendDirectMessageView,
+    GetDirectMessagesView
 )
 
 urlpatterns = [
@@ -80,6 +84,11 @@ urlpatterns = [
     path('games/<int:game_id>/next-round/', NextRoundView.as_view(), name='next-round'),
     path('games/<int:game_id>/end/', EndGameView.as_view(), name='end-game'),
     path('games/join/', JoinGameByCodeView.as_view(), name='join-game'),
+    # Direct messaging routes
+    path('direct-messages/add-friend/', AddFriendView.as_view(), name='add-friend'),
+    path('direct-messages/friends/', ListFriendsView.as_view(), name='list-friends'),
+    path('direct-messages/send/', SendDirectMessageView.as_view(), name='send-direct-message'),
+    path('direct-messages/<int:user_id>/', GetDirectMessagesView.as_view(), name='get-direct-messages'),
     # Journal prompts routes (specific routes first)
     path('prompts/random/', RandomJournalPromptView.as_view(), name='random-journal-prompt'),
     path('prompts/', JournalPromptsListView.as_view(), name='journal-prompts-list'),

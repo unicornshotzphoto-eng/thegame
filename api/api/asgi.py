@@ -24,11 +24,11 @@ from quiz import routing
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
-            URLRouter(
-                routing.websocket_urlpatterns
-            )
+    # Development: allow all origins for websocket connections
+    # For production, wrap with AllowedHostsOriginValidator
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            routing.websocket_urlpatterns
         )
     ),
 })

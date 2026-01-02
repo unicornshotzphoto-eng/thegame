@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db import models
-from .models import User, GroupChat, GroupMessage, SharedCalendar, CalendarEvent, Question, QuestionCategory, GameSession, PlayerAnswer, JournalPrompt, SharedJournal, JournalEntry, SharedPromptSession, PromptResponse
+from .models import User, GroupChat, GroupMessage, SharedCalendar, CalendarEvent, Question, QuestionCategory, GameSession, PlayerAnswer, JournalPrompt, SharedJournal, JournalEntry, SharedPromptSession, PromptResponse, Friendship, DirectMessage
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -214,7 +214,7 @@ class SharedPromptSessionSerializer(serializers.ModelSerializer):
     created_by = UserSerializer(read_only=True)
     members = UserSerializer(many=True, read_only=True)
     prompt = JournalPromptSerializer(read_only=True)
-    responses = PromptResponseSerializer(many=True, read_only=True, source='promptresponse_set')
+    responses = PromptResponseSerializer(many=True, read_only=True)
     members_count = serializers.SerializerMethodField()
     
     class Meta:
@@ -240,3 +240,23 @@ class SharedPromptSessionListSerializer(serializers.ModelSerializer):
     
     def get_response_count(self, obj):
         return obj.promptresponse_set.count()
+
+
+class DirectMessageSerializer(serializers.ModelSerializer):
+    sender = UserSerializer(read_only=True)
+    recipient = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = DirectMessage
+        fields = ('id', 'sender', 'recipient', 'content', 'image', 'created_at', 'read')
+        read_only_fields = ('id', 'sender', 'created_at')
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    user1 = UserSerializer(read_only=True)
+    user2 = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Friendship
+        fields = ('id', 'user1', 'user2', 'created_at')
+        read_only_fields = ('id', 'created_at')
