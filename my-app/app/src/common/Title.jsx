@@ -5,10 +5,12 @@ function Title({ text }) {
 
     return (
         <Text style = {{
-            color: 'white',
+            color: '#E8C9A0',
             fontSize: 48,
             textAlign: 'center',
             fontFamily: 'montserrat-regular',
+            fontWeight: 'bold',
+            marginBottom: 20,
         }}>
             {text}
         </Text>

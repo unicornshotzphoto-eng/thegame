@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
 import { useLocalSearchParams } from 'expo-router';
 import { showAlert } from '../utils/alert';
-import { THEME } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function CategorySelection({ navigation, route }) {
   const localParams = useLocalSearchParams?.() || {};
@@ -131,17 +131,18 @@ function CategorySelection({ navigation, route }) {
   }, [navigation]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={goBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Game</Text>
-        <View style={styles.spacer} />
-      </View>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={goBack} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Create Game</Text>
+          <View style={styles.spacer} />
+        </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.infoCard}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>Turn-based Categories</Text>
           <Text style={styles.infoText}>
             Players will pick ONE category on their turn during the game. You don't need to select categories now.
@@ -169,34 +170,35 @@ function CategorySelection({ navigation, route }) {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: THEME.spacing.lg,
-    paddingVertical: THEME.spacing.md,
-    backgroundColor: THEME.surfaceDark,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderBottomWidth: 2,
+    borderBottomColor: '#D4A574',
   },
   backButton: {
-    paddingHorizontal: THEME.spacing.md,
+    paddingHorizontal: 12,
   },
   backButtonText: {
-    color: THEME.primary,
+    color: '#D4A574',
     fontSize: 16,
     fontWeight: '600',
   },
   headerTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -207,30 +209,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: THEME.spacing.lg,
+    padding: 16,
   },
   subtitle: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 16,
-    marginBottom: THEME.spacing.lg,
+    marginBottom: 24,
     textAlign: 'center',
   },
   infoCard: {
-    backgroundColor: THEME.surfaceDark,
-    borderRadius: THEME.borderRadius.lg,
-    padding: THEME.spacing.lg,
-    borderWidth: 1,
-    borderColor: THEME.borderLight,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   infoTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: THEME.spacing.sm,
+    marginBottom: 8,
     textAlign: 'center',
   },
   infoText: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -239,36 +241,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: THEME.spacing.xl,
+    marginBottom: 24,
   },
   categoryCard: {
     width: '48%',
-    backgroundColor: THEME.surfaceDark,
-    borderRadius: THEME.borderRadius.lg,
-    padding: THEME.spacing.lg,
-    marginBottom: THEME.spacing.md,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 2,
-    borderColor: THEME.borderLight,
+    borderColor: '#D4A574',
     alignItems: 'center',
     justifyContent: 'center',
   },
   categoryCardSelected: {
-    borderColor: THEME.primary,
-    backgroundColor: THEME.primary + '15',
+    borderColor: '#E8C9A0',
+    backgroundColor: 'rgba(212, 165, 116, 0.2)',
   },
   categoryEmoji: {
     fontSize: 40,
-    marginBottom: THEME.spacing.sm,
+    marginBottom: 8,
   },
   categoryLabel: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: THEME.spacing.sm,
+    marginBottom: 8,
   },
   categoryRange: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 12,
   },
   checkmark: {
@@ -278,54 +280,54 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkmarkText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: 'bold',
   },
   selectedCount: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 14,
     textAlign: 'center',
-    marginTop: THEME.spacing.lg,
+    marginTop: 24,
   },
   footer: {
-    padding: THEME.spacing.lg,
-    backgroundColor: THEME.surfaceDark,
+    padding: 16,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderTopWidth: 1,
-    borderTopColor: THEME.borderLight,
-    gap: THEME.spacing.sm,
+    borderTopColor: '#D4A574',
+    gap: 12,
   },
   addFriendsButton: {
-    backgroundColor: THEME.surfaceLight,
+    backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: THEME.primary,
-    paddingVertical: THEME.spacing.lg,
-    borderRadius: THEME.borderRadius.lg,
+    borderColor: '#D4A574',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: THEME.spacing.sm,
+    marginBottom: 12,
   },
   addFriendsButtonText: {
-    color: THEME.primary,
+    color: '#D4A574',
     fontSize: 16,
     fontWeight: 'bold',
   },
   createButton: {
-    backgroundColor: THEME.primary,
-    paddingVertical: THEME.spacing.lg,
-    borderRadius: THEME.borderRadius.lg,
+    backgroundColor: '#D4A574',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
   },
   createButtonDisabled: {
-    backgroundColor: THEME.text.muted,
+    backgroundColor: '#C8A882',
     opacity: 0.6,
   },
   createButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: 'bold',
   },

@@ -14,6 +14,7 @@ import api from '../core/api';
 import { showAlert } from '../utils/alert';
 import useStore from '../core/global';
 import { THEME } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function GameHub({ navigation }) {
   const user = useStore((state) => state.user);
@@ -75,8 +76,9 @@ function GameHub({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Quiz Games</Text>
@@ -133,15 +135,16 @@ function GameHub({ navigation }) {
             )}
           </View>
         )}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     paddingBottom: THEME.spacing.xl,
@@ -149,83 +152,84 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: THEME.spacing.xl,
     paddingVertical: THEME.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    borderBottomWidth: 2,
+    borderBottomColor: '#D4A574',
   },
   title: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 28,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   section: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     marginHorizontal: THEME.spacing.lg,
     marginTop: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
     padding: THEME.spacing.lg,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   sectionTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: THEME.spacing.md,
     fontFamily: 'montserrat-regular',
   },
   sectionSubtitle: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 14,
     marginBottom: THEME.spacing.lg,
     fontFamily: 'montserrat-regular',
   },
   primaryButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   cancelButton: {
-    backgroundColor: THEME.borderLight,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     marginTop: THEME.spacing.md,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   cancelButtonText: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
+  },
   secondaryButton: {
-    backgroundColor: '#222',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
-    borderWidth: 1,
-    borderColor: THEME.border,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   secondaryButtonText: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontWeight: '600',
     fontSize: 15,
-  },
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'montserrat-regular',
   },
   joinFormContainer: {
     marginTop: THEME.spacing.md,
   },
   gameCodeInput: {
-    backgroundColor: THEME.background,
-    color: THEME.text.primary,
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
+    color: '#E8C9A0',
     padding: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     marginBottom: THEME.spacing.md,
-    borderWidth: 1,
-    borderColor: THEME.border,
+    borderWidth: 2,
+    borderColor: '#D4A574',
     fontFamily: 'montserrat-regular',
   },
   activeGamesSection: {

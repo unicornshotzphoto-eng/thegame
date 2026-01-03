@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, SafeAreaView } from 'react-native';
 import api from '../core/api';
 import useStore from '../core/global';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function JoinGame({ navigation }) {
   const user = useStore((state) => state.user);
@@ -64,19 +65,20 @@ function JoinGame({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.headerSection}>
-          <Text style={styles.title}>Join a Game</Text>
-          <Text style={styles.subtitle}>Enter the 6-character game code to join an existing game</Text>
-        </View>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          {/* Header */}
+          <View style={styles.headerSection}>
+            <Text style={styles.title}>Join a Game</Text>
+            <Text style={styles.subtitle}>Enter the 6-character game code to join an existing game</Text>
+          </View>
 
-        {/* Game Code Input */}
-        <View style={styles.inputSection}>
-          <Text style={styles.label}>Game Code</Text>
-          <TextInput
-            style={[styles.input, codeError ? styles.inputError : null]}
+          {/* Game Code Input */}
+          <View style={styles.inputSection}>
+            <Text style={styles.label}>Game Code</Text>
+            <TextInput
+              style={[styles.input, codeError ? styles.inputError : null]}
             placeholder="e.g., ABC123"
             placeholderTextColor="#666"
             value={gameCode}
@@ -143,13 +145,14 @@ function JoinGame({ navigation }) {
         </View>
       </View>
     </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: 'transparent',
   },
   content: {
     flex: 1,
@@ -162,12 +165,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#E8C9A0',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#999',
+    color: '#C8A882',
     lineHeight: 24,
   },
   inputSection: {
@@ -176,44 +179,44 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    color: '#E8C9A0',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#111',
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#D4A574',
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#fff',
+    color: '#E8C9A0',
     fontSize: 16,
     fontWeight: 'bold',
     letterSpacing: 2,
     textAlign: 'center',
   },
   inputError: {
-    borderColor: '#ff3b30',
+    borderColor: '#ff6b6b',
   },
   errorText: {
-    color: '#ff3b30',
+    color: '#ff6b6b',
     fontSize: 13,
     marginTop: 8,
   },
   charCount: {
     fontSize: 12,
-    color: '#666',
+    color: '#C8A882',
     textAlign: 'right',
     marginBottom: 20,
   },
   joinButton: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: '#D4A574',
     paddingVertical: 14,
     borderRadius: 8,
     marginBottom: 20,
   },
   joinButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -229,37 +232,37 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#333',
+    backgroundColor: '#D4A574',
   },
   dividerText: {
     marginHorizontal: 12,
-    color: '#666',
+    color: '#C8A882',
     fontSize: 14,
   },
   createButton: {
     borderWidth: 1,
-    borderColor: '#28a745',
+    borderColor: '#D4A574',
     paddingVertical: 14,
     borderRadius: 8,
     marginBottom: 32,
   },
   createButtonText: {
-    color: '#28a745',
+    color: '#D4A574',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   infoSection: {
-    backgroundColor: '#111',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: 8,
     padding: 16,
     borderLeftWidth: 3,
-    borderLeftColor: '#1a73e8',
+    borderLeftColor: '#D4A574',
   },
   infoTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#1a73e8',
+    color: '#E8C9A0',
     marginBottom: 12,
   },
   infoItem: {
@@ -267,7 +270,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   infoBullet: {
-    color: '#999',
+    color: '#D4A574',
     fontSize: 14,
     marginRight: 10,
     width: 20,
@@ -275,7 +278,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: '#ccc',
+    color: '#E8C9A0',
     lineHeight: 20,
   },
 });

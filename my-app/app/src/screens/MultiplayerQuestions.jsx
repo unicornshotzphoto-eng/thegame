@@ -16,6 +16,7 @@ import {
 import api from '../core/api';
 import { THEME } from '../constants/appTheme';
 import useStore from '../core/global';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const CATEGORY_COLORS = THEME.categories;
 
@@ -523,16 +524,18 @@ const MultiplayerQuestions = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ActivityIndicator size="large" color="#0000ff" />
-    </SafeAreaView>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    </BackgroundWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
     paddingHorizontal: THEME.spacing.lg,
     paddingVertical: THEME.spacing.md,
   },
@@ -541,11 +544,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: THEME.spacing.md,
     textAlign: 'center',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
   },
   subtitle: {
     fontSize: 16,
-    color: THEME.text.secondary,
+    color: '#C8A882',
     marginBottom: THEME.spacing.lg,
     textAlign: 'center',
   },
@@ -554,17 +557,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: THEME.spacing.md,
     marginTop: THEME.spacing.md,
-    color: THEME.text.primary,
+    color: '#E8C9A0',
   },
   button: {
-    backgroundColor: THEME.button.primary,
+    backgroundColor: '#D4A574',
     padding: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
     marginTop: THEME.spacing.lg,
   },
   buttonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -578,23 +581,25 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    color: THEME.text.muted,
+    color: '#C8A882',
     marginBottom: THEME.spacing.lg,
   },
   friendItem: {
     flexDirection: 'row',
     padding: THEME.spacing.md,
     marginVertical: THEME.spacing.md,
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
     borderLeftWidth: 3,
-    borderLeftColor: THEME.primary,
+    borderLeftColor: '#D4A574',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   selectedFriend: {
-    backgroundColor: THEME.primary,
+    backgroundColor: 'rgba(212, 165, 116, 0.2)',
     borderWidth: 2,
-    borderColor: THEME.accent,
+    borderColor: '#E8C9A0',
   },
   thumbnail: {
     width: 48,
@@ -608,33 +613,35 @@ const styles = StyleSheet.create({
   friendName: {
     fontSize: 16,
     fontWeight: '600',
-    color: THEME.text.primary,
+    color: '#E8C9A0',
   },
   friendEmail: {
     fontSize: 12,
-    color: THEME.text.secondary,
+    color: '#C8A882',
   },
   checkmark: {
     fontSize: 24,
-    color: THEME.accent,
+    color: '#D4A574',
     fontWeight: 'bold',
   },
   selectedCount: {
     padding: THEME.spacing.md,
     marginVertical: THEME.spacing.md,
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
     borderLeftWidth: 3,
-    borderLeftColor: THEME.primary,
+    borderLeftColor: '#D4A574',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   selectedText: {
     fontSize: 16,
     fontWeight: '600',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
   },
   createButton: {
-    backgroundColor: THEME.button.primary,
+    backgroundColor: '#D4A574',
     padding: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',

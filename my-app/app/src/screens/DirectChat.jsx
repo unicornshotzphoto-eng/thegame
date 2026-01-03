@@ -19,6 +19,7 @@ import { ChatWebSocket } from '../core/websocket';
 import api from '../core/api';
 import useStore from '../core/global';
 import TypingIndicator from '../components/TypingIndicator';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function DirectChat({ route, navigation }) {
     const params = useLocalSearchParams();
@@ -330,8 +331,9 @@ function DirectChat({ route, navigation }) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <KeyboardAvoidingView 
+        <BackgroundWrapper overlayOpacity={0.5}>
+            <SafeAreaView style={styles.container}>
+                <KeyboardAvoidingView 
                 style={styles.container} 
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
@@ -398,21 +400,22 @@ function DirectChat({ route, navigation }) {
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
+        </BackgroundWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: 'transparent',
     },
     statusBar: {
         flexDirection: 'row',
         alignItems: 'center',
         padding: 8,
-        backgroundColor: '#111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     statusDot: {
         width: 8,
@@ -421,13 +424,13 @@ const styles = StyleSheet.create({
         marginRight: 8,
     },
     connectedDot: {
-        backgroundColor: '#28a745',
+        backgroundColor: '#D4A574',
     },
     disconnectedDot: {
-        backgroundColor: '#dc3545',
+        backgroundColor: '#ff6b6b',
     },
     statusText: {
-        color: '#888',
+        color: '#C8A882',
         fontSize: 12,
     },
     messagesContainer: {
@@ -441,14 +444,18 @@ const styles = StyleSheet.create({
     },
     ownMessage: {
         alignSelf: 'flex-end',
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
+        borderWidth: 1,
+        borderColor: '#E8C9A0',
     },
     otherMessage: {
         alignSelf: 'flex-start',
-        backgroundColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     messageText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 16,
     },
     messageImage: {
@@ -458,13 +465,13 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     timestamp: {
-        color: '#aaa',
+        color: '#C8A882',
         fontSize: 10,
         marginTop: 4,
         alignSelf: 'flex-end',
     },
     visibilityText: {
-        color: '#666',
+        color: '#C8A882',
         fontSize: 10,
         marginTop: 2,
         marginBottom: 8,
@@ -472,22 +479,22 @@ const styles = StyleSheet.create({
     inviteLinkButton: {
         marginTop: 6,
         alignSelf: 'flex-start',
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 8,
     },
     inviteLinkText: {
-        color: '#fff',
+        color: '#2B1810',
         fontWeight: '600',
         fontSize: 12,
     },
     imagePreviewContainer: {
         position: 'relative',
         padding: 12,
-        backgroundColor: '#111',
-        borderTopWidth: 1,
-        borderTopColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderTopWidth: 2,
+        borderTopColor: '#D4A574',
     },
     imagePreview: {
         width: 100,
@@ -513,9 +520,9 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         padding: 12,
-        borderTopWidth: 1,
-        borderTopColor: '#333',
-        backgroundColor: '#000',
+        borderTopWidth: 2,
+        borderTopColor: '#D4A574',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         alignItems: 'center',
     },
     imageButton: {
@@ -529,26 +536,28 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        backgroundColor: '#111',
-        color: '#fff',
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
+        color: '#E8C9A0',
         borderRadius: 20,
         paddingHorizontal: 16,
         paddingVertical: 8,
         marginRight: 8,
         maxHeight: 100,
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     sendButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         borderRadius: 20,
         paddingHorizontal: 20,
         paddingVertical: 10,
         justifyContent: 'center',
     },
     sendButtonDisabled: {
-        backgroundColor: '#555',
+        backgroundColor: '#C8A882',
     },
     sendButtonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontWeight: '600',
     },
     typingContainer: {

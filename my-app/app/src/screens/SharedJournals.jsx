@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../core/api';
-import { THEME } from '../constants/appTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const SharedJournals = () => {
   const [journals, setJournals] = useState([]);
@@ -374,37 +374,37 @@ const SharedJournals = () => {
   // Show Prompt Session Detail View
   if (selectedPromptSession && currentPromptForSession) {
     return (
-      <View style={[styles.container, { backgroundColor: THEME.background }]}>
+      <View style={[styles.container, { backgroundColor: 'transparent' }]}>
         {/* Header */}
         <View style={[styles.header, { backgroundColor: '#FFFFFF' }]}>
-          <TouchableOpacity style={[styles.backButton, { backgroundColor: THEME.primary }]} onPress={handleBackPress}>
-            <Ionicons name="arrow-back" size={24} color={THEME.white} />
+          <TouchableOpacity style={[styles.backButton, { backgroundColor: '#D4A574' }]} onPress={handleBackPress}>
+            <Ionicons name="arrow-back" size={24} color={'white'} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: THEME.primary }]}>Prompt Session</Text>
+          <Text style={[styles.headerTitle, { color: '#D4A574' }]}>Prompt Session</Text>
           <View style={styles.inviteButton} />
         </View>
 
         <ScrollView style={styles.contentArea} showsVerticalScrollIndicator={false}>
           {/* Prompt Display */}
-          <View style={[styles.promptDisplaySection, { backgroundColor: THEME.surface, borderColor: THEME.border }]}>
-            <Ionicons name="bulb" size={32} color={THEME.primary} style={styles.promptDisplayIcon} />
-            <Text style={[styles.promptDisplayText, { color: THEME.text.primary }]}>
+          <View style={[styles.promptDisplaySection, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)', borderColor: '#D4A574' }]}>
+            <Ionicons name="bulb" size={32} color={'#D4A574'} style={styles.promptDisplayIcon} />
+            <Text style={[styles.promptDisplayText, { color: '#E8C9A0' }]}>
               {currentPromptForSession.prompt_text}
             </Text>
             {currentPromptForSession.difficulty && (
-              <Text style={[styles.difficultyBadge, { color: THEME.subtext }]}>
+              <Text style={[styles.difficultyBadge, { color: '#C8A882' }]}>
                 {currentPromptForSession.difficulty}
               </Text>
             )}
           </View>
 
           {/* Response Section */}
-          <View style={[styles.entryForm, { borderColor: THEME.border }]}>
-            <Text style={[styles.sectionTitle, { color: THEME.text.primary }]}>Your Response</Text>
+          <View style={[styles.entryForm, { borderColor: '#D4A574' }]}>
+            <Text style={[styles.sectionTitle, { color: '#E8C9A0' }]}>Your Response</Text>
             <TextInput
-              style={[styles.inputLarge, { color: THEME.text.primary, borderColor: THEME.border, backgroundColor: THEME.surface }]}
+              style={[styles.inputLarge, { color: '#E8C9A0', borderColor: '#D4A574', backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}
               placeholder="Write your response to this prompt..."
-              placeholderTextColor={THEME.subtext}
+              placeholderTextColor={'#C8A882'}
               value={newEntryContent}
               onChangeText={setNewEntryContent}
               multiline
@@ -412,27 +412,27 @@ const SharedJournals = () => {
               editable={!loading}
             />
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: THEME.primary, opacity: loading ? 0.6 : 1 }]}
+              style={[styles.button, { backgroundColor: '#D4A574', opacity: loading ? 0.6 : 1 }]}
               onPress={addEntryToJournal}
               disabled={loading}
             >
-              <Text style={{ color: THEME.white, fontWeight: '600' }}>Submit Response</Text>
+              <Text style={{ color: 'white', fontWeight: '600' }}>Submit Response</Text>
             </TouchableOpacity>
           </View>
 
           {/* All Responses Section */}
           <View style={styles.entriesSection}>
-            <Text style={[styles.sectionTitle, { color: THEME.text.primary }]}>Responses ({promptResponses.length})</Text>
+            <Text style={[styles.sectionTitle, { color: '#E8C9A0' }]}>Responses ({promptResponses.length})</Text>
             {promptResponses.length === 0 ? (
-              <Text style={[styles.emptyText, { color: THEME.subtext }]}>No responses yet</Text>
+              <Text style={[styles.emptyText, { color: '#C8A882' }]}>No responses yet</Text>
             ) : (
               promptResponses.map((resp) => {
                 console.log('Rendering response:', resp);
                 return (
-                  <View key={resp.id} style={[styles.entryCard, { backgroundColor: THEME.surface, borderColor: THEME.border }]}>
-                    {resp.author && <Text style={[styles.entryAuthor, { color: THEME.primary }]}>{resp.author.username}</Text>}
-                    {resp.response && <Text style={[styles.entryContent, { color: THEME.text.primary }]}>{resp.response}</Text>}
-                    {resp.created_at && <Text style={[styles.entryDate, { color: THEME.subtext }]}>
+                  <View key={resp.id} style={[styles.entryCard, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)', borderColor: '#D4A574' }]}>
+                    {resp.author && <Text style={[styles.entryAuthor, { color: '#D4A574' }]}>{resp.author.username}</Text>}
+                    {resp.response && <Text style={[styles.entryContent, { color: '#E8C9A0' }]}>{resp.response}</Text>}
+                    {resp.created_at && <Text style={[styles.entryDate, { color: '#C8A882' }]}>
                       {new Date(resp.created_at).toLocaleDateString()}
                     </Text>}
                   </View>
@@ -447,15 +447,15 @@ const SharedJournals = () => {
 
   if (selectedJournal) {
     return (
-      <View style={[styles.container, { backgroundColor: THEME.background }]}>
+      <View style={[styles.container, { backgroundColor: 'transparent' }]}>
         {/* Header */}
         <View style={[styles.header, { backgroundColor: '#FFFFFF' }]}>
-          <TouchableOpacity style={[styles.backButton, { backgroundColor: THEME.primary }]} onPress={handleBackPress}>
-            <Ionicons name="arrow-back" size={24} color={THEME.white} />
+          <TouchableOpacity style={[styles.backButton, { backgroundColor: '#D4A574' }]} onPress={handleBackPress}>
+            <Ionicons name="arrow-back" size={24} color={'white'} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: THEME.primary }]}>{selectedJournal.name}</Text>
+          <Text style={[styles.headerTitle, { color: '#D4A574' }]}>{selectedJournal.name}</Text>
           <TouchableOpacity style={styles.inviteButton} onPress={() => setShowInviteModal(true)}>
-            <Ionicons name="person-add" size={24} color={THEME.white} />
+            <Ionicons name="person-add" size={24} color={'white'} />
             <Text style={styles.inviteButtonText}>Invite</Text>
           </TouchableOpacity>
         </View>
@@ -463,31 +463,31 @@ const SharedJournals = () => {
         <ScrollView style={styles.contentArea} showsVerticalScrollIndicator={false}>
           {/* Journal Info */}
           <View style={styles.journalInfo}>
-            <Text style={[styles.infoLabel, { color: THEME.text.primary }]}>Description:</Text>
-            <Text style={[styles.infoText, { color: THEME.subtext }]}>
+            <Text style={[styles.infoLabel, { color: '#E8C9A0' }]}>Description:</Text>
+            <Text style={[styles.infoText, { color: '#C8A882' }]}>
               {selectedJournal.description || 'No description'}
             </Text>
-            <Text style={[styles.infoLabel, { color: THEME.text.primary }]}>Members:</Text>
-            <Text style={[styles.infoText, { color: THEME.subtext }]}>
+            <Text style={[styles.infoLabel, { color: '#E8C9A0' }]}>Members:</Text>
+            <Text style={[styles.infoText, { color: '#C8A882' }]}>
               {selectedJournal.members_count} member(s)
             </Text>
           </View>
 
           {/* Add Entry Section */}
-          <View style={[styles.entryForm, { borderColor: THEME.border }]}>
-            <Text style={[styles.sectionTitle, { color: THEME.text.primary }]}>Add Your Entry</Text>
+          <View style={[styles.entryForm, { borderColor: '#D4A574' }]}>
+            <Text style={[styles.sectionTitle, { color: '#E8C9A0' }]}>Add Your Entry</Text>
             <TextInput
-              style={[styles.input, { color: THEME.text.primary, borderColor: THEME.border, backgroundColor: THEME.surface }]}
+              style={[styles.input, { color: '#E8C9A0', borderColor: '#D4A574', backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}
               placeholder="Entry Title (optional)"
-              placeholderTextColor={THEME.subtext}
+              placeholderTextColor={'#C8A882'}
               value={newEntryTitle}
               onChangeText={setNewEntryTitle}
               editable={!loading}
             />
             <TextInput
-              style={[styles.inputLarge, { color: THEME.text.primary, borderColor: THEME.border, backgroundColor: THEME.surface }]}
+              style={[styles.inputLarge, { color: '#E8C9A0', borderColor: '#D4A574', backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}
               placeholder="Write your journal entry here..."
-              placeholderTextColor={THEME.subtext}
+              placeholderTextColor={'#C8A882'}
               value={newEntryContent}
               onChangeText={setNewEntryContent}
               multiline
@@ -495,28 +495,28 @@ const SharedJournals = () => {
               editable={!loading}
             />
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: THEME.primary, opacity: loading ? 0.6 : 1 }]}
+              style={[styles.button, { backgroundColor: '#D4A574', opacity: loading ? 0.6 : 1 }]}
               onPress={addEntryToJournal}
               disabled={loading}
             >
-              <Text style={{ color: THEME.white, fontWeight: '600' }}>Add Entry</Text>
+              <Text style={{ color: 'white', fontWeight: '600' }}>Add Entry</Text>
             </TouchableOpacity>
           </View>
 
           {/* Entries List */}
           <View style={styles.entriesSection}>
-            <Text style={[styles.sectionTitle, { color: THEME.text.primary }]}>Journal Entries</Text>
+            <Text style={[styles.sectionTitle, { color: '#E8C9A0' }]}>Journal Entries</Text>
             {journalEntries.length === 0 ? (
-              <Text style={[styles.emptyText, { color: THEME.subtext }]}>No entries yet</Text>
+              <Text style={[styles.emptyText, { color: '#C8A882' }]}>No entries yet</Text>
             ) : (
               journalEntries.map((entry) => (
-                <View key={entry.id} style={[styles.entryCard, { backgroundColor: THEME.surface, borderColor: THEME.border }]}>
-                  {entry.author && <Text style={[styles.entryAuthor, { color: THEME.primary }]}>{entry.author.username}</Text>}
+                <View key={entry.id} style={[styles.entryCard, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)', borderColor: '#D4A574' }]}>
+                  {entry.author && <Text style={[styles.entryAuthor, { color: '#D4A574' }]}>{entry.author.username}</Text>}
                   {entry.title ? (
-                    <Text style={[styles.entryTitle, { color: THEME.text.primary }]}>{entry.title}</Text>
+                    <Text style={[styles.entryTitle, { color: '#E8C9A0' }]}>{entry.title}</Text>
                   ) : null}
-                  {entry.content && <Text style={[styles.entryContent, { color: THEME.text.primary }]}>{entry.content}</Text>}
-                  {entry.created_at && <Text style={[styles.entryDate, { color: THEME.subtext }]}>
+                  {entry.content && <Text style={[styles.entryContent, { color: '#E8C9A0' }]}>{entry.content}</Text>}
+                  {entry.created_at && <Text style={[styles.entryDate, { color: '#C8A882' }]}>
                     {new Date(entry.created_at).toLocaleDateString()}
                   </Text>}
                 </View>
@@ -527,28 +527,28 @@ const SharedJournals = () => {
 
         {/* Invite Modal */}
         {showInviteModal && (
-          <View style={[styles.modal, { backgroundColor: THEME.backdrop }]}>
-            <View style={[styles.modalContent, { backgroundColor: THEME.surface }]}>
-              <Text style={[styles.modalTitle, { color: THEME.text.primary }]}>Invite Friends</Text>
+          <View style={[styles.modal, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+            <View style={[styles.modalContent, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}>
+              <Text style={[styles.modalTitle, { color: '#E8C9A0' }]}>Invite Friends</Text>
               <FlatList
                 data={friends}
                 keyExtractor={(item) => item.id.toString()}
                 scrollEnabled={false}
                 renderItem={({ item }) => (
                   <TouchableOpacity
-                    style={[styles.friendItem, { borderBottomColor: THEME.border }]}
+                    style={[styles.friendItem, { borderBottomColor: '#D4A574' }]}
                     onPress={() => inviteFriendToJournal(item.id)}
                   >
-                    <Text style={[styles.friendName, { color: THEME.text.primary }]}>{item.username}</Text>
-                    <Ionicons name="add-circle" size={24} color={THEME.primary} />
+                    <Text style={[styles.friendName, { color: '#E8C9A0' }]}>{item.username}</Text>
+                    <Ionicons name="add-circle" size={24} color={'#D4A574'} />
                   </TouchableOpacity>
                 )}
               />
               <TouchableOpacity
-                style={[styles.button, { backgroundColor: THEME.secondary }]}
+                style={[styles.button, { backgroundColor: '#D4A574' }]}
                 onPress={() => setShowInviteModal(false)}
               >
-                <Text style={{ color: THEME.white, fontWeight: '600' }}>Close</Text>
+                <Text style={{ color: 'white', fontWeight: '600' }}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -558,135 +558,131 @@ const SharedJournals = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: THEME.background }]}>
-      {/* Header */}
-      <View style={[styles.header, { backgroundColor: THEME.primary }]}>
-        <Text style={[styles.headerTitle, { color: THEME.white }]}>Shared Journals</Text>
-        <TouchableOpacity style={styles.createButton} onPress={() => setShowActionModal(true)}>
-          <Ionicons name="add-circle" size={28} color={THEME.white} />
-        </TouchableOpacity>
-      </View>
-
-      {loading && journals.length === 0 && prompts.length === 0 ? (
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color={THEME.primary} />
-        </View>
-      ) : journals.length === 0 && prompts.length === 0 ? (
-        <ScrollView contentContainerStyle={styles.centerContent} showsVerticalScrollIndicator={false}>
-          <Ionicons name="book-outline" size={64} color={THEME.subtext} />
-          <Text style={[styles.emptyText, { color: THEME.subtext }]}>No journals or prompts yet</Text>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: THEME.primary, marginTop: 16 }]}
-            onPress={() => setShowActionModal(true)}
-          >
-            <Text style={{ color: THEME.white, fontWeight: '600' }}>Create or Request</Text>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Shared Journals</Text>
+          <TouchableOpacity style={styles.createButton} onPress={() => setShowActionModal(true)}>
+            <Ionicons name="add-circle" size={28} color="#E8C9A0" />
           </TouchableOpacity>
-        </ScrollView>
-      ) : (
-        <ScrollView 
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Shared Journals Section */}
-          {journals.length > 0 && (
-            <View style={styles.sectionWrapper}>
-              <Text style={[styles.sectionHeader, { color: THEME.text.primary }]}>Your Journals</Text>
-              {journals.map((item) => (
-                <TouchableOpacity
-                  key={item.id.toString()}
-                  style={[styles.journalCard, { backgroundColor: THEME.surface, borderColor: THEME.border }]}
-                  onPress={() => handleJournalPress(item)}
-                >
-                  <Ionicons name="book" size={32} color={THEME.primary} style={styles.journalIcon} />
+        </View>
+
+        {loading && journals.length === 0 && prompts.length === 0 ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color="#D4A574" />
+          </View>
+        ) : journals.length === 0 && prompts.length === 0 ? (
+          <ScrollView contentContainerStyle={styles.centerContent} showsVerticalScrollIndicator={false}>
+            <Ionicons name="book-outline" size={64} color="#C8A882" />
+            <Text style={styles.emptyText}>No journals yet</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setShowActionModal(true)}
+            >
+              <Text style={{ color: '#2B1810', fontWeight: '600' }}>Create or Request</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        ) : (
+          <ScrollView 
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Shared Journals Section */}
+            {journals.length > 0 && (
+              <View style={styles.sectionWrapper}>
+                <Text style={styles.sectionHeader}>Your Journals</Text>
+                {journals.map((item) => (
+                  <TouchableOpacity
+                    key={item.id.toString()}
+                    style={styles.journalCard}
+                    onPress={() => handleJournalPress(item)}
+                  >
+                    <Ionicons name="book" size={32} color="#D4A574" style={styles.journalIcon} />
                   <View style={styles.journalCardContent}>
-                    <Text style={[styles.journalName, { color: THEME.text.primary }]}>{item.name}</Text>
-                    <Text style={[styles.journalDesc, { color: THEME.subtext }]} numberOfLines={1}>
+                    <Text style={[styles.journalName, { color: '#E8C9A0' }]}>{item.name}</Text>
+                    <Text style={[styles.journalDesc, { color: '#C8A882' }]} numberOfLines={1}>
                       {item.description || 'No description'}
                     </Text>
-                    <Text style={[styles.memberCount, { color: THEME.subtext }]}>
+                    <Text style={[styles.memberCount, { color: '#C8A882' }]}>
                       {item.members_count} member(s)
                     </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={24} color={THEME.subtext} />
+                  <Ionicons name="chevron-forward" size={24} color={'#C8A882'} />
                 </TouchableOpacity>
               ))}
             </View>
           )}
 
-          {/* Prompts Section */}
-          {prompts.length > 0 && (
-            <View style={[styles.sectionWrapper, { marginTop: journals.length > 0 ? 16 : 0 }]}>
-              <Text style={[styles.sectionHeader, { color: THEME.text.primary }]}>Available Prompts</Text>
-              {prompts.slice(0, 5).map((prompt) => (
-                <View
-                  key={prompt.id.toString()}
-                  style={[styles.promptCard, { backgroundColor: THEME.surface, borderColor: THEME.border }]}
-                >
-                  <Ionicons name="bulb" size={24} color={THEME.primary} style={styles.promptIcon} />
-                  <View style={styles.promptCardContent}>
-                    <Text style={[styles.promptText, { color: THEME.text.primary }]} numberOfLines={2}>
-                      {prompt.prompt_text}
-                    </Text>
-                    {prompt.difficulty && (
-                      <Text style={[styles.difficultyText, { color: THEME.subtext }]}>
-                        {prompt.difficulty}
-                      </Text>
-                    )}
-                  </View>
+            {/* Shared Prompts Section */}
+            {prompts.length > 0 && (
+              <View style={styles.sectionWrapper}>
+                <Text style={styles.sectionHeader}>Available Prompts</Text>
+                {prompts.map((prompt) => (
                   <TouchableOpacity
-                    style={[styles.promptActionButton, { backgroundColor: THEME.primary }]}
-                    onPress={() => startPromptSession(prompt)}
+                    key={prompt.id.toString()}
+                    style={styles.promptCard}
+                    onPress={() => {
+                      setCurrentPromptForSession(prompt);
+                      setShowInviteModal(true);
+                    }}
                   >
-                    <Ionicons name="send" size={18} color={THEME.white} />
+                    <Ionicons name="bulb" size={28} color="#D4A574" style={styles.promptIcon} />
+                    <View style={styles.promptCardContent}>
+                      <Text style={[styles.promptText, { color: '#E8C9A0' }]} numberOfLines={2}>
+                        {prompt.prompt_text}
+                      </Text>
+                      {prompt.difficulty && (
+                        <Text style={[styles.difficultyText, { color: '#C8A882' }]}>
+                          {prompt.difficulty}
+                        </Text>
+                      )}
+                    </View>
+                    <Ionicons name="chevron-forward" size={24} color={'#C8A882'} />
                   </TouchableOpacity>
-                </View>
-              ))}
-              {prompts.length > 5 && (
-                <Text style={[styles.morePromptsText, { color: THEME.subtext }]}>
-                  ... and {prompts.length - 5} more prompts available
-                </Text>
-              )}
-            </View>
-          )}
+                ))}
+              </View>
+            )}
+
         </ScrollView>
       )}
 
       {/* Action Modal - Choose Create Journal or Request Prompt */}
       {showActionModal && (
-        <View style={[styles.modal, { backgroundColor: THEME.backdrop }]}>
-          <View style={[styles.modalContent, { backgroundColor: THEME.surface }]}>
-            <Text style={[styles.modalTitle, { color: THEME.text.primary }]}>Create or Request</Text>
+        <View style={[styles.modal, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}>
+            <Text style={[styles.modalTitle, { color: '#E8C9A0' }]}>Create or Request</Text>
             <TouchableOpacity
-              style={[styles.actionOption, { borderColor: THEME.border }]}
+              style={[styles.actionOption, { borderColor: '#D4A574' }]}
               onPress={() => {
                 setShowActionModal(false);
                 setShowCreateModal(true);
               }}
             >
-              <Ionicons name="add-circle" size={28} color={THEME.primary} />
+              <Ionicons name="add-circle" size={28} color={'#D4A574'} />
               <View style={styles.actionTextWrapper}>
-                <Text style={[styles.actionTitle, { color: THEME.text.primary }]}>Create Journal</Text>
-                <Text style={[styles.actionDesc, { color: THEME.subtext }]}>Start a new shared journal</Text>
+                <Text style={[styles.actionTitle, { color: '#E8C9A0' }]}>Create Journal</Text>
+                <Text style={[styles.actionDesc, { color: '#C8A882' }]}>Start a new shared journal</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.actionOption, { borderColor: THEME.border, borderTopWidth: 1 }]}
+              style={[styles.actionOption, { borderColor: '#D4A574', borderTopWidth: 1 }]}
               onPress={() => {
                 setShowActionModal(false);
                 setShowInviteModal(true);
               }}
             >
-              <Ionicons name="bulb" size={28} color={THEME.primary} />
+              <Ionicons name="bulb" size={28} color={'#D4A574'} />
               <View style={styles.actionTextWrapper}>
-                <Text style={[styles.actionTitle, { color: THEME.text.primary }]}>Request Prompt</Text>
-                <Text style={[styles.actionDesc, { color: THEME.subtext }]}>Share a prompt with friends</Text>
+                <Text style={[styles.actionTitle, { color: '#E8C9A0' }]}>Request Prompt</Text>
+                <Text style={[styles.actionDesc, { color: '#C8A882' }]}>Share a prompt with friends</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.button, { backgroundColor: THEME.secondary, marginTop: 16 }]}
+              style={[styles.button, { backgroundColor: '#D4A574', marginTop: 16 }]}
               onPress={() => setShowActionModal(false)}
             >
-              <Text style={{ color: THEME.white, fontWeight: '600' }}>Cancel</Text>
+              <Text style={{ color: 'white', fontWeight: '600' }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -694,21 +690,21 @@ const SharedJournals = () => {
 
       {/* Create Journal Modal */}
       {showCreateModal && (
-        <View style={[styles.modal, { backgroundColor: THEME.backdrop }]}>
-          <View style={[styles.modalContent, { backgroundColor: THEME.surface }]}>
-            <Text style={[styles.modalTitle, { color: THEME.text.primary }]}>Create New Journal</Text>
+        <View style={[styles.modal, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}>
+            <Text style={[styles.modalTitle, { color: '#E8C9A0' }]}>Create New Journal</Text>
             <TextInput
-              style={[styles.input, { color: THEME.text.primary, borderColor: THEME.border, backgroundColor: THEME.background }]}
+              style={[styles.input, { color: '#E8C9A0', borderColor: '#D4A574', backgroundColor: 'transparent' }]}
               placeholder="Journal Name"
-              placeholderTextColor={THEME.subtext}
+              placeholderTextColor={'#C8A882'}
               value={newJournalName}
               onChangeText={setNewJournalName}
               editable={!loading}
             />
             <TextInput
-              style={[styles.inputLarge, { color: THEME.text.primary, borderColor: THEME.border, backgroundColor: THEME.background }]}
+              style={[styles.inputLarge, { color: '#E8C9A0', borderColor: '#D4A574', backgroundColor: 'transparent' }]}
               placeholder="Description (optional)"
-              placeholderTextColor={THEME.subtext}
+              placeholderTextColor={'#C8A882'}
               value={newJournalDesc}
               onChangeText={setNewJournalDesc}
               multiline
@@ -717,20 +713,20 @@ const SharedJournals = () => {
             />
             <View style={styles.buttonRow}>
               <TouchableOpacity
-                style={[styles.button, { flex: 1, backgroundColor: THEME.primary }]}
+                style={[styles.button, { flex: 1, backgroundColor: '#D4A574' }]}
                 onPress={createJournal}
                 disabled={loading}
               >
-                <Text style={{ color: THEME.white, fontWeight: '600' }}>Create</Text>
+                <Text style={{ color: 'white', fontWeight: '600' }}>Create</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, { flex: 1, backgroundColor: THEME.secondary, marginLeft: 8 }]}
+                style={[styles.button, { flex: 1, backgroundColor: '#D4A574', marginLeft: 8 }]}
                 onPress={() => {
                   setShowCreateModal(false);
                   setShowActionModal(true);
                 }}
               >
-                <Text style={{ color: THEME.white, fontWeight: '600' }}>Back</Text>
+                <Text style={{ color: 'white', fontWeight: '600' }}>Back</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -739,10 +735,10 @@ const SharedJournals = () => {
 
       {/* Invite Friends to Prompt Modal */}
       {showInviteModal && (
-        <View style={[styles.modal, { backgroundColor: THEME.backdrop }]}>
-          <View style={[styles.modalContent, { backgroundColor: THEME.surface }]}>
-            <Text style={[styles.modalTitle, { color: THEME.text.primary }]}>Invite Friends to Prompt</Text>
-            <Text style={[styles.modalSubtitle, { color: THEME.subtext }]}>Select friends to share the prompt with</Text>
+        <View style={[styles.modal, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: 'rgba\(139, 69, 19, 0.4\)' }]}>
+            <Text style={[styles.modalTitle, { color: '#E8C9A0' }]}>Invite Friends to Prompt</Text>
+            <Text style={[styles.modalSubtitle, { color: '#C8A882' }]}>Select friends to share the prompt with</Text>
             <FlatList
               data={friends}
               keyExtractor={(item) => item.id.toString()}
@@ -751,8 +747,8 @@ const SharedJournals = () => {
                 <TouchableOpacity
                   style={[
                     styles.friendItem,
-                    { borderBottomColor: THEME.border },
-                    selectedFriendsToInvite.includes(item.id) && { backgroundColor: THEME.background }
+                    { borderBottomColor: '#D4A574' },
+                    selectedFriendsToInvite.includes(item.id) && { backgroundColor: 'transparent' }
                   ]}
                   onPress={() => {
                     setSelectedFriendsToInvite(prev =>
@@ -762,18 +758,18 @@ const SharedJournals = () => {
                     );
                   }}
                 >
-                  <Text style={[styles.friendName, { color: THEME.text.primary }]}>{item.username}</Text>
+                  <Text style={[styles.friendName, { color: '#E8C9A0' }]}>{item.username}</Text>
                   <Ionicons 
                     name={selectedFriendsToInvite.includes(item.id) ? 'checkmark-circle' : 'ellipse-outline'} 
                     size={24} 
-                    color={selectedFriendsToInvite.includes(item.id) ? THEME.primary : THEME.subtext}
+                    color={selectedFriendsToInvite.includes(item.id) ? '#D4A574' : '#C8A882'}
                   />
                 </TouchableOpacity>
               )}
             />
             <View style={styles.buttonRow}>
               <TouchableOpacity
-                style={[styles.button, { flex: 1, backgroundColor: THEME.primary }]}
+                style={[styles.button, { flex: 1, backgroundColor: '#D4A574' }]}
                 disabled={selectedFriendsToInvite.length === 0 || loading}
                 onPress={() => {
                   // Get first available prompt to share
@@ -782,31 +778,33 @@ const SharedJournals = () => {
                   }
                 }}
               >
-                <Text style={{ color: THEME.white, fontWeight: '600' }}>
+                <Text style={{ color: 'white', fontWeight: '600' }}>
                   Share ({selectedFriendsToInvite.length})
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.button, { flex: 1, backgroundColor: THEME.secondary, marginLeft: 8 }]}
+                style={[styles.button, { flex: 1, backgroundColor: '#D4A574', marginLeft: 8 }]}
                 onPress={() => {
                   setShowInviteModal(false);
                   setShowActionModal(true);
                   setSelectedFriendsToInvite([]);
                 }}
               >
-                <Text style={{ color: THEME.white, fontWeight: '600' }}>Back</Text>
+                <Text style={{ color: 'white', fontWeight: '600' }}>Back</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       )}
-    </View>
+      </View>
+    </BackgroundWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   header: {
     paddingTop: 12,
@@ -816,6 +814,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 60,
+    backgroundColor: 'transparent',
   },
   headerTitle: {
     fontSize: 20,
@@ -823,6 +822,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 8,
+    color: '#E8C9A0',
   },
   createButton: {
     padding: 8,
@@ -832,6 +832,7 @@ const styles = StyleSheet.create({
     padding: 8,
     minWidth: 40,
     borderRadius: 6,
+    backgroundColor: '#D4A574',
   },
   inviteButton: {
     padding: 8,
@@ -839,12 +840,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#FF0000',
+    backgroundColor: '#D4A574',
     borderRadius: 6,
     minWidth: 80,
   },
   inviteButtonText: {
-    color: THEME.white,
+    color: '#2B1810',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -871,6 +872,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
     marginTop: 8,
+    color: '#D4A574',
   },
   journalCard: {
     flexDirection: 'row',
@@ -879,6 +881,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderColor: '#D4A574',
   },
   journalIcon: {
     marginRight: 12,
@@ -890,13 +894,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#E8C9A0',
   },
   journalDesc: {
     fontSize: 13,
     marginBottom: 4,
+    color: '#C8A882',
   },
   memberCount: {
     fontSize: 12,
+    color: '#C8A882',
   },
   promptCard: {
     flexDirection: 'row',
@@ -905,6 +912,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderColor: '#D4A574',
   },
   promptIcon: {
     marginRight: 12,
@@ -917,6 +926,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 18,
     marginBottom: 4,
+    color: '#E8C9A0',
   },
   difficultyText: {
     fontSize: 11,
@@ -929,12 +939,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minWidth: 40,
     minHeight: 40,
+    backgroundColor: '#D4A574',
   },
   morePromptsText: {
     fontSize: 12,
     fontStyle: 'italic',
     marginTop: 8,
     textAlign: 'center',
+    color: '#C8A882',
   },
   promptDisplaySection: {
     paddingHorizontal: 16,
@@ -943,6 +955,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     alignItems: 'flex-start',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderColor: '#D4A574',
   },
   promptDisplayIcon: {
     marginBottom: 12,
@@ -952,11 +966,13 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontWeight: '500',
     marginBottom: 8,
+    color: '#E8C9A0',
   },
   difficultyBadge: {
     fontSize: 12,
     fontWeight: '600',
     fontStyle: 'italic',
+    color: '#C8A882',
   },
   journalInfo: {
     paddingHorizontal: 16,
@@ -968,21 +984,25 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 8,
     marginBottom: 4,
+    color: '#D4A574',
   },
   infoText: {
     fontSize: 13,
     marginBottom: 4,
+    color: '#E8C9A0',
   },
   entryForm: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     marginBottom: 8,
+    borderBottomColor: '#D4A574',
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 12,
+    color: '#D4A574',
   },
   input: {
     borderWidth: 1,
@@ -991,6 +1011,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 8,
     fontSize: 13,
+    borderColor: '#D4A574',
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
+    color: '#E8C9A0',
   },
   inputLarge: {
     borderWidth: 1,
@@ -1000,12 +1023,17 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     fontSize: 13,
     textAlignVertical: 'top',
+    borderColor: '#D4A574',
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
+    color: '#E8C9A0',
   },
   button: {
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 6,
     alignItems: 'center',
+    backgroundColor: '#D4A574',
+    marginTop: 16,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -1019,29 +1047,36 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 6,
     borderWidth: 1,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderColor: '#D4A574',
   },
   entryAuthor: {
     fontSize: 12,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#D4A574',
   },
   entryTitle: {
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 6,
+    color: '#E8C9A0',
   },
   entryContent: {
     fontSize: 13,
     lineHeight: 18,
     marginBottom: 6,
+    color: '#E8C9A0',
   },
   entryDate: {
     fontSize: 11,
+    color: '#C8A882',
   },
   emptyText: {
     fontSize: 16,
     textAlign: 'center',
     marginTop: 16,
+    color: '#C8A882',
   },
   modal: {
     position: 'absolute',
@@ -1052,6 +1087,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: '90%',
@@ -1063,15 +1099,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    backgroundColor: 'rgba(43, 24, 16, 0.8)',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
+    color: '#E8C9A0',
   },
   modalSubtitle: {
     fontSize: 13,
     marginBottom: 12,
+    color: '#C8A882',
   },
   friendItem: {
     flexDirection: 'row',
@@ -1080,9 +1119,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
+    borderBottomColor: '#D4A574',
   },
   friendName: {
     fontSize: 14,
+    color: '#E8C9A0',
   },
   actionOption: {
     flexDirection: 'row',
@@ -1091,6 +1132,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderBottomWidth: 1,
     minHeight: 70,
+    borderBottomColor: '#D4A574',
   },
   actionTextWrapper: {
     flex: 1,
@@ -1100,9 +1142,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#E8C9A0',
   },
   actionDesc: {
     fontSize: 12,
+    color: '#C8A882',
   },
 });
 

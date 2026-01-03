@@ -16,6 +16,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
 import { THEME } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function FriendSelection({ navigation, route }) {
   const router = useRouter();
@@ -130,18 +131,19 @@ function FriendSelection({ navigation, route }) {
   ), [selectedFriends]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>← Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Select Players</Text>
-        <View style={styles.spacer} />
-      </View>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Select Players</Text>
+          <View style={styles.spacer} />
+        </View>
 
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
           placeholder="Search friends..."
           placeholderTextColor={THEME.text.secondary}
           value={searchQuery}
@@ -191,13 +193,14 @@ function FriendSelection({ navigation, route }) {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',
@@ -205,20 +208,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: THEME.spacing.lg,
     paddingVertical: THEME.spacing.md,
-    backgroundColor: THEME.surfaceDark,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderBottomWidth: 2,
+    borderBottomColor: '#D4A574',
   },
   backButton: {
     paddingHorizontal: THEME.spacing.md,
   },
   backButtonText: {
-    color: THEME.primary,
+    color: '#D4A574',
     fontSize: 16,
     fontWeight: '600',
   },
   headerTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -227,19 +230,19 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     padding: THEME.spacing.lg,
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    borderBottomColor: '#D4A574',
   },
   searchInput: {
-    backgroundColor: THEME.background,
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
     borderRadius: THEME.borderRadius.lg,
     paddingHorizontal: THEME.spacing.lg,
     paddingVertical: THEME.spacing.md,
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 14,
     borderWidth: 1,
-    borderColor: THEME.borderLight,
+    borderColor: '#D4A574',
   },
   loadingContainer: {
     flex: 1,
@@ -253,30 +256,30 @@ const styles = StyleSheet.create({
     padding: THEME.spacing.xl,
   },
   emptyText: {
-    color: THEME.text.secondary,
+    color: '#E8C9A0',
     fontSize: 18,
     marginBottom: THEME.spacing.md,
   },
   emptySubtext: {
-    color: THEME.text.muted,
+    color: '#C8A882',
     fontSize: 14,
   },
   listContainer: {
     padding: THEME.spacing.lg,
   },
   friendCard: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.lg,
     padding: THEME.spacing.lg,
     marginBottom: THEME.spacing.md,
     borderWidth: 2,
-    borderColor: THEME.borderLight,
+    borderColor: '#D4A574',
     flexDirection: 'row',
     alignItems: 'center',
   },
   friendCardSelected: {
-    borderColor: THEME.primary,
-    backgroundColor: THEME.primary + '15',
+    borderColor: '#D4A574',
+    backgroundColor: 'rgba(212, 165, 116, 0.2)',
   },
   friendInfo: {
     flex: 1,
@@ -290,12 +293,12 @@ const styles = StyleSheet.create({
     marginRight: THEME.spacing.md,
   },
   avatarPlaceholder: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -303,52 +306,52 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   username: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: THEME.spacing.sm,
   },
   email: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 14,
   },
   checkmark: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     alignItems: 'center',
     justifyContent: 'center',
   },
   checkmarkText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: 'bold',
   },
   selectedCount: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: THEME.spacing.md,
   },
   footer: {
     padding: THEME.spacing.lg,
-    backgroundColor: THEME.surfaceDark,
-    borderTopWidth: 1,
-    borderTopColor: THEME.borderLight,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderTopWidth: 2,
+    borderTopColor: '#D4A574',
   },
   continueButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingVertical: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
     alignItems: 'center',
   },
   continueButtonDisabled: {
-    backgroundColor: THEME.text.muted,
+    backgroundColor: '#C8A882',
     opacity: 0.6,
   },
   continueButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 16,
     fontWeight: 'bold',
   },

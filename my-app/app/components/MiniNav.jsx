@@ -1,17 +1,18 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Animated, Easing, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Animated, Easing, Alert, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import useStore from '@/app/src/core/global';
 import { clearSecureStorage, getAuthToken, getUserData } from '@/app/src/core/secureStorage';
 import { THEME } from '@/app/src/constants/appTheme';
 
 const DEFAULT_TABS = [
-  { name: 'GameHub', label: 'Games', icon: '🎮' },
+  { name: '/', label: 'Home', icon: '🏠' },
   { name: 'JoinGame', label: 'Join', icon: '🔑' },
   { name: 'Friends', label: 'Friends', icon: '👥' },
-  { name: 'Messages', label: 'Messages', icon: '💬' },
+  { name: 'Messages', label: 'Messages', icon: require('../../assets/images/messages.png'), isImage: true },
   { name: 'Search', label: 'Search', icon: '🔍' },
   { name: 'Calendar', label: 'Calendar', icon: '📅' },
+  { name: 'Gardens', label: 'Gardens', icon: '🌱' },
   { name: 'Journal', label: 'Journal', icon: '📝' },
   { name: 'Rules', label: 'Rules', icon: '📖' },
 ];
@@ -132,7 +133,18 @@ export default function MiniNav({ router, tabs = DEFAULT_TABS, style }) {
                   animateClose(() => router.push(tab.name));
                 }}
               >
-                <Text style={[styles.icon, { fontSize: Math.max(16, Math.round(itemSize * 0.4)) }]}>{tab.icon}</Text>
+                {tab.isImage ? (
+                  <Image
+                    source={tab.icon}
+                    style={{
+                      width: Math.max(16, Math.round(itemSize * 0.6)),
+                      height: Math.max(16, Math.round(itemSize * 0.6)),
+                      resizeMode: 'contain',
+                    }}
+                  />
+                ) : (
+                  <Text style={[styles.icon, { fontSize: Math.max(16, Math.round(itemSize * 0.4)) }]}>{tab.icon}</Text>
+                )}
               </TouchableOpacity>
             ))}
           </ScrollView>

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Alert, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../core/api';
-import { THEME } from '../constants/appTheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const SharedPromptSessions = () => {
   const [sessions, setSessions] = useState([]);
@@ -233,15 +233,16 @@ const SharedPromptSessions = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Collaborative Prompts</Text>
-      </View>
-
-      {loading && sessions.length === 0 ? (
-        <View style={styles.centerContent}>
-          <ActivityIndicator size="large" color={THEME.primary} />
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Collaborative Prompts</Text>
         </View>
+
+        {loading && sessions.length === 0 ? (
+          <View style={styles.centerContent}>
+            <ActivityIndicator size="large" color="#D4A574" />
+          </View>
       ) : prompts.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="chatbubbles" size={48} color="#999" />
@@ -292,7 +293,7 @@ const SharedPromptSessions = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Invite Friends</Text>
               <TouchableOpacity onPress={() => setShowInviteModal(false)}>
-                <Ionicons name="close" size={28} color={THEME.primary} />
+                <Ionicons name="close" size={28} color="#D4A574" />
               </TouchableOpacity>
             </View>
 
@@ -352,30 +353,31 @@ const SharedPromptSessions = () => {
           </View>
         </View>
       )}
-    </View>
+      </View>
+    </BackgroundWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'transparent',
   },
   header: {
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     paddingHorizontal: 16,
     paddingVertical: 12,
     paddingTop: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomWidth: 0,
+    borderBottomColor: 'transparent',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: THEME.primary,
+    color: '#E8C9A0',
     flex: 1,
   },
   centerContent: {
@@ -388,7 +390,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   promptCard: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: 8,
     padding: 16,
     marginBottom: 12,
@@ -397,7 +399,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderLeftWidth: 4,
-    borderLeftColor: THEME.primary,
+    borderLeftColor: '#D4A574',
   },
   promptContent: {
     flex: 1,
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
   promptText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#E8C9A0',
     marginBottom: 8,
     lineHeight: 22,
   },
@@ -415,10 +417,10 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
-    color: '#999',
+    color: '#C8A882',
   },
   inviteButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -427,7 +429,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   inviteButtonText: {
-    color: 'white',
+    color: '#2B1810',
     fontWeight: '600',
     fontSize: 10,
     marginTop: 2,
@@ -440,12 +442,12 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#999',
+    color: '#C8A882',
     marginTop: 16,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: '#bbb',
+    color: '#C8A882',
     marginTop: 8,
   },
   modalOverlay: {
@@ -457,7 +459,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   modal: {
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(43, 24, 16, 0.95)',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     maxHeight: '80%',
@@ -472,16 +474,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#D4A574',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#E8C9A0',
   },
   modalSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#C8A882',
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
@@ -499,7 +501,7 @@ const styles = StyleSheet.create({
   },
   noFriendsText: {
     fontSize: 14,
-    color: '#999',
+    color: '#C8A882',
     marginTop: 12,
     textAlign: 'center',
   },
@@ -507,8 +509,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    backgroundColor: 'white',
+    borderTopColor: '#D4A574',
+    backgroundColor: 'rgba(43, 24, 16, 0.95)',
   },
   friendCheckbox: {
     flexDirection: 'row',
@@ -516,30 +518,30 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: 'rgba(212, 165, 116, 0.2)',
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: '#D4A574',
     marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'transparent',
   },
   checkboxSelected: {
-    backgroundColor: THEME.primary,
-    borderColor: THEME.primary,
+    backgroundColor: '#D4A574',
+    borderColor: '#D4A574',
   },
   friendName: {
     fontSize: 16,
-    color: '#333',
+    color: '#E8C9A0',
     fontWeight: '500',
   },
   submitButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 6,

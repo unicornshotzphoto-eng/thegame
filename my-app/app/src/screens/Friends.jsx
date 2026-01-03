@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
 import { THEME } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function Friends() {
     const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'requests', 'sent'
@@ -378,7 +379,8 @@ function Friends() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <BackgroundWrapper overlayOpacity={0.5}>
+            <SafeAreaView style={styles.container}>
             <View style={styles.tabBar}>
                 <TouchableOpacity
                     style={[styles.tab, activeTab === 'friends' && styles.activeTab]}
@@ -421,19 +423,20 @@ function Friends() {
             
             {renderContent()}
         </SafeAreaView>
+        </BackgroundWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.background,
+        backgroundColor: 'transparent',
     },
     tabBar: {
         flexDirection: 'row',
-        backgroundColor: THEME.surfaceDark,
-        borderBottomWidth: 1,
-        borderBottomColor: THEME.borderLight,
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     tab: {
         flex: 1,
@@ -443,31 +446,31 @@ const styles = StyleSheet.create({
         borderBottomColor: 'transparent',
     },
     activeTab: {
-        borderBottomColor: THEME.primary,
+        borderBottomColor: '#D4A574',
     },
     tabText: {
-        color: THEME.text.secondary,
+        color: '#C8A882',
         fontSize: 14,
         fontWeight: '600',
     },
     activeTabText: {
-        color: THEME.primary,
+        color: '#E8C9A0',
     },
     searchContainer: {
         padding: THEME.spacing.lg,
-        backgroundColor: THEME.surfaceDark,
-        borderBottomWidth: 1,
-        borderBottomColor: THEME.borderLight,
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     searchInput: {
-        backgroundColor: THEME.background,
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
         borderRadius: THEME.borderRadius.lg,
         paddingHorizontal: THEME.spacing.lg,
         paddingVertical: THEME.spacing.md,
-        color: THEME.text.primary,
+        color: '#E8C9A0',
         fontSize: 14,
-        borderWidth: 1,
-        borderColor: THEME.borderLight,
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     loadingContainer: {
         flex: 1,
@@ -481,24 +484,24 @@ const styles = StyleSheet.create({
         padding: THEME.spacing.xl,
     },
     emptyText: {
-        color: THEME.text.secondary,
+        color: '#E8C9A0',
         fontSize: 18,
         marginBottom: THEME.spacing.md,
     },
     emptySubtext: {
-        color: THEME.text.muted,
+        color: '#C8A882',
         fontSize: 14,
     },
     listContainer: {
         padding: THEME.spacing.lg,
     },
     card: {
-        backgroundColor: THEME.surfaceDark,
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: THEME.borderRadius.lg,
         padding: THEME.spacing.lg,
         marginBottom: THEME.spacing.md,
-        borderWidth: 1,
-        borderColor: THEME.borderLight,
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     userInfo: {
         flexDirection: 'row',
@@ -512,12 +515,12 @@ const styles = StyleSheet.create({
         marginRight: THEME.spacing.md,
     },
     avatarPlaceholder: {
-        backgroundColor: THEME.primary,
+        backgroundColor: '#D4A574',
         justifyContent: 'center',
         alignItems: 'center',
     },
     avatarText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 20,
         fontWeight: 'bold',
     },
@@ -525,17 +528,17 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     username: {
-        color: THEME.text.primary,
+        color: '#E8C9A0',
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: THEME.spacing.sm,
     },
     email: {
-        color: THEME.text.secondary,
+        color: '#C8A882',
         fontSize: 14,
     },
     pendingText: {
-        color: THEME.accent,
+        color: '#D4A574',
         fontSize: 12,
         marginTop: THEME.spacing.md,
         fontStyle: 'italic',
@@ -546,27 +549,27 @@ const styles = StyleSheet.create({
     },
     acceptButton: {
         flex: 1,
-        backgroundColor: THEME.primary,
+        backgroundColor: '#D4A574',
         paddingVertical: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
         alignItems: 'center',
     },
     rejectButton: {
         flex: 1,
-        backgroundColor: THEME.button.danger,
+        backgroundColor: 'rgba(192, 57, 43, 0.8)',
         paddingVertical: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
         alignItems: 'center',
     },
     removeButton: {
-        backgroundColor: THEME.button.danger,
+        backgroundColor: 'rgba(192, 57, 43, 0.8)',
         paddingHorizontal: THEME.spacing.lg,
         paddingVertical: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
         alignItems: 'center',
     },
     addButton: {
-        backgroundColor: THEME.primary,
+        backgroundColor: '#D4A574',
         paddingHorizontal: THEME.spacing.lg,
         paddingVertical: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
@@ -579,10 +582,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     buttonDisabled: {
-        backgroundColor: THEME.text.muted,
+        backgroundColor: '#C8A882',
     },
     buttonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontWeight: 'bold',
         fontSize: 14,
     },

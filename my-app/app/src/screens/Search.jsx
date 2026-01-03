@@ -6,6 +6,7 @@ import { showAlert } from '../utils/alert';
 import { THEME } from '../constants/appTheme';
 import { getAuthToken } from '../core/secureStorage';
 import useStore from '../core/global';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function Search({ navigation }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -116,7 +117,8 @@ function Search({ navigation }) {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <BackgroundWrapper overlayOpacity={0.5}>
+            <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
                 <TextInput
                     style={styles.searchInput}
@@ -156,28 +158,29 @@ function Search({ navigation }) {
                 />
             )}
         </SafeAreaView>
+        </BackgroundWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: THEME.background,
+        backgroundColor: 'transparent',
     },
     searchContainer: {
         padding: 16,
-        backgroundColor: THEME.surfaceDark,
-        borderBottomWidth: 1,
-        borderBottomColor: THEME.borderLight,
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     searchInput: {
-        backgroundColor: THEME.background,
-        color: THEME.text.primary,
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
+        color: '#E8C9A0',
         padding: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: THEME.border,
+        borderColor: '#D4A574',
     },
     loadingContainer: {
         flex: 1,
@@ -190,19 +193,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     emptyText: {
-        color: '#888',
+        color: '#C8A882',
         fontSize: 16,
     },
     listContainer: {
         padding: THEME.spacing.lg,
     },
     userCard: {
-        backgroundColor: THEME.surfaceDark,
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: THEME.borderRadius.lg,
         padding: THEME.spacing.lg,
         marginBottom: THEME.spacing.md,
-        borderWidth: 1,
-        borderColor: THEME.borderLight,
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     userInfo: {
         flexDirection: 'row',
@@ -215,12 +218,12 @@ const styles = StyleSheet.create({
         marginRight: THEME.spacing.md,
     },
     avatarPlaceholder: {
-        backgroundColor: THEME.primary,
+        backgroundColor: '#D4A574',
         justifyContent: 'center',
         alignItems: 'center',
     },
     avatarText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 20,
         fontWeight: 'bold',
     },
@@ -228,17 +231,17 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     username: {
-        color: THEME.text.primary,
+        color: '#E8C9A0',
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: THEME.spacing.sm,
     },
     email: {
-        color: THEME.text.secondary,
+        color: '#C8A882',
         fontSize: 14,
     },
     addButton: {
-        backgroundColor: THEME.primary,
+        backgroundColor: '#D4A574',
         paddingHorizontal: THEME.spacing.lg,
         paddingVertical: THEME.spacing.md,
         borderRadius: THEME.borderRadius.md,
@@ -246,10 +249,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     addButtonDisabled: {
-        backgroundColor: THEME.text.muted,
+        backgroundColor: '#C8A882',
     },
     addButtonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontWeight: 'bold',
         fontSize: 14,
     },

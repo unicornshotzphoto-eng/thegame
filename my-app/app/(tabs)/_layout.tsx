@@ -24,6 +24,8 @@ export default function TabLayout() {
       <Stack.Screen name="Journal" />
       <Stack.Screen name="Rules" />
       <Stack.Screen name="JoinGame" />
+      <Stack.Screen name="Gardens" />
+      <Stack.Screen name="GardenDetail" />
     </Stack>
   );
 }

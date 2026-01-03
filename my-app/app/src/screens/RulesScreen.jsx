@@ -2,6 +2,7 @@ import React from 'react';
 import { Text, View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Title from '../common/Title';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const rules = [
   'One partner reads a question aloud.',
@@ -38,55 +39,61 @@ const Divider = () => <View style={styles.divider} />;
 
 const RulesScreen = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <Title text="Instructions & Rules" />
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+          <Title text="Instructions & Rules" />
 
-        <SectionTitle>Player Rules</SectionTitle>
-        {playerRules.map((p, i) => (
-          <Text key={`player-${i}`} style={styles.text}>◦ {p}</Text>
-        ))}
+          <SectionTitle>Player Rules</SectionTitle>
+          {playerRules.map((p, i) => (
+            <Text key={`player-${i}`} style={styles.text}>◦ {p}</Text>
+          ))}
 
-        <Divider />
-        <SectionTitle>Rules</SectionTitle>
-        {rules.map((r, i) => (
-          <Bullet key={`rule-${i}`} index={i + 1} text={r} />
-        ))}
+          <Divider />
+          <SectionTitle>Rules</SectionTitle>
+          {rules.map((r, i) => (
+            <Bullet key={`rule-${i}`} index={i + 1} text={r} />
+          ))}
 
-        <SectionTitle>Game End</SectionTitle>
-        {endings.map((e, i) => (
-          <Text key={`end-${i}`} style={styles.indentText}>◦ {e}</Text>
-        ))}
+          <SectionTitle>Game End</SectionTitle>
+          {endings.map((e, i) => (
+            <Text key={`end-${i}`} style={styles.indentText}>◦ {e}</Text>
+          ))}
 
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </BackgroundWrapper>
   );
 };
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: 'transparent',
   },
   content: {
     padding: 20,
+    backgroundColor: 'transparent',
   },
   scrollView: {
     flex: 1,
     width: '100%',
+    backgroundColor: 'transparent',
   },
   text: {
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 10,
     fontFamily: 'montserrat-regular',
-    color: 'white',
+    color: '#E8C9A0',
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
     marginTop: 12,
     marginBottom: 8,
-    color: 'white',
+    color: '#D4A574',
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
   },
   indentText: {
     paddingLeft: 12,
@@ -94,7 +101,14 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 8,
     fontFamily: 'montserrat-regular',
-    color: 'white',
+    color: '#E8C9A0',
+    textShadow: '1px 1px 2px rgba(0, 0, 0, 0.3)',
+  },
+  divider: {
+    height: 2,
+    backgroundColor: '#D4A574',
+    marginVertical: 16,
+    opacity: 0.6,
   },
 });
 

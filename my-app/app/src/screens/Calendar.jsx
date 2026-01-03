@@ -19,6 +19,7 @@ import api from '../core/api';
 import { showAlert } from '../utils/alert';
 import useStore from '../core/global';
 import { THEME } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -372,7 +373,8 @@ function Calendar({ navigation }) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Shared Calendars</Text>
         <TouchableOpacity
@@ -543,13 +545,14 @@ function Calendar({ navigation }) {
         </View>
       </Modal>
     </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',
@@ -557,17 +560,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: THEME.spacing.xl,
     paddingVertical: THEME.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    borderBottomWidth: 2,
+    borderBottomColor: '#D4A574',
   },
   title: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 24,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   createButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     width: 45,
     height: 45,
     borderRadius: 22.5,
@@ -575,28 +578,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   createButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 24,
     fontWeight: 'bold',
   },
   createFormContainer: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     padding: THEME.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    borderBottomWidth: 2,
+    borderBottomColor: '#D4A574',
   },
   input: {
-    backgroundColor: THEME.background,
-    color: THEME.text.primary,
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
+    color: '#E8C9A0',
     padding: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     marginBottom: THEME.spacing.md,
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: '#D4A574',
     fontFamily: 'montserrat-regular',
   },
   submitButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     padding: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
@@ -605,7 +608,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
@@ -621,14 +624,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: THEME.spacing.xl,
   },
   emptyText: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: THEME.spacing.md,
     fontFamily: 'montserrat-regular',
   },
   emptySubtext: {
-    color: THEME.text.muted,
+    color: '#C8A882',
     fontSize: 14,
     fontFamily: 'montserrat-regular',
   },
@@ -637,7 +640,7 @@ const styles = StyleSheet.create({
     paddingVertical: THEME.spacing.md,
   },
   calendarCard: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.lg,
     marginBottom: THEME.spacing.md,
@@ -645,49 +648,49 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderLeftWidth: 4,
-    borderLeftColor: THEME.primary,
+    borderLeftColor: '#D4A574',
   },
   calendarContent: {
     flex: 1,
   },
   calendarName: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: THEME.spacing.md,
     fontFamily: 'montserrat-regular',
   },
   calendarMeta: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 11,
     marginBottom: THEME.spacing.sm,
     fontFamily: 'montserrat-regular',
   },
   calendarDate: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 11,
     fontFamily: 'montserrat-regular',
   },
   inviteButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingHorizontal: THEME.spacing.md,
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     marginLeft: THEME.spacing.md,
   },
   inviteButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 12,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
   },
   modalContent: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -695,17 +698,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: THEME.spacing.xl,
     paddingVertical: THEME.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: THEME.borderLight,
+    borderBottomWidth: 2,
+    borderBottomColor: '#D4A574',
   },
   modalTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 20,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   modalCloseText: {
-    color: THEME.text.primary,
+    color: '#D4A574',
     fontSize: 24,
   },
   friendsListContent: {
@@ -715,16 +718,16 @@ const styles = StyleSheet.create({
   friendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.md,
     marginBottom: THEME.spacing.md,
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: '#D4A574',
   },
   friendItemSelected: {
-    borderColor: THEME.primary,
-    backgroundColor: THEME.primary,
+    borderColor: '#E8C9A0',
+    backgroundColor: 'rgba(212, 165, 116, 0.2)',
   },
   friendAvatar: {
     width: 40,
@@ -733,48 +736,50 @@ const styles = StyleSheet.create({
     marginRight: THEME.spacing.md,
   },
   avatarPlaceholder: {
-    backgroundColor: THEME.borderLight,
+    backgroundColor: '#D4A574',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
-    color: THEME.text.muted,
+    color: '#2B1810',
     fontSize: 12,
     fontWeight: 'bold',
   },
   friendName: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 14,
     flex: 1,
     fontFamily: 'montserrat-regular',
   },
   checkmark: {
-    color: THEME.accent,
+    color: '#D4A574',
     fontSize: 18,
     fontWeight: 'bold',
   },
   modalFooter: {
     flexDirection: 'row',
     padding: THEME.spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: THEME.borderLight,
+    borderTopWidth: 2,
+    borderTopColor: '#D4A574',
     gap: THEME.spacing.md,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: THEME.borderLight,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   cancelButtonText: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   inviteConfirmButton: {
     flex: 1,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
@@ -783,7 +788,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   inviteConfirmButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
@@ -792,12 +797,12 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   calendarWidget: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     margin: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
     padding: THEME.spacing.lg,
-    borderWidth: 1,
-    borderColor: THEME.borderLight,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   monthHeader: {
     flexDirection: 'row',
@@ -806,7 +811,7 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.lg,
   },
   monthTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
@@ -815,12 +820,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     justifyContent: 'center',
     alignItems: 'center',
   },
   navButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -844,7 +849,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   dayHeaderText: {
-    color: THEME.accent,
+    color: '#D4A574',
     fontSize: 11,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -893,44 +898,44 @@ const styles = StyleSheet.create({
     color: 'transparent',
   },
   dayText: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 14,
     fontWeight: '500',
     fontFamily: 'montserrat-regular',
   },
   todayDay: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     borderWidth: 2,
-    borderColor: THEME.accent,
+    borderColor: '#E8C9A0',
   },
   todayDayText: {
-    color: '#fff',
+    color: '#2B1810',
     fontWeight: 'bold',
   },
   selectedDay: {
-    backgroundColor: THEME.accent,
+    backgroundColor: 'rgba(212, 165, 116, 0.6)',
     borderWidth: 2,
-    borderColor: THEME.primary,
+    borderColor: '#D4A574',
   },
   selectedDayText: {
-    color: THEME.background,
+    color: '#E8C9A0',
     fontWeight: 'bold',
   },
   selectedDateInfo: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.md,
     borderLeftWidth: 4,
-    borderLeftColor: THEME.primary,
+    borderLeftColor: '#D4A574',
   },
   selectedDateLabel: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 12,
     marginBottom: THEME.spacing.sm,
     fontFamily: 'montserrat-regular',
   },
   selectedDateValue: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
@@ -938,17 +943,17 @@ const styles = StyleSheet.create({
   notePreview: {
     marginTop: THEME.spacing.md,
     paddingTop: THEME.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: THEME.borderLight,
+    borderTopWidth: 2,
+    borderTopColor: '#D4A574',
   },
   notePreviewLabel: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 11,
     marginBottom: THEME.spacing.sm,
     fontFamily: 'montserrat-regular',
   },
   notePreviewText: {
-    color: '#ccc',
+    color: '#E8C9A0',
     fontSize: 12,
     fontFamily: 'montserrat-regular',
   },
@@ -958,13 +963,13 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   noteModalContent: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: THEME.spacing.lg,
     maxHeight: '80%',
-    borderTopWidth: 1,
-    borderTopColor: THEME.borderLight,
+    borderTopWidth: 2,
+    borderTopColor: '#D4A574',
   },
   noteModalHeader: {
     flexDirection: 'row',
@@ -973,31 +978,31 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   noteModalTitle: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   noteModalClose: {
-    color: THEME.text.primary,
+    color: '#D4A574',
     fontSize: 24,
     fontWeight: 'bold',
   },
   noteModalDate: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 12,
     marginBottom: THEME.spacing.lg,
     fontFamily: 'montserrat-regular',
   },
   noteInput: {
-    backgroundColor: THEME.background,
-    color: THEME.text.primary,
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
+    color: '#E8C9A0',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.md,
     height: 150,
     marginBottom: THEME.spacing.lg,
-    borderWidth: 1,
-    borderColor: THEME.border,
+    borderWidth: 2,
+    borderColor: '#D4A574',
     textAlignVertical: 'top',
     fontFamily: 'montserrat-regular',
   },
@@ -1007,25 +1012,27 @@ const styles = StyleSheet.create({
   },
   noteCancelButton: {
     flex: 1,
-    backgroundColor: THEME.borderLight,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   noteCancelButtonText: {
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },
   noteSaveButton: {
     flex: 1,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingVertical: THEME.spacing.md,
     borderRadius: THEME.borderRadius.md,
     alignItems: 'center',
   },
   noteSaveButtonText: {
-    color: '#fff',
+    color: '#2B1810',
     fontWeight: 'bold',
     fontFamily: 'montserrat-regular',
   },

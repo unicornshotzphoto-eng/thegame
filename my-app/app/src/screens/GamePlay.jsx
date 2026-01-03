@@ -9,6 +9,7 @@ import useStore from '../core/global';
 import { getUserData, storeCurrentGameSession, clearCurrentGameSession } from '../core/secureStorage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { GameWebSocket } from '../core/websocket';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function GamePlay({ route, navigation }) {
     const router = useRouter();
@@ -55,9 +56,13 @@ function GamePlay({ route, navigation }) {
     const [hasAnswered, setHasAnswered] = useState(false);
     const [copiedCode, setCopiedCode] = useState(false);
     const [wsStatus, setWsStatus] = useState('disconnected');
+    const [roundTimer, setRoundTimer] = useState(30);
+    const timerIntervalRef = useRef(null);
     const wsRef = useRef(null);
     const [inviteVisible, setInviteVisible] = useState(false);
     const [endGameModalVisible, setEndGameModalVisible] = useState(false);
+    const [timerPaused, setTimerPaused] = useState(false);
+    const [waitingPlayerNames, setWaitingPlayerNames] = useState([]);
 
     const categories = [
         { id: 'spiritual', label: 'Spiritual', range: '1-20' },
@@ -122,6 +127,57 @@ function GamePlay({ route, navigation }) {
             } catch {}
         };
     }, []);
+
+    // Timer effect for 30-second round countdown
+    useEffect(() => {
+        setRoundTimer(30);
+        
+        timerIntervalRef.current = setInterval(() => {
+            // Check if all players have entered (answered in current round)
+            if (currentRound && session?.players) {
+                const playersWhoAnswered = new Set(
+                    (currentRound.answers || []).map(a => a.player?.id || a.player?.username)
+                );
+                const allPlayerIds = new Set(
+                    session.players.map(p => p.id || p.username)
+                );
+                
+                const allHaveAnswered = allPlayerIds.size === playersWhoAnswered.size;
+                const notAnswered = session.players.filter(
+                    p => !playersWhoAnswered.has(p.id) && !playersWhoAnswered.has(p.username)
+                );
+                
+                setTimerPaused(!allHaveAnswered);
+                setWaitingPlayerNames(notAnswered.map(p => p.username || 'Unknown'));
+                
+                // Only decrement if all players have answered
+                if (allHaveAnswered) {
+                    setRoundTimer(prev => {
+                        if (prev <= 1) {
+                            clearInterval(timerIntervalRef.current);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }
+            } else {
+                // If we have current round data, continue countdown
+                setRoundTimer(prev => {
+                    if (prev <= 1) {
+                        clearInterval(timerIntervalRef.current);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }
+        }, 1000);
+
+        return () => {
+            if (timerIntervalRef.current) {
+                clearInterval(timerIntervalRef.current);
+            }
+        };
+    }, [currentRound?.id, currentRound?.answers, session?.players]);
 
     const fetchGameSession = async () => {
         try {
@@ -542,9 +598,10 @@ function GamePlay({ route, navigation }) {
     });
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => {
+        <BackgroundWrapper overlayOpacity={0.5}>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => {
                     console.log('[GamePlay] Back button pressed');
                     console.log('[GamePlay] Router available:', !!router);
                     try {
@@ -705,16 +762,15 @@ function GamePlay({ route, navigation }) {
                         </Text>
                     )}
                                 {isCreator && (
-                                    <View style={{ marginTop: 12 }}>
-                                        <TouchableOpacity
-                                            style={[styles.nextRoundButton, answeredCount < totalPlayers && styles.nextRoundButtonDisabled]}
-                                            onPress={advanceToNextRound}
-                                            disabled={answeredCount < totalPlayers}
-                                        >
-                                            <Text style={styles.nextRoundButtonText}>
-                                                {answeredCount >= totalPlayers ? 'Advance to Next Round' : `Waiting for players (${answeredCount}/${totalPlayers})`}
-                                            </Text>
-                                        </TouchableOpacity>
+                                    <View style={{ marginTop: 12, alignItems: 'center' }}>
+                                        <View style={styles.timerContainer}>
+                                            <Text style={styles.timerText}>{roundTimer}s</Text>
+                                        </View>
+                                        <Text style={styles.timerLabel}>
+                                            {timerPaused 
+                                                ? `⏸ Waiting for: ${waitingPlayerNames.join(', ')}`
+                                                : (roundTimer > 0 ? 'Next round starts in...' : 'Time\'s up! Loading next round...')}
+                                        </Text>
                                     </View>
                                 )}
                 </View>
@@ -825,13 +881,14 @@ function GamePlay({ route, navigation }) {
                 )}
             </ScrollView>
         </SafeAreaView>
+        </BackgroundWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: 'transparent',
     },
     header: {
         flexDirection: 'row',
@@ -839,27 +896,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     backButton: {
         padding: 8,
     },
     backButtonText: {
-        color: '#1a73e8',
+        color: '#D4A574',
         fontSize: 16,
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#E8C9A0',
     },
     endGameButton: {
         padding: 8,
     },
     endGameText: {
-        color: '#ff3b30',
+        color: '#ff6b6b',
         fontSize: 14,
         fontWeight: '600',
     },
@@ -867,7 +924,7 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     inviteText: {
-        color: '#28a745',
+        color: '#D4A574',
         fontSize: 14,
         fontWeight: '600',
     },
@@ -876,17 +933,17 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     scoreboardCard: {
-        backgroundColor: '#111',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 12,
         padding: 20,
         marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#333',
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     scoreboardTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#1a73e8',
+        color: '#D4A574',
         marginBottom: 16,
     },
     scoreRow: {
@@ -894,82 +951,84 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#222',
+        borderBottomColor: '#C8A882',
     },
     playerName: {
         fontSize: 16,
-        color: '#fff',
+        color: '#E8C9A0',
     },
     currentPlayer: {
         fontWeight: 'bold',
-        color: '#1a73e8',
+        color: '#D4A574',
     },
     playerScore: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#1a73e8',
+        color: '#D4A574',
     },
     gameCodeCard: {
-        backgroundColor: '#1a1a1a',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 12,
         padding: 16,
         marginBottom: 20,
         borderWidth: 2,
-        borderColor: '#28a745',
+        borderColor: '#D4A574',
     },
     gameCodeLabel: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#999',
+        color: '#C8A882',
         marginBottom: 12,
     },
     gameCodeContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#111',
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
         borderRadius: 8,
         padding: 12,
     },
     gameCodeText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#28a745',
+        color: '#D4A574',
         letterSpacing: 2,
         flex: 1,
         fontFamily: 'Courier New',
     },
     copyButton: {
-        backgroundColor: '#28a745',
+        backgroundColor: '#D4A574',
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderRadius: 6,
         marginLeft: 12,
     },
     copyButtonText: {
-        color: '#000',
+        color: '#2B1810',
         fontWeight: 'bold',
         fontSize: 12,
     },
     inviteSecondaryButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderRadius: 6,
         marginLeft: 8,
     },
     inviteSecondaryText: {
-        color: '#fff',
+        color: '#2B1810',
         fontWeight: 'bold',
         fontSize: 12,
     },
     turnIndicator: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         padding: 16,
         borderRadius: 8,
         marginBottom: 20,
+        borderLeftWidth: 4,
+        borderLeftColor: '#D4A574',
     },
     turnText: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center',
@@ -984,7 +1043,7 @@ const styles = StyleSheet.create({
         paddingBottom: 12,
     },
     categoryButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 8,
@@ -994,21 +1053,21 @@ const styles = StyleSheet.create({
     categoryButtonText: {
         fontSize: 12,
         fontWeight: '600',
-        color: '#fff',
+        color: '#2B1810',
         textAlign: 'center',
         marginBottom: 4,
     },
     categoryRange: {
         fontSize: 10,
-        color: '#cce5ff',
+        color: '#C8A882',
     },
     questionCard: {
-        backgroundColor: '#111',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 12,
         padding: 20,
         marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#333',
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     questionHeader: {
         flexDirection: 'row',
@@ -1019,95 +1078,117 @@ const styles = StyleSheet.create({
     questionNumber: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#1a73e8',
+        color: '#D4A574',
     },
     pointsBadge: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 12,
     },
     pointsText: {
-        color: '#fff',
+        color: '#2B1810',
         fontWeight: 'bold',
         fontSize: 14,
     },
     questionText: {
         fontSize: 18,
-        color: '#fff',
+        color: '#E8C9A0',
         marginBottom: 16,
         lineHeight: 26,
     },
     consequenceBox: {
-        backgroundColor: '#221a00',
+        backgroundColor: 'rgba(139, 69, 19, 0.5)',
         padding: 12,
         borderRadius: 8,
         marginBottom: 16,
         borderLeftWidth: 4,
-        borderLeftColor: '#ffc107',
+        borderLeftColor: '#D4A574',
     },
     consequenceLabel: {
         fontSize: 12,
-        color: '#ffc107',
+        color: '#D4A574',
         fontWeight: 'bold',
         marginBottom: 4,
     },
     consequenceText: {
         fontSize: 14,
-        color: '#f0ad4e',
+        color: '#E8C9A0',
     },
     input: {
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
-        color: '#fff',
+        color: '#E8C9A0',
         minHeight: 100,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#333',
+        borderColor: '#D4A574',
         textAlignVertical: 'top',
     },
     submitButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingVertical: 14,
         borderRadius: 8,
         alignItems: 'center',
     },
     submitButtonDisabled: {
-        backgroundColor: '#ccc',
+        backgroundColor: '#C8A882',
     },
     submitButtonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 16,
         fontWeight: 'bold',
     },
     nextRoundButton: {
-        backgroundColor: '#28a745',
+        backgroundColor: '#D4A574',
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: 'center',
     },
     nextRoundButtonDisabled: {
-        backgroundColor: '#555',
+        backgroundColor: '#C8A882',
     },
     nextRoundButtonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 14,
         fontWeight: '600',
     },
+    timerContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: '#D4A574',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 12,
+        borderWidth: 3,
+        borderColor: '#E8C9A0',
+    },
+    timerText: {
+        fontSize: 48,
+        fontWeight: 'bold',
+        color: '#2B1810',
+    },
+    timerLabel: {
+        color: '#E8C9A0',
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'center',
+    },
     recentTurnsCard: {
-        backgroundColor: '#111',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 12,
         padding: 20,
         marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#333',
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     recentTurnsTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#1a73e8',
+        color: '#D4A574',
         marginBottom: 12,
     },
     turnRow: {
@@ -1115,66 +1196,70 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#222',
+        borderBottomColor: '#C8A882',
     },
     turnPlayer: {
         fontSize: 14,
-        color: '#fff',
+        color: '#E8C9A0',
         flex: 1,
     },
     turnQuestion: {
         fontSize: 14,
-        color: '#999',
+        color: '#C8A882',
         marginRight: 12,
     },
     turnPoints: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#28a745',
+        color: '#D4A574',
     },
     errorText: {
         fontSize: 16,
-        color: '#666',
+        color: '#C8A882',
         textAlign: 'center',
         marginTop: 50,
     },
     waitingBox: {
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 8,
         marginTop: 12,
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     waitingText: {
         fontSize: 16,
-        color: '#999',
+        color: '#C8A882',
         marginTop: 12,
         textAlign: 'center',
     },
     answersCount: {
         fontSize: 14,
-        color: '#1a73e8',
+        color: '#D4A574',
         marginTop: 8,
         fontWeight: '600',
     },
     roundCard: {
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 8,
         padding: 12,
         marginBottom: 12,
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     roundHeader: {
         marginBottom: 8,
     },
     roundQuestion: {
         fontSize: 14,
-        color: '#fff',
+        color: '#E8C9A0',
         fontWeight: '600',
         marginBottom: 4,
     },
     roundPicker: {
         fontSize: 12,
-        color: '#999',
+        color: '#C8A882',
         fontStyle: 'italic',
     },
     answersContainer: {
@@ -1183,21 +1268,23 @@ const styles = StyleSheet.create({
     pickerAnswerLabel: {
         fontSize: 13,
         fontWeight: 'bold',
-        color: '#1a73e8',
+        color: '#D4A574',
         marginBottom: 4,
     },
     pickerAnswer: {
         fontSize: 13,
-        color: '#fff',
-        backgroundColor: '#1a3a5c',
+        color: '#E8C9A0',
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
         padding: 8,
         borderRadius: 4,
         marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     answersLabel: {
         fontSize: 13,
         fontWeight: 'bold',
-        color: '#999',
+        color: '#C8A882',
         marginBottom: 4,
     },
     answerRow: {
@@ -1208,19 +1295,19 @@ const styles = StyleSheet.create({
     },
     answerPlayer: {
         fontSize: 12,
-        color: '#999',
+        color: '#C8A882',
         fontWeight: '600',
         marginRight: 6,
     },
     answerText: {
         fontSize: 12,
-        color: '#fff',
+        color: '#E8C9A0',
         flex: 1,
     },
     answerPoints: {
         fontSize: 12,
         fontWeight: 'bold',
-        color: '#28a745',
+        color: '#D4A574',
         marginLeft: 6,
     },
     modalBackdrop: {
@@ -1235,52 +1322,54 @@ const styles = StyleSheet.create({
     },
     inviteModal: {
         width: '85%',
-        backgroundColor: '#111',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 12,
         padding: 16,
-        borderWidth: 1,
-        borderColor: '#333',
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     inviteTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#fff',
+        color: '#E8C9A0',
     },
     inviteSubtitle: {
         fontSize: 12,
-        color: '#999',
+        color: '#C8A882',
         marginTop: 4,
     },
     inviteAction: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingVertical: 12,
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 10,
     },
     inviteCancel: {
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(139, 69, 19, 0.3)',
         borderWidth: 1,
-        borderColor: '#333',
+        borderColor: '#D4A574',
     },
     inviteActionText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 14,
         fontWeight: '600',
     },
     inviteInfoBox: {
-        backgroundColor: '#222',
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
         padding: 10,
         borderRadius: 8,
         marginTop: 10,
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     inviteInfoText: {
-        color: '#ccc',
+        color: '#C8A882',
         fontSize: 12,
         marginTop: 4,
     },
     inviteLinkText: {
-        color: '#1a73e8',
+        color: '#D4A574',
         fontSize: 12,
         marginTop: 6,
         textDecorationLine: 'underline',
@@ -1292,22 +1381,24 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     modalContent: {
-        backgroundColor: '#2a2a2a',
+        backgroundColor: 'rgba(139, 69, 19, 0.5)',
         borderRadius: 12,
         padding: 24,
         width: '80%',
         maxWidth: 400,
         alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#D4A574',
     },
     modalTitle: {
         fontSize: 20,
         fontWeight: '600',
-        color: '#fff',
+        color: '#E8C9A0',
         marginBottom: 12,
     },
     modalMessage: {
         fontSize: 14,
-        color: '#ccc',
+        color: '#E8C9A0',
         textAlign: 'center',
         marginBottom: 24,
         lineHeight: 20,
@@ -1320,24 +1411,26 @@ const styles = StyleSheet.create({
     modalCancelButton: {
         flex: 1,
         paddingVertical: 12,
-        backgroundColor: '#555',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderRadius: 8,
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     modalCancelText: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 14,
         fontWeight: '600',
     },
     modalConfirmButton: {
         flex: 1,
         paddingVertical: 12,
-        backgroundColor: '#d32f2f',
+        backgroundColor: '#D4A574',
         borderRadius: 8,
         alignItems: 'center',
     },
     modalConfirmText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 14,
         fontWeight: '600',
     },

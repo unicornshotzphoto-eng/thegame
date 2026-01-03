@@ -14,7 +14,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
-import { THEME } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function JournalPrompts() {
   const [currentPrompt, setCurrentPrompt] = useState(null);
@@ -160,16 +160,19 @@ function JournalPrompts() {
 
   if (loading && !currentPrompt) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={THEME.primary} />
-        <Text style={styles.loadingText}>Loading prompts...</Text>
-      </View>
+      <BackgroundWrapper overlayOpacity={0.5}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#D4A574" />
+          <Text style={styles.loadingText}>Loading prompts...</Text>
+        </View>
+      </BackgroundWrapper>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
           <Text style={styles.title}>Journal Prompts</Text>
@@ -219,7 +222,7 @@ function JournalPrompts() {
               <TextInput
                 style={styles.answerInput}
                 placeholder="Type your thoughtful response here..."
-                placeholderTextColor={THEME.text.muted}
+                placeholderTextColor="#C8A882"
                 multiline
                 numberOfLines={6}
                 value={answerText}
@@ -337,7 +340,7 @@ function JournalPrompts() {
             <View style={styles.modalHeader}>
               <Text style={styles.confirmTitle}>Share Prompt</Text>
               <TouchableOpacity onPress={() => { setShowInviteModal(false); setSelectedFriends([]); }}>
-                <Ionicons name="close" size={24} color={THEME.text.primary} />
+                <Ionicons name="close" size={24} color="#E8C9A0" />
               </TouchableOpacity>
             </View>
 
@@ -402,130 +405,122 @@ function JournalPrompts() {
         </View>
       )}
     </View>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   scrollContent: {
-    padding: THEME.spacing.lg,
-    paddingBottom: THEME.spacing.xl * 2,
+    padding: 16,
+    paddingBottom: 32,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: THEME.spacing.xl,
+    padding: 24,
   },
   loadingText: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 16,
-    marginTop: THEME.spacing.md,
-    fontFamily: 'montserrat-regular',
+    marginTop: 12,
   },
   header: {
-    marginBottom: THEME.spacing.xl,
+    marginBottom: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: THEME.text.primary,
-    marginBottom: THEME.spacing.sm,
-    fontFamily: 'montserrat-regular',
+    color: '#E8C9A0',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: THEME.text.secondary,
-    fontFamily: 'montserrat-regular',
+    color: '#C8A882',
   },
   difficultySection: {
-    marginBottom: THEME.spacing.xl,
+    marginBottom: 24,
   },
   sectionLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: THEME.text.primary,
-    marginBottom: THEME.spacing.md,
-    fontFamily: 'montserrat-regular',
+    color: '#E8C9A0',
+    marginBottom: 12,
   },
   difficultyButtons: {
     flexDirection: 'row',
-    gap: THEME.spacing.md,
+    gap: 12,
   },
   difficultyButton: {
     flex: 1,
-    paddingVertical: THEME.spacing.md,
-    paddingHorizontal: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
-    backgroundColor: THEME.surfaceDark,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: '#D4A574',
   },
   difficultyButtonActive: {
-    backgroundColor: THEME.primary,
-    borderColor: THEME.primary,
+    backgroundColor: '#D4A574',
+    borderColor: '#D4A574',
   },
   difficultyButtonText: {
-    color: THEME.text.secondary,
+    color: '#C8A882',
     fontSize: 12,
     fontWeight: '600',
     textAlign: 'center',
-    fontFamily: 'montserrat-regular',
   },
   difficultyButtonTextActive: {
-    color: THEME.text.primary,
+    color: '#2B1810',
   },
   promptCard: {
-    backgroundColor: THEME.surfaceDark,
-    borderRadius: THEME.borderRadius.lg,
-    padding: THEME.spacing.lg,
-    marginBottom: THEME.spacing.xl,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
     borderLeftWidth: 4,
-    borderLeftColor: THEME.primary,
+    borderLeftColor: '#D4A574',
   },
   difficultyBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: THEME.primary,
-    paddingHorizontal: THEME.spacing.md,
-    paddingVertical: THEME.spacing.sm,
-    borderRadius: THEME.borderRadius.md,
-    marginBottom: THEME.spacing.md,
+    backgroundColor: '#D4A574',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 12,
   },
   difficultyBadgeText: {
-    color: THEME.text.primary,
+    color: '#2B1810',
     fontSize: 11,
     fontWeight: 'bold',
-    fontFamily: 'montserrat-regular',
   },
   promptText: {
     fontSize: 18,
     fontWeight: '600',
-    color: THEME.text.primary,
-    marginBottom: THEME.spacing.lg,
+    color: '#E8C9A0',
+    marginBottom: 16,
     lineHeight: 26,
-    fontFamily: 'montserrat-regular',
   },
   answerSection: {
-    marginBottom: THEME.spacing.lg,
+    marginBottom: 16,
   },
   answerLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: THEME.text.primary,
-    marginBottom: THEME.spacing.md,
-    fontFamily: 'montserrat-regular',
+    color: '#E8C9A0',
+    marginBottom: 12,
   },
   answerInput: {
-    backgroundColor: THEME.background,
-    borderRadius: THEME.borderRadius.md,
-    padding: THEME.spacing.md,
-    color: THEME.text.primary,
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
+    borderRadius: 8,
+    padding: 12,
+    color: '#E8C9A0',
     borderWidth: 1,
-    borderColor: THEME.border,
-    fontFamily: 'montserrat-regular',
+    borderColor: '#D4A574',
     fontSize: 14,
     minHeight: 120,
   },
@@ -533,107 +528,99 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: THEME.spacing.sm,
+    marginTop: 8,
   },
   characterCount: {
     fontSize: 12,
-    color: THEME.text.muted,
-    fontFamily: 'montserrat-regular',
+    color: '#C8A882',
   },
   savedIndicator: {
     fontSize: 12,
     color: '#4caf50',
     fontWeight: '600',
-    fontFamily: 'montserrat-regular',
   },
   actionButtons: {
     flexDirection: 'row',
-    gap: THEME.spacing.md,
-    marginTop: THEME.spacing.md,
+    gap: 12,
+    marginTop: 12,
   },
   saveButton: {
     flex: 1,
-    backgroundColor: THEME.primary,
-    paddingVertical: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
+    backgroundColor: '#D4A574',
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: THEME.text.primary,
+    color: '#2B1810',
     fontWeight: '600',
     fontSize: 14,
-    fontFamily: 'montserrat-regular',
   },
   clearButton: {
     flex: 1,
-    backgroundColor: THEME.surfaceDark,
-    paddingVertical: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: THEME.button.secondary,
+    borderColor: '#D4A574',
   },
   clearButtonText: {
-    color: THEME.button.secondary,
+    color: '#D4A574',
     fontWeight: '600',
     fontSize: 14,
-    fontFamily: 'montserrat-regular',
   },
   inviteButton: {
-    backgroundColor: THEME.button.secondary,
-    paddingVertical: THEME.spacing.md,
-    paddingHorizontal: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
+    backgroundColor: '#D4A574',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    gap: THEME.spacing.sm,
+    gap: 4,
   },
   inviteButtonText: {
-    color: 'white',
+    color: '#2B1810',
     fontWeight: '600',
     fontSize: 14,
-    fontFamily: 'montserrat-regular',
   },
   shuffleButton: {
-    backgroundColor: THEME.primary,
-    paddingVertical: THEME.spacing.lg,
-    borderRadius: THEME.borderRadius.md,
+    backgroundColor: '#D4A574',
+    paddingVertical: 16,
+    borderRadius: 8,
     alignItems: 'center',
   },
   shuffleButtonDisabled: {
     opacity: 0.6,
   },
   shuffleButtonText: {
-    color: THEME.text.primary,
+    color: '#2B1810',
     fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'montserrat-regular',
   },
   savedSection: {
-    marginTop: THEME.spacing.xl,
+    marginTop: 24,
   },
   savedList: {
-    gap: THEME.spacing.md,
+    gap: 12,
   },
   savedItem: {
-    backgroundColor: THEME.surfaceDark,
-    padding: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    padding: 12,
+    borderRadius: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#4caf50',
+    borderLeftColor: '#D4A574',
   },
   savedPrompt: {
     fontSize: 12,
-    color: THEME.text.muted,
-    marginBottom: THEME.spacing.sm,
-    fontFamily: 'montserrat-regular',
+    color: '#C8A882',
+    marginBottom: 8,
   },
   savedAnswer: {
     fontSize: 13,
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontWeight: '500',
-    fontFamily: 'montserrat-regular',
   },
   confirmOverlay: {
     position: 'absolute',
@@ -644,67 +631,63 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: THEME.spacing.lg,
+    padding: 16,
   },
   confirmCard: {
-    backgroundColor: THEME.surfaceDark,
-    borderRadius: THEME.borderRadius.lg,
-    padding: THEME.spacing.lg,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderRadius: 12,
+    padding: 16,
     width: '100%',
     maxWidth: 300,
   },
   confirmTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: THEME.text.primary,
-    marginBottom: THEME.spacing.md,
-    fontFamily: 'montserrat-regular',
+    color: '#E8C9A0',
+    marginBottom: 12,
   },
   confirmText: {
     fontSize: 14,
-    color: THEME.text.secondary,
-    marginBottom: THEME.spacing.lg,
-    fontFamily: 'montserrat-regular',
+    color: '#C8A882',
+    marginBottom: 16,
   },
   confirmButtons: {
     flexDirection: 'row',
-    gap: THEME.spacing.md,
+    gap: 12,
   },
   confirmCancel: {
     flex: 1,
-    paddingVertical: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
-    backgroundColor: THEME.background,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: THEME.border,
+    borderColor: '#D4A574',
   },
   confirmCancelText: {
-    color: THEME.text.secondary,
+    color: '#E8C9A0',
     fontWeight: '600',
-    fontFamily: 'montserrat-regular',
   },
   confirmSubmit: {
     flex: 1,
-    paddingVertical: THEME.spacing.md,
-    borderRadius: THEME.borderRadius.md,
-    backgroundColor: THEME.primary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: '#D4A574',
     alignItems: 'center',
   },
   confirmSubmitText: {
-    color: THEME.text.primary,
+    color: '#2B1810',
     fontWeight: '600',
-    fontFamily: 'montserrat-regular',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: THEME.spacing.lg,
+    marginBottom: 16,
   },
   friendsListContainer: {
     maxHeight: 300,
-    marginBottom: THEME.spacing.lg,
+    marginBottom: 16,
   },
   friendsList: {
     flexGrow: 0,
@@ -712,40 +695,39 @@ const styles = StyleSheet.create({
   friendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: THEME.spacing.md,
-    paddingHorizontal: THEME.spacing.md,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderBottomColor: THEME.border,
+    borderBottomColor: '#D4A574',
   },
   friendCheckbox: {
     width: 24,
     height: 24,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: THEME.primary,
-    marginRight: THEME.spacing.md,
+    borderColor: '#D4A574',
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   friendName: {
     flex: 1,
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     fontSize: 16,
-    fontFamily: 'montserrat-regular',
   },
   emptyFriendsContainer: {
     alignItems: 'center',
-    paddingVertical: THEME.spacing.xl,
+    paddingVertical: 24,
   },
   emptyFriendsText: {
     fontSize: 16,
     fontWeight: '600',
-    color: THEME.text.primary,
-    marginBottom: THEME.spacing.sm,
+    color: '#E8C9A0',
+    marginBottom: 8,
   },
   emptyFriendsSubtext: {
     fontSize: 14,
-    color: THEME.text.secondary,
+    color: '#C8A882',
     textAlign: 'center',
   },
   buttonDisabled: {

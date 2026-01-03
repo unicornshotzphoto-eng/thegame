@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import api from '../core/api';
 import { showAlert } from '../utils/alert';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 function DirectMessages({ navigation }) {
     const router = useRouter();
@@ -174,10 +175,11 @@ function DirectMessages({ navigation }) {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Messages</Text>
-                <TouchableOpacity 
+        <BackgroundWrapper overlayOpacity={0.5}>
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Messages</Text>
+                    <TouchableOpacity 
                     style={styles.addFriendButton} 
                     onPress={() => setAddFriendModalVisible(true)}
                 >
@@ -251,36 +253,37 @@ function DirectMessages({ navigation }) {
                 />
             )}
         </SafeAreaView>
+        </BackgroundWrapper>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: 'transparent',
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
-        backgroundColor: '#111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     title: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 24,
         fontWeight: 'bold',
     },
     addFriendButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 8,
     },
     addFriendText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 14,
         fontWeight: '600',
     },
@@ -293,9 +296,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     friendCard: {
-        backgroundColor: '#111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
         paddingHorizontal: 16,
         paddingVertical: 12,
     },
@@ -309,15 +312,15 @@ const styles = StyleSheet.create({
         height: 48,
         borderRadius: 24,
         marginRight: 12,
-        backgroundColor: '#333',
+        backgroundColor: '#D4A574',
     },
     avatarPlaceholder: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
     },
     avatarText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 20,
         fontWeight: 'bold',
     },
@@ -325,17 +328,17 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     username: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 16,
         fontWeight: '600',
     },
     email: {
-        color: '#999',
+        color: '#C8A882',
         fontSize: 12,
         marginTop: 4,
     },
     onlineStatus: {
-        color: '#4CAF50',
+        color: '#D4A574',
         fontSize: 12,
         marginTop: 4,
     },
@@ -345,7 +348,7 @@ const styles = StyleSheet.create({
         width: 24,
     },
     arrowText: {
-        color: '#666',
+        color: '#D4A574',
         fontSize: 24,
     },
     buttonRow: {
@@ -359,18 +362,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     messageButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
     },
     removeButton: {
-        backgroundColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderWidth: 1,
+        borderColor: '#D4A574',
     },
     buttonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 12,
         fontWeight: '600',
     },
     removeButtonText: {
-        color: '#999',
+        color: '#D4A574',
         fontSize: 12,
         fontWeight: '600',
     },
@@ -381,55 +386,55 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     emptyTitle: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 18,
         fontWeight: '600',
         marginBottom: 8,
         textAlign: 'center',
     },
     emptySubtitle: {
-        color: '#999',
+        color: '#C8A882',
         fontSize: 14,
         textAlign: 'center',
     },
     modalContainer: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
     },
     modalHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
-        backgroundColor: '#111',
-        borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
+        borderBottomWidth: 2,
+        borderBottomColor: '#D4A574',
     },
     modalTitle: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 20,
         fontWeight: '600',
     },
     closeButton: {
-        color: '#999',
+        color: '#D4A574',
         fontSize: 24,
         fontWeight: '600',
     },
     searchBox: {
         padding: 12,
-        backgroundColor: '#111',
+        backgroundColor: 'rgba(139, 69, 19, 0.4)',
         borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        borderBottomColor: '#D4A574',
     },
     searchInput: {
-        backgroundColor: '#222',
-        color: '#fff',
+        backgroundColor: 'rgba(43, 24, 16, 0.6)',
+        color: '#E8C9A0',
         paddingHorizontal: 12,
         paddingVertical: 10,
         borderRadius: 8,
         fontSize: 14,
         borderWidth: 1,
-        borderColor: '#333',
+        borderColor: '#D4A574',
     },
     searchResultsList: {
         flex: 1,
@@ -439,41 +444,41 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#333',
+        borderBottomColor: '#D4A574',
     },
     smallAvatar: {
         width: 40,
         height: 40,
         borderRadius: 20,
         marginRight: 12,
-        backgroundColor: '#333',
+        backgroundColor: '#D4A574',
     },
     resultDetails: {
         flex: 1,
     },
     resultUsername: {
-        color: '#fff',
+        color: '#E8C9A0',
         fontSize: 14,
         fontWeight: '600',
     },
     resultEmail: {
-        color: '#999',
+        color: '#C8A882',
         fontSize: 12,
         marginTop: 4,
     },
     addButton: {
-        backgroundColor: '#1a73e8',
+        backgroundColor: '#D4A574',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 6,
     },
     addButtonText: {
-        color: '#fff',
+        color: '#2B1810',
         fontSize: 12,
         fontWeight: '600',
     },
     emptyText: {
-        color: '#999',
+        color: '#C8A882',
         fontSize: 14,
         textAlign: 'center',
         marginTop: 20,

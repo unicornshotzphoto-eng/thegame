@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { THEME } from '../constants/appTheme';
 import { getCurrentGameSession, clearCurrentGameSession } from '../core/secureStorage';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,215 +41,189 @@ function Home({ navigation }) {
     }, [])
   );
   
-  const handleResumeGame = async () => {
-    if (savedSession?.sessionId) {
-      console.log('[Home] Resuming game:', savedSession.sessionId);
-      router.push({
-        pathname: '/(tabs)/GamePlay',
-        params: { sessionId: savedSession.sessionId, gameCode: savedSession.gameCode }
-      });
-    }
-  };
-  
-  const handleClearSavedGame = async () => {
-    try {
-      await clearCurrentGameSession();
-      setSavedSession(null);
-      console.log('[Home] Saved game session cleared');
-    } catch (error) {
-      console.error('[Home] Error clearing saved session:', error);
-    }
-  };
-  
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.logo}>Know Me Grow Us</Text>
-          <View style={styles.headerButtons}>
-            <TouchableOpacity
-              style={styles.signInButton}
-              onPress={() => router.push('/signin')}
-            >
-              <Text style={styles.signInText}>Sign In</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.signUpButton}
-              onPress={() => router.push('/Signup')}
-            >
-              <Text style={styles.signUpText}>Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+            {/* Logo & Tagline */}
+            <View style={styles.logoSection}>
+              <Text style={styles.logoMain}>Know Me</Text>
+              <Text style={styles.logoGrow}>Grow Us</Text>
+              <Text style={styles.tagline}>Explore. Share. Connect.</Text>
+            </View>
 
-        {/* Main Content */}
-        <View style={styles.contentContainer}>
-          {/* Main Headline */}
-          <View style={styles.headlineContainer}>
-            <Text style={styles.mainHeadline}>
-              An intimate game for
-            </Text>
-            <Text style={[styles.mainHeadline, styles.highlightText]}>
-              couples
-            </Text>
-          </View>
-
-          {/* Subheadline */}
-          <Text style={styles.subheadline}>
-            Challenge yourself with fun and engaging quizzes designed to deepen your connection.
-          </Text>
-
-          {/* Resume Game Button - Show if saved session exists */}
-          {savedSession && (
-            <View style={styles.resumeContainer}>
-              <TouchableOpacity
-                style={[styles.ctaButton, styles.resumeButton]}
-                onPress={handleResumeGame}
+            {/* Main Cards Grid */}
+            <View style={styles.gridContainer}>
+              {/* Start Game Card */}
+              <TouchableOpacity 
+                style={styles.card}
+                onPress={() => router.push('/(tabs)/FriendSelection')}
               >
-                <Text style={styles.ctaButtonText}>Resume Game</Text>
+                <Text style={styles.cardIcon}>🎴</Text>
+                <Text style={styles.cardTitle}>Start Game</Text>
+                <Text style={styles.cardSubtitle}>Begin the Journey</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.clearButton}
-                onPress={handleClearSavedGame}
+
+              {/* Question Packs Card */}
+              <TouchableOpacity 
+                style={styles.card}
+                onPress={() => router.push('/(tabs)/Search')}
               >
-                <Text style={styles.clearButtonText}>Clear Saved Game</Text>
+                <Text style={styles.cardIcon}>📚</Text>
+                <Text style={styles.cardTitle}>Question Packs</Text>
+                <Text style={styles.cardSubtitle}>Explore Topics</Text>
+              </TouchableOpacity>
+
+              {/* My Progress Card */}
+              <TouchableOpacity 
+                style={styles.card}
+                onPress={() => router.push('/(tabs)/Calendar')}
+              >
+                <Text style={styles.cardIcon}>📈</Text>
+                <Text style={styles.cardTitle}>My Progress</Text>
+                <Text style={styles.cardSubtitle}>Track & Reflect</Text>
+              </TouchableOpacity>
+
+              {/* Settings Card */}
+              <TouchableOpacity 
+                style={styles.card}
+                onPress={() => router.push('/(tabs)/Search')}
+              >
+                <Text style={styles.cardIcon}>⚙️</Text>
+                <Text style={styles.cardTitle}>Settings</Text>
+                <Text style={styles.cardSubtitle}>Customize Experience</Text>
               </TouchableOpacity>
             </View>
-          )}
 
-          {/* CTA Button */}
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={() => router.push('/(tabs)/JoinGame')}
-          >
-            <Text style={styles.ctaButtonText}>Start a Game</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </View>
+            {/* Tonight's Reflection Section */}
+            <View style={styles.reflectionSection}>
+              <Text style={styles.reflectionLabel}>Tonight's Reflection</Text>
+              <View style={styles.reflectionCard}>
+                <Text style={styles.reflectionTitle}>Tempting Question</Text>
+                <Text style={styles.reflectionQuestion}>What's been on your mind today?</Text>
+                <TouchableOpacity style={styles.revealButton}>
+                  <Text style={styles.revealButtonText}>Reveal</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   safeArea: {
     flex: 1,
-    justifyContent: 'space-between',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  logoSection: {
     alignItems: 'center',
-    paddingHorizontal: THEME.spacing.xl,
-    paddingVertical: THEME.spacing.lg,
+    marginBottom: 40,
   },
-  logo: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: THEME.text.primary,
-    letterSpacing: 0.5,
-  },
-  headerButtons: {
-    flexDirection: 'row',
-    gap: THEME.spacing.lg,
-    alignItems: 'center',
-  },
-  signInButton: {
-    paddingVertical: THEME.spacing.md,
-    paddingHorizontal: THEME.spacing.lg,
-  },
-  signInText: {
-    color: THEME.text.primary,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  signUpButton: {
-    paddingVertical: THEME.spacing.md,
-    paddingHorizontal: THEME.spacing.xl,
-    borderWidth: 2,
-    borderColor: THEME.primary,
-    borderRadius: THEME.borderRadius.lg,
-    backgroundColor: 'transparent',
-  },
-  signUpText: {
-    color: THEME.primary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: THEME.spacing.xl,
-  },
-  headlineContainer: {
-    marginBottom: THEME.spacing.xl,
-    alignItems: 'center',
-  },
-  mainHeadline: {
-    fontSize: 48,
+  logoMain: {
+    fontSize: 42,
     fontWeight: '700',
-    color: THEME.text.primary,
-    lineHeight: 56,
-    textAlign: 'center',
-    letterSpacing: -0.5,
+    color: '#D4A574',
+    letterSpacing: 1,
   },
-  highlightText: {
-    color: THEME.primary,
+  logoGrow: {
+    fontSize: 48,
+    fontWeight: '600',
+    color: '#ff4444',
+    fontStyle: 'italic',
+    marginTop: -8,
+    fontFamily: 'cursive',
   },
-  subheadline: {
-    fontSize: 16,
-    color: THEME.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: THEME.spacing.xxl,
-    maxWidth: width - THEME.spacing.xl * 2,
+  tagline: {
+    fontSize: 14,
+    color: '#C8A882',
+    marginTop: 8,
+    letterSpacing: 2,
   },
-  ctaButton: {
-    paddingVertical: THEME.spacing.lg,
-    paddingHorizontal: THEME.spacing.xxl,
-    backgroundColor: THEME.primary,
-    borderRadius: 50,
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 40,
+  },
+  card: {
+    width: '48%',
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderRadius: 16,
     borderWidth: 2,
-    borderColor: THEME.primary,
-    elevation: 5,
-    shadowColor: THEME.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    borderColor: '#D4A574',
+    padding: 20,
+    marginBottom: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  ctaButtonText: {
+  cardIcon: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  cardTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: THEME.text.primary,
-    letterSpacing: 0.3,
-  },
-  resumeContainer: {
-    gap: THEME.spacing.md,
-    marginBottom: THEME.spacing.lg,
-  },
-  resumeButton: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
-    shadowColor: '#4CAF50',
-  },
-  clearButton: {
-    paddingVertical: THEME.spacing.md,
-    paddingHorizontal: THEME.spacing.lg,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: '#999',
-    backgroundColor: 'transparent',
-  },
-  clearButtonText: {
-    fontSize: 14,
-    color: '#999',
+    color: '#E8C9A0',
+    marginBottom: 4,
     textAlign: 'center',
-    fontWeight: '500',
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: '#C8A882',
+    textAlign: 'center',
+  },
+  reflectionSection: {
+    marginBottom: 30,
+  },
+  reflectionLabel: {
+    fontSize: 14,
+    color: '#C8A882',
+    textAlign: 'center',
+    letterSpacing: 1.5,
+    marginBottom: 16,
+  },
+  reflectionCard: {
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#D4A574',
+    padding: 24,
+    alignItems: 'center',
+  },
+  reflectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#D4A574',
+    marginBottom: 12,
+  },
+  reflectionQuestion: {
+    fontSize: 16,
+    color: '#E8C9A0',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  revealButton: {
+    backgroundColor: '#D4A574',
+    paddingVertical: 10,
+    paddingHorizontal: 32,
+    borderRadius: 20,
+  },
+  revealButtonText: {
+    color: '#2B1810',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
 

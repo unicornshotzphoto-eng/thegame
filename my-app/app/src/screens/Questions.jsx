@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../core/api';
 import { THEME, COMMON_STYLES } from '../constants/appTheme';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 const CATEGORY_COLORS = THEME.categories;
 
@@ -666,9 +667,10 @@ function Questions({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {renderTabNavigation()}
-      <ScrollView contentContainerStyle={styles.homeScrollContent}>
+    <BackgroundWrapper overlayOpacity={0.5}>
+      <SafeAreaView style={[styles.container, { backgroundColor: 'transparent' }]}>
+        {renderTabNavigation()}
+        <ScrollView contentContainerStyle={styles.homeScrollContent}>
         <View style={styles.header2}>
           <View style={styles.headerTop}>
             <TouchableOpacity 
@@ -728,14 +730,15 @@ function Questions({ navigation }) {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </BackgroundWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: THEME.background,
+    backgroundColor: 'transparent',
   },
   scrollView: {
     flex: 1,
@@ -757,54 +760,54 @@ const styles = StyleSheet.create({
   },
   header2: {
     padding: 16,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingTop: 12,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: THEME.text.accent,
+    color: '#2B1810',
     marginBottom: THEME.spacing.sm,
   },
   subtitle: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: '#E8C9A0',
   },
   categoryTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FFF',
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.md,
   },
   progress: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.md,
   },
   progressBar: {
     height: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(212, 165, 116, 0.3)',
     borderRadius: 3,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#FFF',
+    backgroundColor: '#D4A574',
   },
   scoreSection: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: THEME.spacing.md,
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     marginHorizontal: THEME.spacing.md,
     marginTop: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
     borderLeftWidth: 3,
-    borderLeftColor: THEME.primary,
-    shadowColor: THEME.shadow.color,
-    shadowOffset: THEME.shadow.offset,
-    shadowOpacity: THEME.shadow.opacity,
-    shadowRadius: THEME.shadow.radius,
+    borderLeftColor: '#D4A574',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
     elevation: 3,
   },
   scoreItem: {
@@ -812,26 +815,26 @@ const styles = StyleSheet.create({
   },
   scoreLabel: {
     fontSize: 12,
-    color: THEME.text.accent,
+    color: '#C8A882',
     marginBottom: THEME.spacing.sm,
   },
   scoreValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
   },
   questionCard: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     marginHorizontal: THEME.spacing.md,
     marginTop: THEME.spacing.lg,
     padding: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
     borderLeftWidth: 4,
-    borderLeftColor: THEME.primary,
-    shadowColor: THEME.shadow.color,
-    shadowOffset: THEME.shadow.offset,
-    shadowOpacity: THEME.shadow.opacity,
-    shadowRadius: THEME.shadow.radius,
+    borderLeftColor: '#D4A574',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
     elevation: 3,
   },
   pointsBadge: {
@@ -840,40 +843,41 @@ const styles = StyleSheet.create({
     paddingVertical: THEME.spacing.sm,
     borderRadius: THEME.borderRadius.sm,
     marginBottom: THEME.spacing.lg,
+    backgroundColor: '#D4A574',
   },
   pointsText: {
-    color: '#FFF',
+    color: '#2B1810',
     fontWeight: 'bold',
     fontSize: 12,
   },
   questionText: {
     fontSize: 18,
-    color: THEME.text.primary,
+    color: '#E8C9A0',
     lineHeight: 26,
     fontWeight: '500',
   },
   answerInputSection: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     marginHorizontal: THEME.spacing.md,
     marginTop: THEME.spacing.lg,
     padding: THEME.spacing.md,
     borderRadius: THEME.borderRadius.lg,
     borderLeftWidth: 3,
-    borderLeftColor: THEME.primary,
-    shadowColor: THEME.shadow.color,
-    shadowOffset: THEME.shadow.offset,
-    shadowOpacity: THEME.shadow.opacity,
-    shadowRadius: THEME.shadow.radius,
+    borderLeftColor: '#D4A574',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
     elevation: 3,
   },
   textInput: {
-    borderWidth: 1,
-    borderColor: THEME.border,
+    borderWidth: 2,
+    borderColor: '#D4A574',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.md,
     fontSize: 14,
-    color: THEME.text.primary,
-    backgroundColor: THEME.background,
+    color: '#E8C9A0',
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
     textAlignVertical: 'top',
     maxHeight: 120,
   },
@@ -898,34 +902,36 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   submitButton: {
-    backgroundColor: THEME.button.primary,
+    backgroundColor: '#D4A574',
   },
   skipButton: {
-    backgroundColor: THEME.button.secondary,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   buttonText: {
-    color: '#FFF',
+    color: '#2B1810',
     fontWeight: 'bold',
     fontSize: 14,
   },
   statsSection: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     marginHorizontal: THEME.spacing.md,
     padding: THEME.spacing.md,
     borderRadius: THEME.borderRadius.lg,
     marginBottom: THEME.spacing.lg,
     borderLeftWidth: 3,
-    borderLeftColor: THEME.primary,
-    shadowColor: THEME.shadow.color,
-    shadowOffset: THEME.shadow.offset,
-    shadowOpacity: THEME.shadow.opacity,
-    shadowRadius: THEME.shadow.radius,
+    borderLeftColor: '#D4A574',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
     elevation: 3,
   },
   statsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.lg,
   },
   statsRow: {
@@ -938,26 +944,26 @@ const styles = StyleSheet.create({
   statCount: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.sm,
   },
   statLabel: {
     fontSize: 12,
-    color: THEME.text.secondary,
+    color: '#C8A882',
   },
   backButton: {
     marginHorizontal: THEME.spacing.md,
     paddingVertical: THEME.spacing.md,
     paddingHorizontal: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.md,
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     alignItems: 'center',
     marginBottom: THEME.spacing.lg,
     borderWidth: 2,
-    borderColor: THEME.primary,
+    borderColor: '#D4A574',
   },
   backButtonText: {
-    color: THEME.text.accent,
+    color: '#E8C9A0',
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -967,16 +973,16 @@ const styles = StyleSheet.create({
     paddingVertical: THEME.spacing.md,
     paddingHorizontal: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     alignItems: 'center',
-    shadowColor: THEME.shadow.color,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.5,
-    shadowRadius: THEME.shadow.radius,
+    shadowRadius: 3,
     elevation: 5,
   },
   multiplayerButtonText: {
-    color: '#FFF',
+    color: '#2B1810',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -997,53 +1003,58 @@ const styles = StyleSheet.create({
     marginBottom: THEME.spacing.md,
   },
   teamModeCard: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
   },
   multiplayerModeCard: {
-    backgroundColor: THEME.button.secondary,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   modeIcon: {
     fontSize: 48,
     marginBottom: THEME.spacing.md,
+    color: '#2B1810',
   },
   modeTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
+    color: '#2B1810',
     marginBottom: THEME.spacing.md,
     textAlign: 'center',
   },
   modeDescription: {
     fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#E8C9A0',
     textAlign: 'center',
     marginBottom: THEME.spacing.md,
     lineHeight: 20,
   },
   modeFeatures: {
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(212, 165, 116, 0.2)',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.md,
   },
   featureText: {
     fontSize: 13,
-    color: '#FFF',
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.sm,
     fontWeight: '500',
   },
   createTeamCard: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
   },
   joinTeamCard: {
-    backgroundColor: THEME.button.secondary,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   actionContainer: {
     paddingHorizontal: THEME.spacing.xl,
     paddingVertical: THEME.spacing.md,
   },
   actionCard: {
-    backgroundColor: THEME.surfaceDark,
+    backgroundColor: 'rgba(139, 69, 19, 0.4)',
     borderRadius: THEME.borderRadius.lg,
     padding: THEME.spacing.lg,
     shadowColor: '#000',
@@ -1051,17 +1062,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3,
     elevation: 3,
+    borderWidth: 2,
+    borderColor: '#D4A574',
   },
   actionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.lg,
     textAlign: 'center',
   },
   actionDescription: {
     fontSize: 13,
-    color: THEME.text.secondary,
+    color: '#C8A882',
     marginBottom: THEME.spacing.lg,
     lineHeight: 20,
     textAlign: 'center',
@@ -1074,14 +1087,14 @@ const styles = StyleSheet.create({
     gap: THEME.spacing.md,
   },
   memberBadge: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingHorizontal: THEME.spacing.md,
     paddingVertical: THEME.spacing.sm,
     borderRadius: THEME.borderRadius.md,
     marginBottom: THEME.spacing.sm,
   },
   memberText: {
-    color: '#FFF',
+    color: '#2B1810',
     fontWeight: '600',
     fontSize: 12,
   },
@@ -1091,23 +1104,23 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: THEME.text.accent,
+    color: '#E8C9A0',
     marginBottom: THEME.spacing.sm,
   },
   codeInput: {
     borderWidth: 2,
-    borderColor: THEME.primary,
+    borderColor: '#D4A574',
     borderRadius: THEME.borderRadius.md,
     padding: THEME.spacing.md,
     fontSize: 16,
-    color: THEME.text.primary,
-    backgroundColor: THEME.background,
+    color: '#E8C9A0',
+    backgroundColor: 'rgba(43, 24, 16, 0.6)',
     fontWeight: 'bold',
     letterSpacing: 2,
     textAlign: 'center',
   },
   actionButton: {
-    backgroundColor: THEME.primary,
+    backgroundColor: '#D4A574',
     paddingVertical: THEME.spacing.md,
     paddingHorizontal: THEME.spacing.lg,
     borderRadius: THEME.borderRadius.lg,
