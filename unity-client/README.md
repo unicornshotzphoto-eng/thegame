@@ -72,3 +72,8 @@ NativeWebSocket or BestHTTP and mirror the endpoints above.
 - `Networking/*Service.cs`: endpoint groupings
 - `State/AppState.cs`: auth and user state
 
+## Contract test runner
+There is a stub runner at `Assets/Scripts/Testing/ContractTestRunner.cs`.
+Attach it to a GameObject in a test scene, fill in username/password,
+and press Play to validate a small set of endpoints.
+
