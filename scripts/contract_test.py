@@ -5,14 +5,13 @@ Lightweight API contract test runner.
 Usage:
   BASE_URL=http://localhost:8000 \
   USERNAME=your_user PASSWORD=your_pass \
-  CONTRACT_VARIANT=main \
   python3 scripts/contract_test.py
 
 Notes:
-- CONTRACT_VARIANT can be: any (default), head, main.
 - If USERNAME/PASSWORD are provided, the script signs in and uses the access token.
 - Alternatively, set TOKEN to bypass sign-in.
-- Some tests require IDs; set env vars like GROUP_ID, CALENDAR_ID, SESSION_ID, etc.
+- Some tests require IDs; set env vars like GROUP_ID, CALENDAR_ID, SESSION_ID, ROUND_ID, etc.
+- QUESTION_CATEGORY / QUESTION_CATEGORY_MAIN override default category codes.
 """
 
 import json
@@ -75,18 +74,9 @@ def build_base_url():
     return base
 
 
-def should_run_test(variant, selected_variant):
-    if variant == "any":
-        return True
-    if selected_variant == "any":
-        return False
-    return variant == selected_variant
-
-
 def run_tests():
     base_url = build_base_url()
     timeout = int(os.getenv("REQUEST_TIMEOUT", "10"))
-    selected_variant = os.getenv("CONTRACT_VARIANT", "any").strip().lower()
 
     username = os.getenv("USERNAME")
     password = os.getenv("PASSWORD")
@@ -98,7 +88,6 @@ def run_tests():
         "calendar_id": os.getenv("CALENDAR_ID"),
         "event_id": os.getenv("EVENT_ID"),
         "question_id": os.getenv("QUESTION_ID"),
-        "game_id": os.getenv("GAME_ID"),
         "session_id": os.getenv("SESSION_ID"),
         "round_id": os.getenv("ROUND_ID"),
     }
@@ -133,7 +122,6 @@ def run_tests():
             "path": "/quiz/search/users/?q=test",
             "expect": {"type": "object", "keys": ["users"]},
             "auth": True,
-            "variant": "any",
         },
         {
             "name": "Friends list",
@@ -141,7 +129,6 @@ def run_tests():
             "path": "/quiz/friends/",
             "expect": {"type": "object", "keys": ["friends"]},
             "auth": True,
-            "variant": "any",
         },
         {
             "name": "Pending friend requests",
@@ -149,7 +136,6 @@ def run_tests():
             "path": "/quiz/friends/requests/",
             "expect": {"type": "object", "keys": ["received", "sent"]},
             "auth": True,
-            "variant": "any",
         },
         {
             "name": "Groups list",
@@ -157,7 +143,6 @@ def run_tests():
             "path": "/quiz/groups/",
             "expect": {"type": "object", "keys": ["groups"]},
             "auth": True,
-            "variant": "any",
         },
         {
             "name": "Question categories",
@@ -165,7 +150,6 @@ def run_tests():
             "path": "/quiz/questions/categories/",
             "expect": {"type": "object", "keys": ["categories"]},
             "auth": False,
-            "variant": "head",
         },
         {
             "name": "Random question",
@@ -173,40 +157,21 @@ def run_tests():
             "path": "/quiz/questions/random/",
             "expect": {"type": "object", "keys": ["id", "question_text"]},
             "auth": False,
-            "variant": "head",
         },
         {
             "name": "Questions by category",
             "method": "GET",
             "path": "/quiz/questions/{category}/",
-            "expect": {"type": "array", "item_keys": ["id", "question_text"]},
+            "expect": {"type": "array", "item_keys": ["id", "question_text", "question_number"]},
             "auth": False,
-            "variant": "head",
-            "template": {"category": os.getenv("QUESTION_CATEGORY", "spiritual")},
+            "template": {"category": os.getenv("QUESTION_CATEGORY", "spiritual_knowing")},
         },
         {
-            "name": "Calendars list",
-            "method": "GET",
-            "path": "/quiz/calendars/",
-            "expect": {"type": "object", "keys": ["calendars"]},
-            "auth": True,
-            "variant": "head",
-        },
-        {
-            "name": "Legacy multiplayer games list",
-            "method": "GET",
-            "path": "/quiz/games/",
-            "expect": {"type": "object", "keys": ["games"]},
-            "auth": True,
-            "variant": "head",
-        },
-        {
-            "name": "Questions list (main variant)",
+            "name": "Questions list (with category)",
             "method": "GET",
             "path": "/quiz/questions/?category={category}",
             "expect": {"type": "object", "keys": ["questions"]},
-            "auth": True,
-            "variant": "main",
+            "auth": False,
             "template": {"category": os.getenv("QUESTION_CATEGORY_MAIN", "spiritual_knowing")},
         },
         {
@@ -215,7 +180,6 @@ def run_tests():
             "path": "/quiz/questions/responses/",
             "expect": {"type": "object", "keys": ["responses"]},
             "auth": True,
-            "variant": "main",
         },
         {
             "name": "Active sessions",
@@ -223,7 +187,6 @@ def run_tests():
             "path": "/quiz/game/active/",
             "expect": {"type": "object", "keys": ["sessions"]},
             "auth": True,
-            "variant": "main",
         },
         {
             "name": "Group messages",
@@ -231,7 +194,6 @@ def run_tests():
             "path": "/quiz/groups/{group_id}/messages/",
             "expect": {"type": "object", "keys": ["messages"]},
             "auth": True,
-            "variant": "any",
             "env": ["GROUP_ID"],
         },
         {
@@ -240,8 +202,23 @@ def run_tests():
             "path": "/quiz/calendars/{calendar_id}/",
             "expect": {"type": "object", "keys": ["calendar"]},
             "auth": True,
-            "variant": "head",
             "env": ["CALENDAR_ID"],
+        },
+        {
+            "name": "Calendar events",
+            "method": "GET",
+            "path": "/quiz/calendars/{calendar_id}/events/",
+            "expect": {"type": "object", "keys": ["events"]},
+            "auth": True,
+            "env": ["CALENDAR_ID"],
+        },
+        {
+            "name": "Question detail",
+            "method": "GET",
+            "path": "/quiz/questions/{question_id}/",
+            "expect": {"type": "object", "keys": ["id", "question_text"]},
+            "auth": True,
+            "env": ["QUESTION_ID"],
         },
         {
             "name": "Game session detail",
@@ -249,8 +226,31 @@ def run_tests():
             "path": "/quiz/game/{session_id}/",
             "expect": {"type": "object", "keys": ["session"]},
             "auth": True,
-            "variant": "main",
             "env": ["SESSION_ID"],
+        },
+        {
+            "name": "Random question (game round)",
+            "method": "POST",
+            "path": "/quiz/game/random-question/",
+            "expect": {"type": "object", "keys": ["round"]},
+            "auth": True,
+            "payload": {
+                "session_id": os.getenv("SESSION_ID"),
+                "category": os.getenv("QUESTION_CATEGORY_MAIN", "spiritual_knowing"),
+            },
+            "env": ["SESSION_ID"],
+        },
+        {
+            "name": "Submit game answer",
+            "method": "POST",
+            "path": "/quiz/game/answer/",
+            "expect": {"type": "object", "keys": ["turn"]},
+            "auth": True,
+            "payload": {
+                "round_id": os.getenv("ROUND_ID"),
+                "answer": "Sample answer",
+            },
+            "env": ["ROUND_ID"],
         },
     ]
 
@@ -259,8 +259,6 @@ def run_tests():
     skipped = 0
 
     for test in tests:
-        if not should_run_test(test["variant"], selected_variant):
-            continue
         if test.get("auth") and not token:
             skipped += 1
             print(f"[SKIP] {test['name']} (auth required)")
@@ -285,6 +283,7 @@ def run_tests():
             test["method"],
             url,
             headers=headers if test.get("auth") else {},
+            payload=test.get("payload"),
             timeout=timeout,
         )
 
