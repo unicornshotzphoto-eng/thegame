@@ -1,0 +1,1936 @@
+openapi: 3.0.3
+info:
+  title: TheGame API
+  version: 0.1.0
+  description: |
+    Draft OpenAPI spec generated from Django URL configs, views, and
+    repository docs. Note: api/quiz/urls.py and api/quiz/views.py contain
+    unresolved merge conflicts, so some endpoints are listed as variants
+    with x-variant annotations.
+servers:
+  - url: http://localhost:8000
+    description: Local dev
+  - url: http://192.168.1.210:8000
+    description: LAN dev
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Profile
+  - name: Users
+  - name: Friends
+  - name: Groups
+  - name: Calendars
+  - name: Questions
+  - name: Game
+  - name: Multiplayer
+paths:
+  /quiz/signin/:
+    post:
+      tags: [Auth]
+      summary: Sign in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+      responses:
+        '200':
+          description: Auth tokens and user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/signup/:
+    post:
+      tags: [Auth]
+      summary: Sign up
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '201':
+          description: Auth tokens and user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/profile/picture/:
+    post:
+      tags: [Profile]
+      summary: Update profile picture
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                thumbnail:
+                  type: string
+                  format: binary
+              required: [thumbnail]
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfilePictureResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/search/users/:
+    get:
+      tags: [Users]
+      summary: Search users
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search query for username or email
+      responses:
+        '200':
+          description: List of matching users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchUsersResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/friends/request/send/:
+    post:
+      tags: [Friends]
+      summary: Send friend request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendRequestSendRequest'
+      responses:
+        '201':
+          description: Friend request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/friends/request/{request_id}/respond/:
+    post:
+      tags: [Friends]
+      summary: Respond to friend request
+      parameters:
+        - in: path
+          name: request_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FriendRequestRespondRequest'
+      responses:
+        '200':
+          description: Friend request updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/friends/:
+    get:
+      tags: [Friends]
+      summary: List friends
+      responses:
+        '200':
+          description: Friends list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendsListResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/friends/requests/:
+    get:
+      tags: [Friends]
+      summary: List pending friend requests
+      responses:
+        '200':
+          description: Pending friend requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PendingRequestsResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/groups/create/:
+    post:
+      tags: [Groups]
+      summary: Create group chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGroupRequest'
+      responses:
+        '201':
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupChat'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/groups/:
+    get:
+      tags: [Groups]
+      summary: List groups
+      responses:
+        '200':
+          description: Group list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupListResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/groups/{group_id}/:
+    get:
+      tags: [Groups]
+      summary: Get group details
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Group details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupChat'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/groups/{group_id}/messages/:
+    get:
+      tags: [Groups]
+      summary: List group messages
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Message list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMessagesResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Groups]
+      summary: Send group message
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupMessageRequest'
+      responses:
+        '201':
+          description: Message created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupMessage'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/groups/{group_id}/add-members/:
+    post:
+      tags: [Groups]
+      summary: Add members to group
+      x-variant: head
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupMembersRequest'
+      responses:
+        '200':
+          description: Members added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/groups/{group_id}/members/add/:
+    post:
+      tags: [Groups]
+      summary: Add members to group
+      x-variant: main
+      deprecated: true
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddGroupMembersRequest'
+      responses:
+        '200':
+          description: Members added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/calendars/:
+    get:
+      tags: [Calendars]
+      summary: List shared calendars
+      x-variant: head
+      responses:
+        '200':
+          description: Calendar list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarListResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Calendars]
+      summary: Create shared calendar
+      x-variant: head
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCalendarRequest'
+      responses:
+        '201':
+          description: Calendar created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarCreateResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/calendars/{calendar_id}/:
+    get:
+      tags: [Calendars]
+      summary: Get calendar detail
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Calendar detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarDetailResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/calendars/{calendar_id}/invite/:
+    post:
+      tags: [Calendars]
+      summary: Invite friends to calendar
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalendarInviteRequest'
+      responses:
+        '200':
+          description: Invitations sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/calendars/{calendar_id}/events/:
+    get:
+      tags: [Calendars]
+      summary: List calendar events
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventsResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags: [Calendars]
+      summary: Create calendar event
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/calendars/{calendar_id}/events/{event_id}/:
+    get:
+      tags: [Calendars]
+      summary: Get calendar event
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags: [Calendars]
+      summary: Update calendar event
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventRequest'
+      responses:
+        '200':
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags: [Calendars]
+      summary: Delete calendar event
+      x-variant: head
+      parameters:
+        - in: path
+          name: calendar_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/categories/:
+    get:
+      tags: [Questions]
+      summary: List question categories
+      security: []
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionCategoryListResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/random/:
+    get:
+      tags: [Questions]
+      summary: Random question (any category)
+      security: []
+      responses:
+        '200':
+          description: Random question
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/random/{category}/:
+    get:
+      tags: [Questions]
+      summary: Random question by category
+      security: []
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Random question
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/{category}/:
+    get:
+      tags: [Questions]
+      summary: List questions by category
+      security: []
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/:
+    get:
+      tags: [Questions]
+      summary: List categories or questions (variant)
+      description: |
+        Head variant returns {categories: []}. Main variant expects query
+        param `category` and returns {questions: []}.
+      security: []
+      x-variant: head-and-main
+      parameters:
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Category identifier (main variant)
+      responses:
+        '200':
+          description: Categories or questions
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/QuestionCategoryListResponse'
+                  - $ref: '#/components/schemas/QuestionListResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/{question_id}/:
+    get:
+      tags: [Questions]
+      summary: Get question detail
+      x-variant: main
+      parameters:
+        - in: path
+          name: question_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Question detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/answer/:
+    post:
+      tags: [Questions]
+      summary: Submit a question response
+      x-variant: main
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionResponseRequest'
+      responses:
+        '201':
+          description: Response created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/questions/responses/:
+    get:
+      tags: [Questions]
+      summary: List responses for current user
+      x-variant: main
+      responses:
+        '200':
+          description: Response list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponsesResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/create/:
+    post:
+      tags: [Multiplayer]
+      summary: Create multiplayer game (legacy)
+      x-variant: head
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreateRequestLegacy'
+      responses:
+        '201':
+          description: Game session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionLegacy'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/:
+    get:
+      tags: [Multiplayer]
+      summary: List multiplayer games (legacy)
+      x-variant: head
+      responses:
+        '200':
+          description: Game list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionListResponseLegacy'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/{game_id}/:
+    get:
+      tags: [Multiplayer]
+      summary: Get multiplayer game details (legacy)
+      x-variant: head
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Game session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionLegacy'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/{game_id}/start-round/:
+    post:
+      tags: [Multiplayer]
+      summary: Start round (legacy)
+      x-variant: head
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRoundRequest'
+      responses:
+        '200':
+          description: Game session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionLegacy'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/{game_id}/submit-answer/:
+    post:
+      tags: [Multiplayer]
+      summary: Submit answer (legacy)
+      x-variant: head
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitLegacyAnswerRequest'
+      responses:
+        '201':
+          description: Answer accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/{game_id}/answers/:
+    get:
+      tags: [Multiplayer]
+      summary: List answers for current question (legacy)
+      x-variant: head
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Answers list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameAnswersResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/{game_id}/next-round/:
+    post:
+      tags: [Multiplayer]
+      summary: Advance to next round (legacy)
+      x-variant: head
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Game session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionLegacy'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/games/{game_id}/end/:
+    post:
+      tags: [Multiplayer]
+      summary: End game (legacy)
+      x-variant: head
+      parameters:
+        - in: path
+          name: game_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Game session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionLegacy'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/game/create/:
+    post:
+      tags: [Game]
+      summary: Create session-based game
+      x-variant: main
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameCreateRequestTurnBased'
+      responses:
+        '201':
+          description: Game session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSessionTurnBased'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/game/{session_id}/:
+    get:
+      tags: [Game]
+      summary: Get session details
+      x-variant: main
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Session detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDetailResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/game/{session_id}/delete/:
+    delete:
+      tags: [Game]
+      summary: Delete session
+      x-variant: main
+      parameters:
+        - in: path
+          name: session_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Session deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/game/random-question/:
+    post:
+      tags: [Game]
+      summary: Create round with random question
+      x-variant: main
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RandomQuestionRequestTurnBased'
+      responses:
+        '200':
+          description: Round created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RandomQuestionResponseTurnBased'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/game/answer/:
+    post:
+      tags: [Game]
+      summary: Submit answer for round
+      x-variant: main
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitGameAnswerRequestTurnBased'
+      responses:
+        '200':
+          description: Answer saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmitGameAnswerResponseTurnBased'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz/game/active/:
+    get:
+      tags: [Game]
+      summary: List active sessions
+      x-variant: main
+      responses:
+        '200':
+          description: Active sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveSessionsResponse'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+      additionalProperties: true
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      additionalProperties: true
+
+    SignInRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    SignUpRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        thumbnail:
+          type: string
+          nullable: true
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        access:
+          type: string
+        refresh:
+          type: string
+        token:
+          type: string
+      additionalProperties: true
+
+    ProfilePictureResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        message:
+          type: string
+
+    SearchUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
+    FriendRequestSendRequest:
+      type: object
+      required: [to_user_id]
+      properties:
+        to_user_id:
+          type: integer
+
+    FriendRequestRespondRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [accept, reject]
+
+    FriendsListResponse:
+      type: object
+      properties:
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+
+    FriendRequestSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        from_user:
+          $ref: '#/components/schemas/User'
+        to_user:
+          $ref: '#/components/schemas/User'
+        created_at:
+          type: string
+          format: date-time
+
+    PendingRequestsResponse:
+      type: object
+      properties:
+        received:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendRequestSummary'
+        sent:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendRequestSummary'
+
+    GroupChat:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        created_by:
+          $ref: '#/components/schemas/User'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        member_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        last_message:
+          type: object
+          nullable: true
+          properties:
+            sender:
+              type: string
+            content:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+
+    GroupListResponse:
+      type: object
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupChat'
+
+    GroupMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        group:
+          type: integer
+        sender:
+          $ref: '#/components/schemas/User'
+        content:
+          type: string
+        image:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    GroupMessagesResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupMessage'
+
+    CreateGroupRequest:
+      type: object
+      required: [name, member_ids]
+      properties:
+        name:
+          type: string
+        member_ids:
+          type: array
+          items:
+            type: integer
+
+    GroupMessageRequest:
+      type: object
+      properties:
+        content:
+          type: string
+        image:
+          type: string
+          nullable: true
+
+    AddGroupMembersRequest:
+      type: object
+      required: [member_ids]
+      properties:
+        member_ids:
+          type: array
+          items:
+            type: integer
+
+    CalendarListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        created_by:
+          $ref: '#/components/schemas/User'
+        members_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        calendar:
+          type: integer
+        creator:
+          $ref: '#/components/schemas/User'
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        color:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Calendar:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        created_by:
+          $ref: '#/components/schemas/User'
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        members_count:
+          type: integer
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarEvent'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CalendarListResponse:
+      type: object
+      properties:
+        calendars:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarListItem'
+
+    CalendarCreateResponse:
+      type: object
+      properties:
+        calendar:
+          $ref: '#/components/schemas/CalendarListItem'
+
+    CalendarDetailResponse:
+      type: object
+      properties:
+        calendar:
+          $ref: '#/components/schemas/Calendar'
+
+    CalendarEventsResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarEvent'
+
+    CalendarEventResponse:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/CalendarEvent'
+
+    CreateCalendarRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+
+    CalendarInviteRequest:
+      type: object
+      required: [friend_ids]
+      properties:
+        friend_ids:
+          type: array
+          items:
+            type: integer
+
+    CreateEventRequest:
+      type: object
+      required: [title, start_date, end_date]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        color:
+          type: string
+
+    UpdateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        color:
+          type: string
+
+    QuestionCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        category:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        question_count:
+          type: integer
+          nullable: true
+
+    Question:
+      type: object
+      properties:
+        id:
+          type: integer
+        question_text:
+          type: string
+        points:
+          type: integer
+        consequence:
+          type: string
+        order:
+          type: integer
+          nullable: true
+        question_number:
+          type: integer
+          nullable: true
+        category:
+          $ref: '#/components/schemas/QuestionCategory'
+
+    QuestionCategoryListResponse:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionCategory'
+
+    QuestionListResponse:
+      type: object
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+
+    QuestionResponseRequest:
+      type: object
+      required: [question_id, response_text]
+      properties:
+        question_id:
+          type: integer
+        response_text:
+          type: string
+        partner_id:
+          type: integer
+          nullable: true
+
+    QuestionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        question:
+          $ref: '#/components/schemas/Question'
+        user:
+          $ref: '#/components/schemas/User'
+        partner:
+          $ref: '#/components/schemas/User'
+        response_text:
+          type: string
+        is_correct:
+          type: boolean
+        points_earned:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    QuestionResponsesResponse:
+      type: object
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResponse'
+
+    GameSessionLegacy:
+      type: object
+      description: Multiplayer game session (legacy variant).
+      properties:
+        id:
+          type: integer
+        creator:
+          $ref: '#/components/schemas/User'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        status:
+          type: string
+        current_round:
+          type: integer
+        current_question:
+          $ref: '#/components/schemas/Question'
+        category_picker:
+          $ref: '#/components/schemas/User'
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerAnswer'
+        player_scores:
+          type: object
+          additionalProperties:
+            type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GameSessionListItemLegacy:
+      type: object
+      properties:
+        id:
+          type: integer
+        creator:
+          $ref: '#/components/schemas/User'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        player_count:
+          type: integer
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GameSessionListResponseLegacy:
+      type: object
+      properties:
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameSessionListItemLegacy'
+
+    PlayerAnswer:
+      type: object
+      properties:
+        id:
+          type: integer
+        player:
+          $ref: '#/components/schemas/User'
+        question:
+          $ref: '#/components/schemas/Question'
+        answer_text:
+          type: string
+        points_awarded:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    GameAnswersResponse:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerAnswer'
+
+    GameCreateRequestLegacy:
+      type: object
+      required: [friend_ids]
+      properties:
+        friend_ids:
+          type: array
+          items:
+            type: integer
+
+    StartRoundRequest:
+      type: object
+      required: [category]
+      properties:
+        category:
+          type: string
+
+    SubmitLegacyAnswerRequest:
+      type: object
+      required: [answer]
+      properties:
+        answer:
+          type: string
+
+    GameSessionTurnBased:
+      type: object
+      description: Turn-based session (main variant).
+      properties:
+        id:
+          type: integer
+        session_type:
+          type: string
+        group:
+          $ref: '#/components/schemas/GroupChat'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        current_turn_user:
+          $ref: '#/components/schemas/User'
+        turn_order:
+          type: array
+          items:
+            type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    GameRound:
+      type: object
+      properties:
+        id:
+          type: integer
+        session:
+          type: integer
+        question:
+          $ref: '#/components/schemas/Question'
+        picker:
+          $ref: '#/components/schemas/User'
+        picker_answer:
+          type: string
+          nullable: true
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameTurn'
+        is_completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    GameTurn:
+      type: object
+      properties:
+        id:
+          type: integer
+        round:
+          type: integer
+        player:
+          $ref: '#/components/schemas/User'
+        answer:
+          type: string
+          nullable: true
+        points_earned:
+          type: integer
+        answered_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    GameCreateRequestTurnBased:
+      type: object
+      required: [session_type]
+      properties:
+        session_type:
+          type: string
+          enum: [direct, group]
+        group_id:
+          type: integer
+          nullable: true
+        participant_ids:
+          type: array
+          items:
+            type: integer
+
+    RandomQuestionRequestTurnBased:
+      type: object
+      required: [session_id, category]
+      properties:
+        session_id:
+          type: integer
+        category:
+          type: string
+
+    RandomQuestionResponseTurnBased:
+      type: object
+      properties:
+        round:
+          $ref: '#/components/schemas/GameRound'
+
+    SubmitGameAnswerRequestTurnBased:
+      type: object
+      required: [round_id, answer]
+      properties:
+        round_id:
+          type: integer
+        answer:
+          type: string
+
+    SubmitGameAnswerResponseTurnBased:
+      type: object
+      properties:
+        turn:
+          $ref: '#/components/schemas/GameTurn'
+        round_completed:
+          type: boolean
+        all_answered:
+          type: boolean
+        answered_count:
+          type: integer
+        total_players:
+          type: integer
+        points_earned:
+          type: integer
+
+    SessionDetailResponse:
+      type: object
+      properties:
+        session:
+          $ref: '#/components/schemas/GameSessionTurnBased'
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameRound'
+        current_round:
+          $ref: '#/components/schemas/GameRound'
+          nullable: true
+        scores:
+          type: object
+          additionalProperties:
+            type: integer
+
+    ActiveSessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameSessionTurnBased'
+
+x-websockets:
+  - url: ws://localhost:8000/ws/chat/{room_name}/
+    description: Chat room updates
+  - url: ws://localhost:8000/ws/game/{game_id}/
+    description: Game updates
+  - url: ws://localhost:8000/ws/notifications/
+    description: Notifications
