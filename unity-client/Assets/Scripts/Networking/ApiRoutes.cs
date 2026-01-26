@@ -14,6 +14,7 @@ namespace UnityClient.Networking
         public const string QuestionCategories = "quiz/questions/categories/";
         public static string QuestionsByCategory(string category) => $"quiz/questions/{category}/";
         public static string QuestionsByCategoryQuery(string category) => $"quiz/questions/?category={category}";
+        public static string QuestionDetail(string questionId) => $"quiz/questions/{questionId}/";
         public const string QuestionResponses = "quiz/questions/responses/";
         public const string SubmitQuestionAnswer = "quiz/questions/answer/";
 
@@ -33,14 +34,6 @@ namespace UnityClient.Networking
         public static string CalendarEvents(string calendarId) => $"quiz/calendars/{calendarId}/events/";
         public static string CalendarEvent(string calendarId, string eventId) => $"quiz/calendars/{calendarId}/events/{eventId}/";
         public static string CalendarInvite(string calendarId) => $"quiz/calendars/{calendarId}/invite/";
-        public const string Journals = "quiz/journals/";
-
-        public const string MultiplayerCreate = "api/games/create/";
-        public static string MultiplayerStartRound(string gameId) => $"api/games/{gameId}/start-round/";
-        public static string MultiplayerSubmitAnswer(string gameId) => $"api/games/{gameId}/submit-answer/";
-        public static string MultiplayerAnswers(string gameId) => $"api/games/{gameId}/answers/";
-        public static string MultiplayerNextRound(string gameId) => $"api/games/{gameId}/next-round/";
-        public static string MultiplayerEnd(string gameId) => $"api/games/{gameId}/end/";
     }
 }
 

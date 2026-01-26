@@ -41,21 +41,20 @@ Friends and social:
 - quiz/groups/create/
 - quiz/groups/{groupId}/messages/
 
-Calendar and journals:
+Calendar:
 - quiz/calendars/
 - quiz/calendars/{calendarId}/
 - quiz/calendars/{calendarId}/events/
 - quiz/calendars/{calendarId}/events/{eventId}/
 - quiz/calendars/{calendarId}/invite/
-- quiz/journals/
 
-Multiplayer (round-based):
-- api/games/create/
-- api/games/{gameId}/start-round/
-- api/games/{gameId}/submit-answer/
-- api/games/{gameId}/answers/
-- api/games/{gameId}/next-round/
-- api/games/{gameId}/end/
+Turn-based game flow (multiplayer):
+- quiz/game/create/
+- quiz/game/{sessionId}/
+- quiz/game/random-question/
+- quiz/game/answer/
+- quiz/game/active/
+- quiz/game/{sessionId}/delete/
 
 ## WebSockets
 The mobile client uses Django Channels with endpoints like:
