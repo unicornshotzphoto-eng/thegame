@@ -1,8 +1,8 @@
 from django.urls import path
 from .views import (
-    SigninView, 
-    SignupView, 
-    UpdateProfilePictureView, 
+    SigninView,
+    SignupView,
+    UpdateProfilePictureView,
     SearchUsersView,
     SendFriendRequestView,
     RespondFriendRequestView,
@@ -13,7 +13,6 @@ from .views import (
     GroupChatDetailView,
     GroupMessagesView,
     AddGroupMembersView,
-<<<<<<< HEAD
     CalendarListCreateView,
     CalendarDetailView,
     CalendarInviteView,
@@ -22,16 +21,6 @@ from .views import (
     QuestionsListView,
     QuestionCategoriesView,
     RandomQuestionView,
-    CreateGameSessionView,
-    GameSessionDetailView,
-    GameSessionListView,
-    StartGameRoundView,
-    SubmitAnswerView,
-    GetAnswersView,
-    NextRoundView,
-    EndGameView
-=======
-    QuestionsListView,
     QuestionDetailView,
     SubmitAnswerView,
     UserResponsesView,
@@ -40,8 +29,7 @@ from .views import (
     SubmitGameAnswerView,
     GameSessionDetailView,
     ActiveGameSessionsView,
-    DeleteGameSessionView
->>>>>>> main
+    DeleteGameSessionView,
 )
 
 urlpatterns = [
@@ -57,8 +45,8 @@ urlpatterns = [
     path('groups/', GroupChatListView.as_view(), name='group-list'),
     path('groups/<int:group_id>/', GroupChatDetailView.as_view(), name='group-detail'),
     path('groups/<int:group_id>/messages/', GroupMessagesView.as_view(), name='group-messages'),
-<<<<<<< HEAD
     path('groups/<int:group_id>/add-members/', AddGroupMembersView.as_view(), name='add-group-members'),
+    path('groups/<int:group_id>/members/add/', AddGroupMembersView.as_view(), name='add-group-members-legacy'),
     # Calendar routes
     path('calendars/', CalendarListCreateView.as_view(), name='calendar-list-create'),
     path('calendars/<int:calendar_id>/', CalendarDetailView.as_view(), name='calendar-detail'),
@@ -69,28 +57,16 @@ urlpatterns = [
     path('questions/categories/', QuestionCategoriesView.as_view(), name='question-categories'),
     path('questions/random/', RandomQuestionView.as_view(), name='random-question'),
     path('questions/random/<str:category>/', RandomQuestionView.as_view(), name='random-question-by-category'),
-    path('questions/<str:category>/', QuestionsListView.as_view(), name='questions-by-category'),
-    path('questions/', QuestionsListView.as_view(), name='questions-list'),
-    # Multiplayer game routes
-    path('games/create/', CreateGameSessionView.as_view(), name='create-game'),
-    path('games/', GameSessionListView.as_view(), name='games-list'),
-    path('games/<int:game_id>/', GameSessionDetailView.as_view(), name='game-detail'),
-    path('games/<int:game_id>/start-round/', StartGameRoundView.as_view(), name='start-round'),
-    path('games/<int:game_id>/submit-answer/', SubmitAnswerView.as_view(), name='submit-answer'),
-    path('games/<int:game_id>/answers/', GetAnswersView.as_view(), name='get-answers'),
-    path('games/<int:game_id>/next-round/', NextRoundView.as_view(), name='next-round'),
-    path('games/<int:game_id>/end/', EndGameView.as_view(), name='end-game'),
-=======
-    path('groups/<int:group_id>/members/add/', AddGroupMembersView.as_view(), name='add-group-members'),
-    path('questions/', QuestionsListView.as_view(), name='questions-list'),
-    path('questions/<int:question_id>/', QuestionDetailView.as_view(), name='question-detail'),
     path('questions/answer/', SubmitAnswerView.as_view(), name='submit-answer'),
     path('questions/responses/', UserResponsesView.as_view(), name='user-responses'),
+    path('questions/<int:question_id>/', QuestionDetailView.as_view(), name='question-detail'),
+    path('questions/<str:category>/', QuestionsListView.as_view(), name='questions-by-category'),
+    path('questions/', QuestionsListView.as_view(), name='questions-list'),
+    # Turn-based game routes
     path('game/create/', CreateGameSessionView.as_view(), name='create-game-session'),
     path('game/<int:session_id>/', GameSessionDetailView.as_view(), name='game-session-detail'),
     path('game/<int:session_id>/delete/', DeleteGameSessionView.as_view(), name='delete-game-session'),
     path('game/random-question/', GetRandomQuestionView.as_view(), name='get-random-question'),
     path('game/answer/', SubmitGameAnswerView.as_view(), name='submit-game-answer'),
     path('game/active/', ActiveGameSessionsView.as_view(), name='active-game-sessions'),
->>>>>>> main
 ]

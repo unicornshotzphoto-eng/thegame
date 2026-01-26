@@ -1,12 +1,9 @@
 openapi: 3.0.3
 info:
   title: TheGame API
-  version: 0.1.0
+  version: 0.2.0
   description: |
-    Draft OpenAPI spec generated from Django URL configs, views, and
-    repository docs. Note: api/quiz/urls.py and api/quiz/views.py contain
-    unresolved merge conflicts, so some endpoints are listed as variants
-    with x-variant annotations.
+    OpenAPI spec aligned with the resolved backend endpoints.
 servers:
   - url: http://localhost:8000
     description: Local dev
@@ -23,7 +20,6 @@ tags:
   - name: Calendars
   - name: Questions
   - name: Game
-  - name: Multiplayer
 paths:
   /quiz/signin/:
     post:
@@ -44,11 +40,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/signup/:
     post:
@@ -69,11 +61,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/profile/picture/:
     post:
@@ -98,11 +86,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProfilePictureResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/search/users/:
     get:
@@ -122,11 +106,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchUsersResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/friends/request/send/:
     post:
@@ -144,13 +124,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessageResponse'
+                $ref: '#/components/schemas/FriendRequestSendResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/friends/request/{request_id}/respond/:
     post:
@@ -176,11 +152,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/friends/:
     get:
@@ -194,11 +166,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/FriendsListResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/friends/requests/:
     get:
@@ -212,11 +180,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PendingRequestsResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/groups/create/:
     post:
@@ -236,11 +200,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GroupChat'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/groups/:
     get:
@@ -254,11 +214,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GroupListResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/groups/{group_id}/:
     get:
@@ -272,17 +228,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: Group details
+          description: Group detail
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GroupChat'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/groups/{group_id}/messages/:
     get:
@@ -302,11 +254,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GroupMessagesResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     post:
       tags: [Groups]
       summary: Send group message
@@ -330,17 +278,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/GroupMessage'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/groups/{group_id}/add-members/:
     post:
       tags: [Groups]
       summary: Add members to group
-      x-variant: head
       parameters:
         - in: path
           name: group_id
@@ -361,17 +304,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/groups/{group_id}/members/add/:
     post:
       tags: [Groups]
-      summary: Add members to group
-      x-variant: main
+      summary: Add members to group (legacy alias)
       deprecated: true
       parameters:
         - in: path
@@ -393,17 +331,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/calendars/:
     get:
       tags: [Calendars]
       summary: List shared calendars
-      x-variant: head
       responses:
         '200':
           description: Calendar list
@@ -412,15 +345,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarListResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     post:
       tags: [Calendars]
       summary: Create shared calendar
-      x-variant: head
       requestBody:
         required: true
         content:
@@ -435,17 +363,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarCreateResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/calendars/{calendar_id}/:
     get:
       tags: [Calendars]
       summary: Get calendar detail
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -460,17 +383,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarDetailResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/calendars/{calendar_id}/invite/:
     post:
       tags: [Calendars]
       summary: Invite friends to calendar
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -491,17 +409,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/calendars/{calendar_id}/events/:
     get:
       tags: [Calendars]
       summary: List calendar events
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -516,15 +429,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarEventsResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     post:
       tags: [Calendars]
       summary: Create calendar event
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -545,17 +453,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarEventResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/calendars/{calendar_id}/events/{event_id}/:
     get:
       tags: [Calendars]
       summary: Get calendar event
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -575,15 +478,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarEventResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     put:
       tags: [Calendars]
       summary: Update calendar event
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -609,15 +507,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/CalendarEventResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
     delete:
       tags: [Calendars]
       summary: Delete calendar event
-      x-variant: head
       parameters:
         - in: path
           name: calendar_id
@@ -637,11 +530,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/categories/:
     get:
@@ -656,11 +545,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/QuestionCategoryListResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/random/:
     get:
@@ -675,11 +560,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/random/{category}/:
     get:
@@ -700,54 +581,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/questions/{category}/:
-    get:
-      tags: [Questions]
-      summary: List questions by category
-      security: []
-      parameters:
-        - in: path
-          name: category
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Questions
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Question'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/:
     get:
       tags: [Questions]
-      summary: List categories or questions (variant)
+      summary: List categories or questions
       description: |
-        Head variant returns {categories: []}. Main variant expects query
-        param `category` and returns {questions: []}.
+        When the category query parameter is provided, returns
+        {questions: []}. Otherwise returns {categories: []}.
       security: []
-      x-variant: head-and-main
       parameters:
         - in: query
           name: category
           schema:
             type: string
-          description: Category identifier (main variant)
       responses:
         '200':
           description: Categories or questions
@@ -758,17 +606,12 @@ paths:
                   - $ref: '#/components/schemas/QuestionCategoryListResponse'
                   - $ref: '#/components/schemas/QuestionListResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/{question_id}/:
     get:
       tags: [Questions]
       summary: Get question detail
-      x-variant: main
       parameters:
         - in: path
           name: question_id
@@ -783,17 +626,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
         default:
-          description: Error response
+          $ref: '#/components/responses/ErrorResponse'
+
+  /quiz/questions/{category}/:
+    get:
+      tags: [Questions]
+      summary: List questions by category
+      security: []
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Questions list
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
+        default:
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/answer/:
     post:
       tags: [Questions]
       summary: Submit a question response
-      x-variant: main
       requestBody:
         required: true
         content:
@@ -808,17 +669,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/QuestionResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/questions/responses/:
     get:
       tags: [Questions]
       summary: List responses for current user
-      x-variant: main
       responses:
         '200':
           description: Response list
@@ -827,248 +683,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/QuestionResponsesResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/create/:
-    post:
-      tags: [Multiplayer]
-      summary: Create multiplayer game (legacy)
-      x-variant: head
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GameCreateRequestLegacy'
-      responses:
-        '201':
-          description: Game session created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameSessionLegacy'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/:
-    get:
-      tags: [Multiplayer]
-      summary: List multiplayer games (legacy)
-      x-variant: head
-      responses:
-        '200':
-          description: Game list
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameSessionListResponseLegacy'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/{game_id}/:
-    get:
-      tags: [Multiplayer]
-      summary: Get multiplayer game details (legacy)
-      x-variant: head
-      parameters:
-        - in: path
-          name: game_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Game session
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameSessionLegacy'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/{game_id}/start-round/:
-    post:
-      tags: [Multiplayer]
-      summary: Start round (legacy)
-      x-variant: head
-      parameters:
-        - in: path
-          name: game_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StartRoundRequest'
-      responses:
-        '200':
-          description: Game session
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameSessionLegacy'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/{game_id}/submit-answer/:
-    post:
-      tags: [Multiplayer]
-      summary: Submit answer (legacy)
-      x-variant: head
-      parameters:
-        - in: path
-          name: game_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SubmitLegacyAnswerRequest'
-      responses:
-        '201':
-          description: Answer accepted
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageResponse'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/{game_id}/answers/:
-    get:
-      tags: [Multiplayer]
-      summary: List answers for current question (legacy)
-      x-variant: head
-      parameters:
-        - in: path
-          name: game_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Answers list
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameAnswersResponse'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/{game_id}/next-round/:
-    post:
-      tags: [Multiplayer]
-      summary: Advance to next round (legacy)
-      x-variant: head
-      parameters:
-        - in: path
-          name: game_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Game session
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameSessionLegacy'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /quiz/games/{game_id}/end/:
-    post:
-      tags: [Multiplayer]
-      summary: End game (legacy)
-      x-variant: head
-      parameters:
-        - in: path
-          name: game_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: Game session
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GameSessionLegacy'
-        default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/game/create/:
     post:
       tags: [Game]
-      summary: Create session-based game
-      x-variant: main
+      summary: Create a game session
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GameCreateRequestTurnBased'
+              $ref: '#/components/schemas/GameCreateRequest'
       responses:
         '201':
           description: Game session created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GameSessionTurnBased'
+                $ref: '#/components/schemas/GameSession'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/game/{session_id}/:
     get:
       tags: [Game]
       summary: Get session details
-      x-variant: main
       parameters:
         - in: path
           name: session_id
@@ -1083,17 +723,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/SessionDetailResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/game/{session_id}/delete/:
     delete:
       tags: [Game]
       summary: Delete session
-      x-variant: main
       parameters:
         - in: path
           name: session_id
@@ -1108,67 +743,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/game/random-question/:
     post:
       tags: [Game]
       summary: Create round with random question
-      x-variant: main
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RandomQuestionRequestTurnBased'
+              $ref: '#/components/schemas/RandomQuestionRequest'
       responses:
         '200':
           description: Round created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RandomQuestionResponseTurnBased'
+                $ref: '#/components/schemas/RandomQuestionResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/game/answer/:
     post:
       tags: [Game]
       summary: Submit answer for round
-      x-variant: main
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SubmitGameAnswerRequestTurnBased'
+              $ref: '#/components/schemas/SubmitGameAnswerRequest'
       responses:
         '200':
           description: Answer saved
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SubmitGameAnswerResponseTurnBased'
+                $ref: '#/components/schemas/SubmitGameAnswerResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
   /quiz/game/active/:
     get:
       tags: [Game]
       summary: List active sessions
-      x-variant: main
       responses:
         '200':
           description: Active sessions
@@ -1177,13 +797,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/ActiveSessionsResponse'
         default:
-          description: Error response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/responses/ErrorResponse'
 
 components:
+  responses:
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
   securitySchemes:
     bearerAuth:
       type: http
@@ -1273,6 +896,14 @@ components:
       required: [to_user_id]
       properties:
         to_user_id:
+          type: integer
+
+    FriendRequestSendResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        request_id:
           type: integer
 
     FriendRequestRespondRequest:
@@ -1580,12 +1211,15 @@ components:
           type: string
         question_count:
           type: integer
-          nullable: true
 
     Question:
       type: object
       properties:
         id:
+          type: integer
+        category:
+          type: string
+        question_number:
           type: integer
         question_text:
           type: string
@@ -1593,14 +1227,9 @@ components:
           type: integer
         consequence:
           type: string
-        order:
-          type: integer
-          nullable: true
-        question_number:
-          type: integer
-          nullable: true
-        category:
-          $ref: '#/components/schemas/QuestionCategory'
+        created_at:
+          type: string
+          format: date-time
 
     QuestionCategoryListResponse:
       type: object
@@ -1659,122 +1288,8 @@ components:
           items:
             $ref: '#/components/schemas/QuestionResponse'
 
-    GameSessionLegacy:
+    GameSession:
       type: object
-      description: Multiplayer game session (legacy variant).
-      properties:
-        id:
-          type: integer
-        creator:
-          $ref: '#/components/schemas/User'
-        players:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-        status:
-          type: string
-        current_round:
-          type: integer
-        current_question:
-          $ref: '#/components/schemas/Question'
-        category_picker:
-          $ref: '#/components/schemas/User'
-        answers:
-          type: array
-          items:
-            $ref: '#/components/schemas/PlayerAnswer'
-        player_scores:
-          type: object
-          additionalProperties:
-            type: integer
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-
-    GameSessionListItemLegacy:
-      type: object
-      properties:
-        id:
-          type: integer
-        creator:
-          $ref: '#/components/schemas/User'
-        players:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-        player_count:
-          type: integer
-        status:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-
-    GameSessionListResponseLegacy:
-      type: object
-      properties:
-        games:
-          type: array
-          items:
-            $ref: '#/components/schemas/GameSessionListItemLegacy'
-
-    PlayerAnswer:
-      type: object
-      properties:
-        id:
-          type: integer
-        player:
-          $ref: '#/components/schemas/User'
-        question:
-          $ref: '#/components/schemas/Question'
-        answer_text:
-          type: string
-        points_awarded:
-          type: integer
-        created_at:
-          type: string
-          format: date-time
-
-    GameAnswersResponse:
-      type: object
-      properties:
-        answers:
-          type: array
-          items:
-            $ref: '#/components/schemas/PlayerAnswer'
-
-    GameCreateRequestLegacy:
-      type: object
-      required: [friend_ids]
-      properties:
-        friend_ids:
-          type: array
-          items:
-            type: integer
-
-    StartRoundRequest:
-      type: object
-      required: [category]
-      properties:
-        category:
-          type: string
-
-    SubmitLegacyAnswerRequest:
-      type: object
-      required: [answer]
-      properties:
-        answer:
-          type: string
-
-    GameSessionTurnBased:
-      type: object
-      description: Turn-based session (main variant).
       properties:
         id:
           type: integer
@@ -1847,7 +1362,7 @@ components:
           type: string
           format: date-time
 
-    GameCreateRequestTurnBased:
+    GameCreateRequest:
       type: object
       required: [session_type]
       properties:
@@ -1862,7 +1377,7 @@ components:
           items:
             type: integer
 
-    RandomQuestionRequestTurnBased:
+    RandomQuestionRequest:
       type: object
       required: [session_id, category]
       properties:
@@ -1871,13 +1386,13 @@ components:
         category:
           type: string
 
-    RandomQuestionResponseTurnBased:
+    RandomQuestionResponse:
       type: object
       properties:
         round:
           $ref: '#/components/schemas/GameRound'
 
-    SubmitGameAnswerRequestTurnBased:
+    SubmitGameAnswerRequest:
       type: object
       required: [round_id, answer]
       properties:
@@ -1886,7 +1401,7 @@ components:
         answer:
           type: string
 
-    SubmitGameAnswerResponseTurnBased:
+    SubmitGameAnswerResponse:
       type: object
       properties:
         turn:
@@ -1906,7 +1421,7 @@ components:
       type: object
       properties:
         session:
-          $ref: '#/components/schemas/GameSessionTurnBased'
+          $ref: '#/components/schemas/GameSession'
         rounds:
           type: array
           items:
@@ -1925,7 +1440,7 @@ components:
         sessions:
           type: array
           items:
-            $ref: '#/components/schemas/GameSessionTurnBased'
+            $ref: '#/components/schemas/GameSession'
 
 x-websockets:
   - url: ws://localhost:8000/ws/chat/{room_name}/
