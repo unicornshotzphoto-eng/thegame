@@ -76,3 +76,10 @@ There is a stub runner at `Assets/Scripts/Testing/ContractTestRunner.cs`.
 Attach it to a GameObject in a test scene, fill in username/password,
 and press Play to validate a small set of endpoints.
 
+## Butterfly animation
+Use `Assets/Scripts/FX/ButterflyFlight.cs` to animate a butterfly across the screen:
+1. Create a butterfly GameObject (mesh or sprite) with optional wing child objects.
+2. Add the `ButterflyFlight` component.
+3. Assign `leftWing` and `rightWing` transforms to enable flapping.
+4. Adjust `durationSeconds`, `waveAmplitude`, and `wingFlapSpeed` for feel.
+
