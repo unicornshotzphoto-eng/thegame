@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('quiz', '0003_groupchat_groupmessage'),
+        ('quiz', '0004_cleanup_legacy_tables'),
     ]
 
     operations = [

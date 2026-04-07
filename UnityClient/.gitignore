@@ -1,0 +1,61 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Memory capture and crash reports
+MemoryCaptures/
+*.stackdump
+
+# Asset meta cache
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity auto-generated files
+*.unityproj
+*.unityproj.user
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb.meta
+*.apk
+*.aab
+*.app
+*.ipa
+*.apk.meta
+*.aab.meta
+
+# Visual Studio
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# JetBrains
+.idea/
+
+# Rider
+.idea/
+
+# Unity Package Manager
+Packages/packages-lock.json
+

@@ -1,28 +1,19 @@
 from django.core.management.base import BaseCommand
-from quiz.models import QuestionCategory, Question
+from quiz.models import Question
 
 class Command(BaseCommand):
     help = 'Seed the database with 200 quiz questions'
 
     def handle(self, *args, **options):
-        # Get or create categories
-        categories_config = {
-            'spiritual': 'Spiritual Knowing',
-            'mental': 'Mental Knowing',
-            'physical': 'Physical Knowing',
-            'disagreeables': 'Disagreeables & Truth Checks',
-            'romantic': 'Romantic Knowing',
-            'erotic': 'Erotic Knowing',
-            'creative': 'Creative & Fun',
+        categories = {
+            'spiritual': 'spiritual_knowing',
+            'mental': 'mental_knowing',
+            'physical': 'physical_knowing',
+            'disagreeables': 'disagreeables_truth',
+            'romantic': 'romantic_knowing',
+            'erotic': 'erotic_knowing',
+            'creative': 'creative_fun',
         }
-        
-        categories = {}
-        for cat_code, cat_name in categories_config.items():
-            cat_obj, _ = QuestionCategory.objects.get_or_create(
-                category=cat_code,
-                defaults={'name': cat_name, 'description': f'{cat_name} questions'}
-            )
-            categories[cat_code] = cat_obj
 
         questions_data = {
             'spiritual': [
@@ -254,15 +245,15 @@ class Command(BaseCommand):
         created_count = 0
         for category_code, questions_list in questions_data.items():
             category = categories[category_code]
-            
+
             for idx, (question_text, consequence, points) in enumerate(questions_list, 1):
                 question, created = Question.objects.get_or_create(
                     category=category,
-                    question_text=question_text,
+                    question_number=idx,
                     defaults={
+                        'question_text': question_text,
                         'consequence': consequence,
                         'points': points,
-                        'order': idx,
                     }
                 )
                 if created:
@@ -504,15 +495,15 @@ class Command(BaseCommand):
         created_count = 0
         for category_name, questions_list in questions_data.items():
             category = categories[category_name]
-            
+
             for idx, (question_text, consequence, points) in enumerate(questions_list, 1):
                 question, created = Question.objects.get_or_create(
                     category=category,
-                    question_text=question_text,
+                    question_number=idx,
                     defaults={
+                        'question_text': question_text,
                         'consequence': consequence,
                         'points': points,
-                        'order': idx,
                     }
                 )
                 if created:

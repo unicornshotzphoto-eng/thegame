@@ -1,0 +1,440 @@
+{
+  "info": {
+    "name": "TheGame API",
+    "_postman_id": "d6e0a4b4-7efb-4a62-8cfe-1efb9de40e75",
+    "description": "Postman collection generated from openapi.yaml (resolved backend).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "token", "value": "" },
+    { "key": "group_id", "value": "" },
+    { "key": "calendar_id", "value": "" },
+    { "key": "event_id", "value": "" },
+    { "key": "question_id", "value": "" },
+    { "key": "session_id", "value": "" },
+    { "key": "round_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign In",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user\",\n  \"password\": \"password\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/quiz/signin/", "host": ["{{base_url}}"], "path": ["quiz", "signin", ""] }
+          }
+        },
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"new_user\",\n  \"email\": \"new_user@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/quiz/signup/", "host": ["{{base_url}}"], "path": ["quiz", "signup", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Update Profile Picture",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "thumbnail", "type": "file", "src": "" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/quiz/profile/picture/", "host": ["{{base_url}}"], "path": ["quiz", "profile", "picture", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Search Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/search/users/?q=test", "host": ["{{base_url}}"], "path": ["quiz", "search", "users", ""], "query": [{ "key": "q", "value": "test" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Friends",
+      "item": [
+        {
+          "name": "Send Friend Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"to_user_id\": 1\n}" },
+            "url": { "raw": "{{base_url}}/quiz/friends/request/send/", "host": ["{{base_url}}"], "path": ["quiz", "friends", "request", "send", ""] }
+          }
+        },
+        {
+          "name": "Respond Friend Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"action\": \"accept\"\n}" },
+            "url": { "raw": "{{base_url}}/quiz/friends/request/{{request_id}}/respond/", "host": ["{{base_url}}"], "path": ["quiz", "friends", "request", "{{request_id}}", "respond", ""] }
+          }
+        },
+        {
+          "name": "Friends List",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/friends/", "host": ["{{base_url}}"], "path": ["quiz", "friends", ""] }
+          }
+        },
+        {
+          "name": "Pending Requests",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/friends/requests/", "host": ["{{base_url}}"], "path": ["quiz", "friends", "requests", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Groups",
+      "item": [
+        {
+          "name": "Create Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"My Group\",\n  \"member_ids\": [2, 3]\n}" },
+            "url": { "raw": "{{base_url}}/quiz/groups/create/", "host": ["{{base_url}}"], "path": ["quiz", "groups", "create", ""] }
+          }
+        },
+        {
+          "name": "Groups List",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/groups/", "host": ["{{base_url}}"], "path": ["quiz", "groups", ""] }
+          }
+        },
+        {
+          "name": "Group Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/groups/{{group_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "groups", "{{group_id}}", ""] }
+          }
+        },
+        {
+          "name": "Group Messages",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/groups/{{group_id}}/messages/", "host": ["{{base_url}}"], "path": ["quiz", "groups", "{{group_id}}", "messages", ""] }
+          }
+        },
+        {
+          "name": "Send Group Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"content\": \"Hello group!\",\n  \"image\": null\n}" },
+            "url": { "raw": "{{base_url}}/quiz/groups/{{group_id}}/messages/", "host": ["{{base_url}}"], "path": ["quiz", "groups", "{{group_id}}", "messages", ""] }
+          }
+        },
+        {
+          "name": "Add Group Members",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"member_ids\": [4, 5]\n}" },
+            "url": { "raw": "{{base_url}}/quiz/groups/{{group_id}}/add-members/", "host": ["{{base_url}}"], "path": ["quiz", "groups", "{{group_id}}", "add-members", ""] }
+          }
+        },
+        {
+          "name": "Add Group Members (Legacy Alias)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"member_ids\": [4, 5]\n}" },
+            "url": { "raw": "{{base_url}}/quiz/groups/{{group_id}}/members/add/", "host": ["{{base_url}}"], "path": ["quiz", "groups", "{{group_id}}", "members", "add", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calendars",
+      "item": [
+        {
+          "name": "Calendars List",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/calendars/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", ""] }
+          }
+        },
+        {
+          "name": "Create Calendar",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Shared Calendar\"\n}" },
+            "url": { "raw": "{{base_url}}/quiz/calendars/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", ""] }
+          }
+        },
+        {
+          "name": "Calendar Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", ""] }
+          }
+        },
+        {
+          "name": "Invite Friends to Calendar",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"friend_ids\": [2, 3]\n}" },
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/invite/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", "invite", ""] }
+          }
+        },
+        {
+          "name": "Calendar Events",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/events/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", "events", ""] }
+          }
+        },
+        {
+          "name": "Create Calendar Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Event\",\n  \"description\": \"Description\",\n  \"start_date\": \"2026-01-01T09:00:00Z\",\n  \"end_date\": \"2026-01-01T10:00:00Z\",\n  \"color\": \"#1a73e8\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/events/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", "events", ""] }
+          }
+        },
+        {
+          "name": "Calendar Event Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/events/{{event_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", "events", "{{event_id}}", ""] }
+          }
+        },
+        {
+          "name": "Update Calendar Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Event\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/events/{{event_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", "events", "{{event_id}}", ""] }
+          }
+        },
+        {
+          "name": "Delete Calendar Event",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/calendars/{{calendar_id}}/events/{{event_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "calendars", "{{calendar_id}}", "events", "{{event_id}}", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Questions",
+      "item": [
+        {
+          "name": "Question Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/quiz/questions/categories/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "categories", ""] }
+          }
+        },
+        {
+          "name": "Random Question",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/quiz/questions/random/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "random", ""] }
+          }
+        },
+        {
+          "name": "Random Question By Category",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/quiz/questions/random/{{category}}/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "random", "{{category}}", ""] }
+          }
+        },
+        {
+          "name": "Questions List (query)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/quiz/questions/?category=spiritual_knowing",
+              "host": ["{{base_url}}"],
+              "path": ["quiz", "questions", ""],
+              "query": [{ "key": "category", "value": "spiritual_knowing" }]
+            }
+          }
+        },
+        {
+          "name": "Questions By Category (path)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/quiz/questions/spiritual_knowing/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "spiritual_knowing", ""] }
+          }
+        },
+        {
+          "name": "Question Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/questions/{{question_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "{{question_id}}", ""] }
+          }
+        },
+        {
+          "name": "Submit Question Answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"question_id\": 1,\n  \"response_text\": \"My answer\"\n}" },
+            "url": { "raw": "{{base_url}}/quiz/questions/answer/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "answer", ""] }
+          }
+        },
+        {
+          "name": "User Responses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/questions/responses/", "host": ["{{base_url}}"], "path": ["quiz", "questions", "responses", ""] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Game",
+      "item": [
+        {
+          "name": "Create Game Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"session_type\": \"direct\",\n  \"participant_ids\": [2]\n}" },
+            "url": { "raw": "{{base_url}}/quiz/game/create/", "host": ["{{base_url}}"], "path": ["quiz", "game", "create", ""] }
+          }
+        },
+        {
+          "name": "Game Session Detail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/game/{{session_id}}/", "host": ["{{base_url}}"], "path": ["quiz", "game", "{{session_id}}", ""] }
+          }
+        },
+        {
+          "name": "Delete Game Session",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/game/{{session_id}}/delete/", "host": ["{{base_url}}"], "path": ["quiz", "game", "{{session_id}}", "delete", ""] }
+          }
+        },
+        {
+          "name": "Get Random Game Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"session_id\": {{session_id}},\n  \"category\": \"spiritual_knowing\"\n}" },
+            "url": { "raw": "{{base_url}}/quiz/game/random-question/", "host": ["{{base_url}}"], "path": ["quiz", "game", "random-question", ""] }
+          }
+        },
+        {
+          "name": "Submit Game Answer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"round_id\": {{round_id}},\n  \"answer\": \"Sample answer\"\n}" },
+            "url": { "raw": "{{base_url}}/quiz/game/answer/", "host": ["{{base_url}}"], "path": ["quiz", "game", "answer", ""] }
+          }
+        },
+        {
+          "name": "Active Game Sessions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/quiz/game/active/", "host": ["{{base_url}}"], "path": ["quiz", "game", "active", ""] }
+          }
+        }
+      ]
+    }
+  ]
+}
